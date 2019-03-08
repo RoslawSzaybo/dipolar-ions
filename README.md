@@ -11,5 +11,5 @@ How to use
 
 3. Compilation and linkning
 ``` bash
-	icc -mkl dsyev.cpp 
+	icc -mkl dsyev.c
 ```
