@@ -62,7 +62,7 @@
 extern void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda );
 
 /* Parameters */
-#define N 5
+#define N 6
 #define LDA N
 
 /* Main program */
@@ -72,12 +72,14 @@ int main() {
         /* Local arrays */
         double w[N];
         double a[LDA*N] = {
-            1.91, -6.49, -0.47, -7.20, -0.65,
-            0.00,  3.80, -6.39,  1.50, -6.34,
-            0.00,  0.00, 4.17, -1.51, 2.67,
-            0.00,  0.00, 0.00,  5.70, 1.80,
-            0.00,  0.00, 0.00,  0.00, -7.10
+            1.91, -6.49, -0.47, -7.20, -0.65, 0.33,
+            0.00,  3.80, -6.39,  1.50, -6.34, 0.12,
+            0.00,  0.00, 4.17, -1.51, 2.67, 0.311,
+            0.00,  0.00, 0.00,  5.70, 1.80, 0.1,
+            0.00,  0.00, 0.00,  0.00, -7.10, 0.3,
+            0.00,  0.00, 0.00,  0.00, 0.00, 0.666
         };
+
         /* Executable statements */
         printf( "LAPACKE_dsyev (row-major, high-level) Example Program Results\n" );
         /* Solve eigenproblem */
