@@ -21,7 +21,7 @@ extern void print_matrix( char* desc, int m, int n, fcomplex* a, int lda );
 extern void print_rmatrix( char* desc, int m, int n, float* a, int lda );
 
 /* Parameters */
-#define N 1020
+#define N 581
 #define LDA N
 
 /* Main program */
@@ -56,8 +56,6 @@ int main() {
         lwork = -1;
         cheev( "Vectors", "Lower", &n, a, &lda, w, &wkopt, &lwork, rwork, &info );
         lwork = (int)wkopt.re;
-        printf("%d\n",lwork);
-
         work = (fcomplex*)malloc( lwork*sizeof(fcomplex) );
         /* Solve eigenproblem */
         cheev( "Vectors", "Lower", &n, a, &lda, w, work, &lwork, rwork, &info );
