@@ -21,7 +21,7 @@ extern void print_matrix( char* desc, int m, int n, fcomplex* a, int lda );
 extern void print_rmatrix( char* desc, int m, int n, float* a, int lda );
 
 /* Parameters */
-#define N 581
+#define N 1035
 #define LDA N
 
 /* Main program */
