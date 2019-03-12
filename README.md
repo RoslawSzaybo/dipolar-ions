@@ -16,10 +16,10 @@ How to use
 
 
 
-
-
 The first problem:
-When I was trying to figure how much time does it take the MKL to diagonalise
-a Hermitian matirx the segmentiation fault occured.
-A diagonalisation of matrices of the size 1000x1000 complex numbers was immidiate (0.5s),
-but for sizes larger thatn 1021x1021 the segfault occured.
+I was trying to figure out how much time does it take the MKL to diagonalise
+a Hermitian matirx. So I was running the an edited verion of the cheev on larger and larger matrices.
+At the matrix size 1021 the segmentiation fault occured.
+
+To make the code run, I didn't change anything. All I did was just to move the code to the plgrid cluster
+and there all was working good.

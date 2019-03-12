@@ -21,7 +21,7 @@ extern void print_matrix( char* desc, int m, int n, fcomplex* a, int lda );
 extern void print_rmatrix( char* desc, int m, int n, float* a, int lda );
 
 /* Parameters */
-#define N 1020
+#define N 1029
 #define LDA N
 
 /* Main program */
@@ -56,8 +56,6 @@ int main() {
         lwork = -1;
         cheev( "Vectors", "Lower", &n, a, &lda, w, &wkopt, &lwork, rwork, &info );
         lwork = (int)wkopt.re;
-        printf("%d\n",lwork);
-
         work = (fcomplex*)malloc( lwork*sizeof(fcomplex) );
         /* Solve eigenproblem */
         cheev( "Vectors", "Lower", &n, a, &lda, w, work, &lwork, rwork, &info );
@@ -67,6 +65,8 @@ int main() {
                 exit( 1 );
         }
         /* Print eigenvalues */
+		printf("\n\nFull success\nFive largerst eigenvalues:\n");
+        print_rmatrix( "Eigenvalues", 1, 5, w, 1 );
         //print_rmatrix( "Eigenvalues", 1, n, w, 1 );
         /* Print eigenvectors */
         //print_matrix( "Eigenvectors (stored columnwise)", n, n, a, lda );
