@@ -1,6 +1,6 @@
-Matrix diagonalisation.
+#Matrix diagonalisation.
 
-How to use
+###How to use
 1. Install Intel(R) MKL
 
 2. Setup local variables, by default it's
@@ -11,12 +11,17 @@ How to use
 
 3. Compilation and linkning
 ``` bash
-	icc -mkl dsyev.c
+	icc -mkl diagonalise.c
+```
+
+4. Program execution
+``` bash
+	./a.out 7000 # the matirx size
 ```
 
 
 
-The first problem:
+###The first problem:
 I was trying to figure out how much time does it take the MKL to diagonalise
 a Hermitian matirx. So I was running the an edited verion of the cheev on larger and larger matrices.
 At the matrix size 1021 the segmentiation fault occured.
