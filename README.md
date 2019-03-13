@@ -23,11 +23,9 @@
 
 ### The first problem:
 I was trying to figure out how much time does it take the MKL to diagonalise
-a Hermitian matirx. So I was running the an edited verion of the cheev on larger and larger matrices.
-At the matrix size 1021 the segmentiation fault occured.
-
-To make the code run, I didn't change anything. All I did was just to move the code to the plgrid cluster
-and there all was working good.
+a Hermitian matirx. So I was running an edited version of the `cheev` example on larger and larger matrices.
+At the matrix size 1021 the segmentiation fault occured. However it was not a problem for cluster, that was
+only present on my pc.
 
 The problem got resolved automatically as soon as I have changed the variable handling i.e. in the original
 version the size of a matrix is stored in `#define N xxx`, which is fortran-alike. I have changed it, so that
