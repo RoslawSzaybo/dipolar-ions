@@ -46,13 +46,13 @@ int get_index_from_state(state psi, const basis b)
         - three layers of vibrations (nx) (b.n1, b.n3, b.n5)
         - two layers of rotations (jmx) 
                 $$
-                \sum_{j=0}^{j=b.j1}(2j+1) = (b.j1)^2 + b.j1
+                \sum_{j=0}^{j=b.j1}(2j+1) = (b.j1)^2 + b.j1 + 1
                 $$
         */
         int no_vib35 = b.n3 * b.n5;
         int no_vib5 = b.n5;
-        int no_j1_rot = b.j1*b.j1 + 2*b.j1;
-        int no_j2_rot = b.j2*b.j2 + 2*b.j2;
+        int no_j1_rot = b.j1*b.j1 + 2*b.j1 + 1;
+        int no_j2_rot = b.j2*b.j2 + 2*b.j2 + 1;
         int no_rot = no_j1_rot * no_j2_rot; 
 
         int idx=0;
@@ -93,8 +93,8 @@ state get_state_from_index(int idx, const basis b)
 {
         int no_vib35 = b.n3 * b.n5;
         int no_vib5 = b.n5;
-        int no_j1_rot = b.j1*b.j1 + 2*b.j1;
-        int no_j2_rot = b.j2*b.j2 + 2*b.j2;
+        int no_j1_rot = b.j1*b.j1 + 2*b.j1 + 1;
+        int no_j2_rot = b.j2*b.j2 + 2*b.j2 + 1;
         int no_rot = no_j1_rot * no_j2_rot; 
 
         state psi = {0, 0, 0, 0, 0, 0, 0};
@@ -130,7 +130,7 @@ void print_state(const state psi, const basis b)
 int main() {
         const basis b = {1000, 2, 3, 3, 2};
 
-        for(int idx=0; idx<200; idx++)
+        for(int idx=0; idx<20; idx++)
         {
                 state psi1 = get_state_from_index(idx, b);
                 print_state(psi1, b);
