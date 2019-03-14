@@ -23,3 +23,9 @@ At the matrix size 1021 the segmentiation fault occured.
 
 To make the code run, I didn't change anything. All I did was just to move the code to the plgrid cluster
 and there all was working good.
+
+
+Statistics from plgrid:
+8000x8000 Hermitian matrix: 500Mb; 7min;
+16k x 16k Hermitian matrix: 2Gb; 51min;
+

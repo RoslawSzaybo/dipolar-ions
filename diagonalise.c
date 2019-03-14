@@ -21,15 +21,18 @@ extern void print_matrix( char* desc, int m, int n, fcomplex* a, int lda );
 extern void print_rmatrix( char* desc, int m, int n, float* a, int lda );
 
 /* Parameters */
-#define N 1029
+#define N 16000
+//#define N 1029
 #define LDA N
 
 /* Main program */
-int main() {
+int main(int argc, char *argv[]) {
         /* Locals */
         int n = N, lda = LDA, info, lwork;
         fcomplex wkopt;
         fcomplex* work;
+		printf("The size of fcomplex is = %d\n",sizeof(fcomplex));
+		printf("The size of float is = %d\n",sizeof(float));
         /* Local arrays */
         /* rwork dimension should be at least max(1,3*n-2) */
         float w[N], rwork[3*N-2];
@@ -65,7 +68,8 @@ int main() {
                 exit( 1 );
         }
         /* Print eigenvalues */
-		printf("\n\nFull success\nFive largerst eigenvalues:\n");
+		printf("\n\nFull success in diagonalising %dx%d matirx\n",n,n);
+		printf("Five largerst eigenvalues:\n");
         print_rmatrix( "Eigenvalues", 1, 5, w, 1 );
         //print_rmatrix( "Eigenvalues", 1, n, w, 1 );
         /* Print eigenvectors */
