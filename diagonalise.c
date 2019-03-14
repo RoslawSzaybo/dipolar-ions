@@ -20,35 +20,57 @@ extern void cheev( char* jobz, char* uplo, int* n, fcomplex* a, int* lda,
 extern void print_matrix( char* desc, int m, int n, fcomplex* a, int lda );
 extern void print_rmatrix( char* desc, int m, int n, float* a, int lda );
 
-/* Parameters */
-#define N 16000
-//#define N 1029
-#define LDA N
-
 /* Main program */
 int main(int argc, char *argv[]) {
         /* Locals */
-        int n = N, lda = LDA, info, lwork;
+        /* idk why the variable lda exists as it is always equal to n,
+        but it was organised like it in the library so lets keep it this way.
+        At leas at this iteration of the program */
+        int n, lda, info, lwork;
+        if(argc != 2)
+        {
+                printf(
+                        "Program requires exactly one argument" 
+                        " – the matrix size.\n");
+                return 0;
+        }
+        else
+        {
+               n = atoi(argv[1]);
+               lda = n;
+        }
         fcomplex wkopt;
         fcomplex* work;
 		printf("The size of fcomplex is = %d\n",sizeof(fcomplex));
 		printf("The size of float is = %d\n",sizeof(float));
         /* Local arrays */
         /* rwork dimension should be at least max(1,3*n-2) */
-        float w[N], rwork[3*N-2];
-        fcomplex a[LDA*LDA];
-        // generate some particular matrix
-        for(int row=0; row< N; row++)
+        float *w = (float*)malloc(sizeof(float)*n),
+                *rwork = (float*)malloc(sizeof(float)*(3*n-2));
+        if(w == NULL || rwork == NULL)
         {
-                for(int column=0; column<N;column++)
+                printf("Not enough memory to allocate w or rwork.\n");
+                return 1;
+        }
+
+        fcomplex *a = (fcomplex*)malloc(sizeof(fcomplex)*lda*lda);
+        if(a == NULL)
+        {
+                printf("Not enough memory to allocate a.\n");
+                return 1;
+        }
+        // generate some particular matrix for testing
+        for(int row=0; row<n; row++)
+        {
+                for(int column=0; column<n; column++)
                 {
                         fcomplex entry = {0.0f, 0.0f};
                         if(row <= column)
                         {
-                                entry.re = (float)(row*N+column);
-                                entry.im = (float)(column*N+row);
+                                entry.re = (float)(row*n+column);
+                                entry.im = (float)(column*n+row);
                         }
-                        a[row*N + column] = entry;
+                        a[row*n + column] = entry;
                 }
         }
         /* Print matrix to be diagonalised */
@@ -76,6 +98,9 @@ int main(int argc, char *argv[]) {
         //print_matrix( "Eigenvectors (stored columnwise)", n, n, a, lda );
         /* Free workspace */
         free( (void*)work );
+        free( w );
+        free( rwork );
+        free( a );
         exit( 0 );
 } /* End of CHEEV Example */
 
