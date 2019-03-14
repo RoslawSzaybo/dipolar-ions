@@ -20,7 +20,6 @@ extern void cheev( char* jobz, char* uplo, int* n, fcomplex* a, int* lda,
 extern void print_matrix( char* desc, int m, int n, fcomplex* a, int lda );
 extern void print_rmatrix( char* desc, int m, int n, float* a, int lda );
 
-
 /* Main program */
 int main(int argc, char *argv[]) {
         /* Locals */
