@@ -2,13 +2,6 @@
 this is a file which used to serve as an example on how to use the
 cheev function. 
 
-I have edited it. Now it diagonalises the Hamiltonian of two
-dipolar ions. The Hamiltonian is turend into a matrix by computing it's 
-expectation values in a basis of (harmonic oscilatior)x(spherical hamonics)^2.
-Both bases are truncated. As a resul a the truncated version of the Hamiltonian
-is represented as a hermitian matirx. That matrix can be diagonalised, and 
-the eigenvectros corresponding to the lowest eigenvalues constitute 
-an approximation to the ground state of the system.
 */
 
 #include <stdlib.h>
@@ -25,7 +18,7 @@ typedef struct _state state;
 
 int jm_jump(int j, int m)
 {
-        /* number of rotatonal states behind $\ket{j,m}$ */
+        /* returns the number of rotational states behind $\ket{j,m}$ */
         int jump=0;
         for(int i=0; i<j; i++)
                 jump += 2*i+1;
@@ -43,8 +36,8 @@ int get_index_from_state(state psi, const basis b)
         \ket{\psi} = \ket{n1}\ket{n3}\ket{n5}\ket{j1,m1}\ket{j2,m2}
         $$
         order of my basis is as follows:
-        - three layers of vibrations (nx) (b.n1, b.n3, b.n5)
-        - two layers of rotations (jmx) 
+        - vibrations (nx) (b.n1, b.n3, b.n5)
+        - rotations (j1, m1), (j2, m2)
                 $$
                 \sum_{j=0}^{j=b.j1}(2j+1) = (b.j1)^2 + b.j1 + 1
                 $$
@@ -126,9 +119,9 @@ void print_state(const state psi, const basis b)
 }
 
 
-/* Main program */
-int main() {
-        const basis b = {1000, 2, 3, 3, 2};
+/* test */
+int test_idx_to_state_translation() {
+        const basis b = {1000, 2, 3, 0, 0};
 
         for(int idx=0; idx<20; idx++)
         {
