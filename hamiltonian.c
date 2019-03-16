@@ -6,15 +6,7 @@ cheev function.
 
 #include <stdlib.h>
 #include <stdio.h>
-
-
-/* Basis */
-struct _basis {int n1, n3, n5, j1, j2;};
-typedef struct _basis basis;
-
-struct _state {int n1, n3, n5, j1, m1, j2, m2;};
-typedef struct _state state;
-
+#include "hamiltonian.h"
 
 int jm_jump(int j, int m)
 {
@@ -120,7 +112,7 @@ void print_state(const state psi, const basis b)
 
 
 /* test */
-int test_idx_to_state_translation() {
+void test_idx_to_state_translation() {
         const basis b = {1000, 2, 3, 0, 0};
 
         for(int idx=0; idx<20; idx++)
@@ -128,7 +120,5 @@ int test_idx_to_state_translation() {
                 state psi1 = get_state_from_index(idx, b);
                 print_state(psi1, b);
         }
-
-        return 0;
 }
 

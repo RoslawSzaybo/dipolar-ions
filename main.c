@@ -32,10 +32,9 @@ int main(int argc, char *argv[]) {
         {
                n = atoi(argv[1]);
         }
+        test_idx_to_state_translation();
         fcomplex wkopt;
         fcomplex* work;
-		printf("The size of fcomplex is = %d\n",sizeof(fcomplex));
-		printf("The size of float is = %d\n",sizeof(float));
         /* Local arrays */
         /* rwork dimension should be at least max(1,3*n-2) */
         float *w = (float*)malloc(sizeof(float)*n),
