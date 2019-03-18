@@ -17,22 +17,29 @@ an approximation to the ground state of the system.
 #include "find-spectrum.h"
 #include "hamiltonian.h"
 
+
 /* Main program */
 int main(int argc, char *argv[]) {
         /* Locals */
         int n, info, lwork;
-        if(argc != 2)
+        int n1, n3, n5, j1, j2;
+        if(argc != 6)
         {
-                printf(
-                        "Program requires exactly one argument" 
-                        " – the matrix size.\n");
+                printf( "This is how you can execute the program:\n" );
+                printf( "\t$ %s n1 n3 n5 j1 j2\n", argv[0]);
                 return 0;
         }
         else
         {
-               n = atoi(argv[1]);
+                n1 = atoi(argv[1]);
+                n3 = atoi(argv[2]);
+                n5 = atoi(argv[3]);
+                j1 = atoi(argv[4]);
+                j2 = atoi(argv[5]);
         }
-        test_idx_to_state_translation();
+        n = n1*n3*n5*(j1*j1+2*j1+1)*(j2*j2+2*j2+1);
+        basis b = {n1, n3, n5, j1, j2};
+        test_bra_H();
         fcomplex wkopt;
         fcomplex* work;
         /* Local arrays */
@@ -52,39 +59,26 @@ int main(int argc, char *argv[]) {
                 return 1;
         }
         // generate some particular matrix for testing
-        for(int row=0; row<n; row++)
-        {
-                for(int column=0; column<n; column++)
-                {
-                        fcomplex entry = {0.0f, 0.0f};
-                        if(row <= column)
-                        {
-                                entry.re = (float)(row*n+column);
-                                entry.im = (float)(column*n+row);
-                        }
-                        a[row*n + column] = entry;
-                }
-        }
+        //construct_Hamiltonian(a, b);
         /* Print matrix to be diagonalised */
-        //print_matrix( "Matrix", n, n, a, n );
+        //print_matrix( "Hamiltonian", n, n, a, n );
         /* Executable statements */
-        printf( " CHEEV Example Program Results\n" );
+        //printf( " Results of the diagonalisation\n" );
         /* Query and allocate the optimal workspace */
         lwork = -1;
         cheev( "Vectors", "Lower", &n, a, &n, w, &wkopt, &lwork, rwork, &info );
         lwork = (int)wkopt.re;
         work = (fcomplex*)malloc( lwork*sizeof(fcomplex) );
         /* Solve eigenproblem */
-        cheev( "Vectors", "Lower", &n, a, &n, w, work, &lwork, rwork, &info );
+        //cheev( "Vectors", "Lower", &n, a, &n, w, work, &lwork, rwork, &info );
         /* Check for convergence */
         if( info > 0 ) {
                 printf( "The algorithm failed to compute eigenvalues.\n" );
                 exit( 1 );
         }
         /* Print eigenvalues */
-		printf("\n\nFull success in diagonalising %dx%d matirx\n",n,n);
-		printf("Five largerst eigenvalues:\n");
-        print_rmatrix( "Eigenvalues", 1, 5, w, 1 );
+        //printf("Five largerst eigenvalues:");
+        //print_rmatrix( "Eigenvalues", 1, 5, w, 1 );
         //print_rmatrix( "Eigenvalues", 1, n, w, 1 );
         /* Print eigenvectors */
         //print_matrix( "Eigenvectors (stored columnwise)", n, n, a, n );
@@ -94,4 +88,4 @@ int main(int argc, char *argv[]) {
         free( rwork );
         free( a );
         exit( 0 );
-} /* End of CHEEV Example */
+} /* End of diagonalisation. */

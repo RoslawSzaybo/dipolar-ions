@@ -1,12 +1,8 @@
-/*
-this is a file which used to serve as an example on how to use the
-cheev function. 
-
-*/
-
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "hamiltonian.h"
+#include "state.h"
 
 int jm_jump(int j, int m)
 {
@@ -20,7 +16,7 @@ int jm_jump(int j, int m)
         return jump;
 }
 
-int get_index_from_state(state psi, const basis b)
+int get_index_from_versor(versor psi, const basis b)
 {
         /*
         product basis 
@@ -30,9 +26,9 @@ int get_index_from_state(state psi, const basis b)
         order of my basis is as follows:
         - vibrations (nx) (b.n1, b.n3, b.n5)
         - rotations (j1, m1), (j2, m2)
-                $$
-                \sum_{j=0}^{j=b.j1}(2j+1) = (b.j1)^2 + b.j1 + 1
-                $$
+        $$
+        \sum_{j=0}^{j=b.j1}(2j+1) = (b.j1)^2 + b.j1 + 1
+        $$
         */
         int no_vib35 = b.n3 * b.n5;
         int no_vib5 = b.n5;
@@ -74,7 +70,7 @@ int getm(int idx)
         return idx-j;
 }
 
-state get_state_from_index(int idx, const basis b)
+versor get_versor_from_index(int idx, const basis b)
 {
         int no_vib35 = b.n3 * b.n5;
         int no_vib5 = b.n5;
@@ -82,7 +78,7 @@ state get_state_from_index(int idx, const basis b)
         int no_j2_rot = b.j2*b.j2 + 2*b.j2 + 1;
         int no_rot = no_j1_rot * no_j2_rot; 
 
-        state psi = {0, 0, 0, 0, 0, 0, 0};
+        versor psi = {0, 0, 0, 0, 0, 0, 0};
 
         psi.n1 = idx/ no_vib35 / no_rot;
         idx %= no_vib35 * no_rot;
@@ -102,23 +98,209 @@ state get_state_from_index(int idx, const basis b)
         return psi;
 }
 
-void print_state(const state psi, const basis b)
+void print_versor(const versor psi, const basis b)
 {
-        printf("State n1=%d, n3=%d, n5=%d, j1=%d, m1 =%2d, j2=%d, m2=%2d\t\t"
+        printf("|%4d,%2d,%2d;%d,%3d;%d,%3d>\t\t"
         "index = %d\n",
         psi.n1, psi.n3, psi.n5, psi.j1, psi.m1, psi.j2, psi.m2,
-        get_index_from_state(psi, b));
+        get_index_from_versor(psi, b));
 }
 
 
+
 /* test */
-void test_idx_to_state_translation() {
+void test_idx_to_versor_translation() {
         const basis b = {1000, 2, 3, 0, 0};
 
         for(int idx=0; idx<20; idx++)
         {
-                state psi1 = get_state_from_index(idx, b);
-                print_state(psi1, b);
+                versor psi1 = get_versor_from_index(idx, b);
+                print_versor(psi1, b);
         }
 }
 
+
+/*
+This function returns a BRA state (it's not ket)
+which is a result of acting with bra called psi
+on the Hamiltonian.
+*/
+state bra_H(versor psi)
+{
+        state output_bra;
+
+        state_init(&output_bra);
+
+        // Harminic oscillator terms
+        const float homega1 = 1.1f;
+        const float homega3 = 100.0f;
+        const float homega5 = 100.0f;
+
+        versor psi_n1 = psi;
+        fcomplex A_psi_n1 = (fcomplex){
+                (float)psi.n1 + 0.5f,
+                0.0f
+        };
+        A_psi_n1.re *= homega1;
+        state_add(&output_bra, psi_n1, A_psi_n1);
+
+        versor psi_n3 = psi;
+        fcomplex A_psi_n3 = (fcomplex){
+                (float)psi.n3 + 0.5f,
+                0.0f
+        };
+        A_psi_n3.re *= homega3;
+        state_add(&output_bra, psi_n3, A_psi_n3);
+
+        versor psi_n5 = psi;
+        fcomplex A_psi_n5 = (fcomplex){
+                (float)psi.n5 + 0.5f,
+                0.0f
+        };
+        A_psi_n5.re *= homega5;
+        state_add(&output_bra, psi_n5, A_psi_n5);
+
+
+        // Kinetic energy of rotations
+        const float B1 = 1.0f;
+        const float B2 = 1.0f;
+
+        versor psi_L2_1 = psi;
+        float j1 = (float)(psi.j1);
+        fcomplex A_psi_L2_1 = (fcomplex){ B1*j1*(j1+1.f), 0.0f };
+        state_add(&output_bra, psi_L2_1, A_psi_L2_1);
+
+        versor psi_L2_2 = psi;
+        float j2 = (float)(psi.j2);
+        fcomplex A_psi_L2_2 = (fcomplex){ B2*j2*(j2+1.f), 0.0f };
+        state_add(&output_bra, psi_L2_2, A_psi_L2_2);
+
+        // An artifitial off-diagonal term
+        const float qpie = 1.0;
+
+        versor psi_a1 = psi;
+        psi_a1.n1++;
+        fcomplex A_psi_a1 = {0.0f, 0.0f};
+        A_psi_a1.re = sqrt(psi.n1+1);
+        A_psi_a1.re*= qpie;
+        state_add(&output_bra, psi_a1, A_psi_a1);
+
+        versor psi_a1dagger = psi;
+        psi_a1dagger.n1--;
+        fcomplex A_psi_a1dagger = {0.0f, 0.0f};
+        A_psi_a1dagger.re = sqrt(psi.n1);
+        A_psi_a1dagger.re*= qpie;
+        state_add(&output_bra, psi_a1dagger, A_psi_a1dagger);
+
+        return output_bra;
+}
+
+
+int valid_versor(versor psi, basis b)
+{
+        if( 0 > psi.n1 || psi.n1 >= b.n1)
+                return 0;
+        
+        if( 0 > psi.n3 || psi.n3 >= b.n3)
+                return 0;
+
+        if( 0 > psi.n5 || psi.n5 >= b.n5)
+                return 0;
+
+        if( psi.j1 < 0 || psi.j1 > b.j1)
+                return 0;
+
+        if( psi.m1 < -b.j1 || psi.m1 > b.j1 )
+                return 0;
+
+        if( psi.j2 < 0 || psi.j2 > b.j2)
+                return 0;
+
+        if( psi.m2 < -b.j2 || psi.m2 > b.j2 )
+                return 0;
+
+        return 1;
+}
+
+
+void construct_Hamiltonian(fcomplex* a, basis b)
+{
+        // fill-in with zeroes
+        int basis_size = b.n1*b.n3*b.n5*(b.j1*b.j1+2*b.j1+1)*(b.j2*b.j2+2*b.j2+1);
+        fcomplex zero = {0.0f, 0.0f};
+        for(int i = 0; i<basis_size*basis_size; i++)
+                a[i] = zero;
+
+        // scan through the matrix rows and replace all the non-zero elements
+        for(int i =0; i<basis_size; i++)
+        {
+                // scan through rows
+                versor psi0 = get_versor_from_index(i, b);
+
+                // act with H from the left
+                state psiH = bra_H(psi0);
+
+                versor loop_versor;
+                fcomplex loop_amplitude;
+                for(int l=0; l<psiH.length; l++)
+                {
+                        loop_versor = state_get_versor(&psiH, l);
+                        // not sure but I have already put reutrn NULL earlier
+                        /* do something like
+                        if(!loop_versor)
+                                continue;
+                        // or check it another way
+                        */
+
+                        // check if the versor is a valid versor
+                        if(!valid_versor(loop_versor, b))
+                                continue;
+
+                        // check if it is above the diagonal
+                        int loc_idx = get_index_from_versor(loop_versor, b);
+                        if( loc_idx < i )
+                                continue;
+
+                        // apply amplitude;
+                        fcomplex amp = state_get_amplitude(&psiH, l);
+                        /* again
+                        if(!amp)
+                                continue;
+                        */
+
+                        // add amplitudes
+                        a[i*basis_size+loc_idx].re += amp.re;
+                        a[i*basis_size+loc_idx].im += amp.im;
+                }
+        }
+}
+
+
+void print_only_versor(const versor psi)
+{
+        printf("|%5d,%5d,%5d;%d,%3d;%d,%3d>",
+        psi.n1, psi.n3, psi.n5, psi.j1, psi.m1, psi.j2, psi.m2);
+}
+
+void test_bra_H() 
+{
+        const basis b = {1000, 2, 3, 3, 3};
+
+        versor psi1 = get_versor_from_index(29942, b);
+        print_versor(psi1, b);
+
+        printf("Okay now the real test begins\n\n");
+
+        state sps = bra_H(psi1);
+        versor loop_versor;
+        fcomplex loop_amplitude;
+        for(int l=0; l < sps.length; l++)
+        {
+                loop_versor = state_get_versor(&sps, l);
+                loop_amplitude = state_get_amplitude(&sps, l);
+                printf("Amplitude = %6.2f+i%6.2f\t", 
+                loop_amplitude.re, loop_amplitude.im);
+                print_only_versor(loop_versor);
+                printf("\t\tidx = %7d\n", get_index_from_versor(loop_versor, b));
+        }
+}
