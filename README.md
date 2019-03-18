@@ -36,3 +36,4 @@ and it turned out that is has resolved the segfault problem.
 ### Statistics from plgrid:
 - 8000x8000 Hermitian matrix: 500Mb; 7min;
 - 16k x 16k Hermitian matrix: 2Gb; 51min;
+- 32k x 32k Hermitian matrix: 8Gb; 7h 01min;
