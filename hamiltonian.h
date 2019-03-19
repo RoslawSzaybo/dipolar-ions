@@ -6,7 +6,6 @@
 
 
 int jm_jump(int j, int m);
-
 /* 
 We work in a product basis
 $$
@@ -42,7 +41,7 @@ on the Hamiltonian one gets a superposition of many bras.
 Those bras are stored in the output state.
 */
 
-state bra_H(versor psi);
+state bra_H(state* psi);
 void test_bra_H();
 void construct_Hamiltonian(fcomplex* a, basis b);
 

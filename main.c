@@ -38,47 +38,59 @@ int main(int argc, char *argv[]) {
                 j2 = atoi(argv[5]);
         }
         n = n1*n3*n5*(j1*j1+2*j1+1)*(j2*j2+2*j2+1);
+        if( n==0 )
+        {
+                printf("Input |%d,%d,%d,%d,%d>\n",n1,n3,n5,j1,j2);
+                printf("Basis size  %d\n",n);
+                printf("Basis size is 0. Change the basis.\n");
+        }
         basis b = {n1, n3, n5, j1, j2};
-        test_bra_H();
+        //test_bra_H();
         fcomplex wkopt;
         fcomplex* work;
         /* Local arrays */
         /* rwork dimension should be at least max(1,3*n-2) */
-        float *w = (float*)malloc(sizeof(float)*n),
-                *rwork = (float*)malloc(sizeof(float)*(3*n-2));
-        if(w == NULL || rwork == NULL)
+        float *w = (float*)malloc(sizeof(float)*n);
+        if(w == NULL)
         {
-                printf("Not enough memory to allocate w or rwork.\n");
+                printf("Not enough memory to allocate w.\n");
+                return 1;
+        }
+        float *rwork = (float*)malloc(sizeof(float)*(3*n-2));
+        if(rwork == NULL)
+        {
+                printf("Not enough memory to allocate rwork.\n");
                 return 1;
         }
 
         fcomplex *a = (fcomplex*)malloc(sizeof(fcomplex)*n*n);
         if(a == NULL)
         {
+                printf("The size of a matirx is %dx%d=%d\n",n,n,n*n);
                 printf("Not enough memory to allocate a.\n");
                 return 1;
         }
         // generate some particular matrix for testing
-        //construct_Hamiltonian(a, b);
+        construct_Hamiltonian(a, b);
         /* Print matrix to be diagonalised */
         //print_matrix( "Hamiltonian", n, n, a, n );
         /* Executable statements */
-        //printf( " Results of the diagonalisation\n" );
+        printf( " Results of the diagonalisation\n" );
         /* Query and allocate the optimal workspace */
         lwork = -1;
         cheev( "Vectors", "Lower", &n, a, &n, w, &wkopt, &lwork, rwork, &info );
         lwork = (int)wkopt.re;
         work = (fcomplex*)malloc( lwork*sizeof(fcomplex) );
         /* Solve eigenproblem */
-        //cheev( "Vectors", "Lower", &n, a, &n, w, work, &lwork, rwork, &info );
+        cheev( "Vectors", "Lower", &n, a, &n, w, work, &lwork, rwork, &info );
         /* Check for convergence */
         if( info > 0 ) {
                 printf( "The algorithm failed to compute eigenvalues.\n" );
                 exit( 1 );
         }
         /* Print eigenvalues */
-        //printf("Five largerst eigenvalues:");
-        //print_rmatrix( "Eigenvalues", 1, 5, w, 1 );
+        printf("The smallest eigenvalues are:");
+        print_rmatrix( "Eigenvalues", 1, 5, w, 1 );
         //print_rmatrix( "Eigenvalues", 1, n, w, 1 );
         /* Print eigenvectors */
         //print_matrix( "Eigenvectors (stored columnwise)", n, n, a, n );

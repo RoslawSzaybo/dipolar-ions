@@ -1,6 +1,6 @@
 #include "state.h"
-#include<stdlib.h>
-#include<stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 
 void state_init(state* psi)

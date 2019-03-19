@@ -120,47 +120,59 @@ void test_idx_to_versor_translation() {
 }
 
 
+void apply_harmonic_oscillator(state * input, state * output)
+{
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                // Harminic oscillator terms
+                const float homega1 = 1.1f;
+                const float homega3 = 100.0f;
+                const float homega5 = 100.0f;
+
+                versor psi_n1 = psi;
+                fcomplex A_psi_n1 = (fcomplex){
+                        (float)psi.n1 + 0.5f,
+                        0.0f
+                };
+                A_psi_n1.re *= homega1;
+                state_add(output, psi_n1, fcomplex_multiply(&A_psi_n1, &A));
+
+                versor psi_n3 = psi;
+                fcomplex A_psi_n3 = (fcomplex){
+                        (float)psi.n3 + 0.5f,
+                        0.0f
+                };
+                A_psi_n3.re *= homega3;
+                state_add(output, psi_n3, fcomplex_multiply(&A_psi_n3, &A));
+
+                versor psi_n5 = psi;
+                fcomplex A_psi_n5 = (fcomplex){
+                        (float)psi.n5 + 0.5f,
+                        0.0f
+                };
+                A_psi_n5.re *= homega5;
+                state_add(output, psi_n5, fcomplex_multiply(&A_psi_n5, &A));
+        }
+}
+
+
 /*
 This function returns a BRA state (it's not ket)
 which is a result of acting with bra called psi
 on the Hamiltonian.
 */
-state bra_H(versor psi)
+state bra_H(state* psi)
 {
         state output_bra;
-
         state_init(&output_bra);
 
-        // Harminic oscillator terms
-        const float homega1 = 1.1f;
-        const float homega3 = 100.0f;
-        const float homega5 = 100.0f;
 
-        versor psi_n1 = psi;
-        fcomplex A_psi_n1 = (fcomplex){
-                (float)psi.n1 + 0.5f,
-                0.0f
-        };
-        A_psi_n1.re *= homega1;
-        state_add(&output_bra, psi_n1, A_psi_n1);
+        apply_harmonic_oscillator(psi, &output_bra);
 
-        versor psi_n3 = psi;
-        fcomplex A_psi_n3 = (fcomplex){
-                (float)psi.n3 + 0.5f,
-                0.0f
-        };
-        A_psi_n3.re *= homega3;
-        state_add(&output_bra, psi_n3, A_psi_n3);
-
-        versor psi_n5 = psi;
-        fcomplex A_psi_n5 = (fcomplex){
-                (float)psi.n5 + 0.5f,
-                0.0f
-        };
-        A_psi_n5.re *= homega5;
-        state_add(&output_bra, psi_n5, A_psi_n5);
-
-
+        /*
         // Kinetic energy of rotations
         const float B1 = 1.0f;
         const float B2 = 1.0f;
@@ -191,6 +203,7 @@ state bra_H(versor psi)
         A_psi_a1dagger.re = sqrt(psi.n1);
         A_psi_a1dagger.re*= qpie;
         state_add(&output_bra, psi_a1dagger, A_psi_a1dagger);
+        */
 
         return output_bra;
 }
@@ -228,6 +241,7 @@ void construct_Hamiltonian(fcomplex* a, basis b)
         // fill-in with zeroes
         int basis_size = b.n1*b.n3*b.n5*(b.j1*b.j1+2*b.j1+1)*(b.j2*b.j2+2*b.j2+1);
         fcomplex zero = {0.0f, 0.0f};
+
         for(int i = 0; i<basis_size*basis_size; i++)
                 a[i] = zero;
 
@@ -236,9 +250,12 @@ void construct_Hamiltonian(fcomplex* a, basis b)
         {
                 // scan through rows
                 versor psi0 = get_versor_from_index(i, b);
+                state state0;
+                state_init(&state0);
+                state_add(&state0, psi0, (fcomplex){1.0f, 0.0f});
 
                 // act with H from the left
-                state psiH = bra_H(psi0);
+                state psiH = bra_H(&state0);
 
                 versor loop_versor;
                 fcomplex loop_amplitude;
@@ -272,6 +289,7 @@ void construct_Hamiltonian(fcomplex* a, basis b)
                         a[i*basis_size+loc_idx].re += amp.re;
                         a[i*basis_size+loc_idx].im += amp.im;
                 }
+               state_free(&psiH);
         }
 }
 
@@ -287,11 +305,16 @@ void test_bra_H()
         const basis b = {1000, 2, 3, 3, 3};
 
         versor psi1 = get_versor_from_index(29942, b);
+
+        state state0;
+        state_init(&state0);
+
+        state_add(&state0, psi1, (fcomplex){1.0f, 0.0f});
         print_versor(psi1, b);
 
         printf("Okay now the real test begins\n\n");
 
-        state sps = bra_H(psi1);
+        state sps = bra_H(&state0);
         versor loop_versor;
         fcomplex loop_amplitude;
         for(int l=0; l < sps.length; l++)
