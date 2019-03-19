@@ -35,5 +35,7 @@ int state_cnt(state* psi);
 void state_add(state* psi, versor ket, fcomplex amplitude);
 versor state_get_versor(state* psi, int idx);
 fcomplex state_get_amplitude(state* psi, int idx);
+void state_times_float(state * input, const float factor);
+void state_add_state(state * sum, const state * compound);
 
 #endif // state_h

@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
         // generate some particular matrix for testing
         construct_Hamiltonian(a, b);
         /* Print matrix to be diagonalised */
-        //print_matrix( "Hamiltonian", n, n, a, n );
+        print_matrix( "Hamiltonian", n, n, a, n );
         /* Executable statements */
         printf( " Results of the diagonalisation\n" );
         /* Query and allocate the optimal workspace */
@@ -89,8 +89,7 @@ int main(int argc, char *argv[]) {
                 exit( 1 );
         }
         /* Print eigenvalues */
-        printf("The smallest eigenvalues are:");
-        print_rmatrix( "Eigenvalues", 1, 5, w, 1 );
+        print_rmatrix( "Five smallest eigenvalues:", 1, 5, w, 1 );
         //print_rmatrix( "Eigenvalues", 1, n, w, 1 );
         /* Print eigenvectors */
         //print_matrix( "Eigenvectors (stored columnwise)", n, n, a, n );

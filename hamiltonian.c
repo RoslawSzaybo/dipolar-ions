@@ -160,6 +160,111 @@ void apply_harmonic_oscillator(state * input, state * output)
 
 
 /*
+$$
+\bra{output} = \bra{input} B(\hat{L}_1^2 + hat{L}_2^2 )
+$$
+*/
+void apply_rotational_kinetic_energy(state * input, state * output)
+{
+        const float B1 = 1.0f;
+        const float B2 = 1.0f;
+
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                versor psi_L2_1 = psi;
+                float j1 = (float)(psi.j1);
+                float BJJ1 =  B1*j1*(j1+1.f);
+                state_add(output, psi_L2_1, fcomplex_times_float(&A, BJJ1));
+
+                versor psi_L2_2 = psi;
+                float j2 = (float)(psi.j2);
+                float BJJ2 =  B2*j2*(j2+1.f);
+                state_add(output, psi_L2_2, fcomplex_times_float(&A, BJJ2));
+        }
+}
+
+/*
+$$
+\bra{output} = \bra{input} \omega_1^{-1/2}(\hat{a}_1 + hat{a}_1^\dagger )
+$$
+*/
+void apply_a1_plus_a1dagger(state * input, state * output)
+{
+        float omega_1 = 0.1;
+        float sqrt_omega_1 = sqrt(omega_1);
+        float sqrt_omega_1_inv = 1.0f/sqrt_omega_1;
+
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                versor psi_a1 = psi;
+                psi_a1.n1++;
+                float a1_factor = sqrt(psi.n1 + 1.0);
+                state_add(output, psi_a1, fcomplex_times_float(&A, a1_factor));
+
+                versor psi_a1dagger = psi;
+                psi_a1dagger.n1--;
+                float a1_dagger_factor = sqrt(psi.n1);
+                state_add(output, psi_a1dagger, fcomplex_times_float(&A, a1_dagger_factor));
+        }
+        state_times_float(output, sqrt_omega_1_inv);
+}
+
+void apply_a3_plus_a3dagger(state * input, state * output)
+{
+        float omega_3 = 0.1;
+        float sqrt_omega_3 = sqrt(omega_3);
+        float sqrt_omega_3_inv = 1.0f/sqrt_omega_3;
+
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                versor psi_a3 = psi;
+                psi_a3.n3++;
+                float a3_factor = sqrt(psi.n3 + 1.0);
+                state_add(output, psi_a3, fcomplex_times_float(&A, a3_factor));
+
+                versor psi_a3dagger = psi;
+                psi_a3dagger.n3--;
+                float a3_dagger_factor = sqrt(psi.n3);
+                state_add(output, psi_a3dagger, fcomplex_times_float(&A, a3_dagger_factor));
+        }
+        state_times_float(output, sqrt_omega_3_inv);
+}
+
+void apply_a5_plus_a5dagger(state * input, state * output)
+{
+        float omega_5 = 0.1;
+        float sqrt_omega_5 = sqrt(omega_5);
+        float sqrt_omega_5_inv = 1.0f/sqrt_omega_5;
+
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                versor psi_a5 = psi;
+                psi_a5.n5++;
+                float a5_factor = sqrt(psi.n5 + 1.0);
+                state_add(output, psi_a5, fcomplex_times_float(&A, a5_factor));
+
+                versor psi_a5dagger = psi;
+                psi_a5dagger.n5--;
+                float a5_dagger_factor = sqrt(psi.n5);
+                state_add(output, psi_a5dagger, fcomplex_times_float(&A, a5_dagger_factor));
+        }
+        state_times_float(output, sqrt_omega_5_inv);
+}
+
+
+/*
 This function returns a BRA state (it's not ket)
 which is a result of acting with bra called psi
 on the Hamiltonian.
@@ -169,41 +274,14 @@ state bra_H(state* psi)
         state output_bra;
         state_init(&output_bra);
 
-
         apply_harmonic_oscillator(psi, &output_bra);
-
-        /*
-        // Kinetic energy of rotations
-        const float B1 = 1.0f;
-        const float B2 = 1.0f;
-
-        versor psi_L2_1 = psi;
-        float j1 = (float)(psi.j1);
-        fcomplex A_psi_L2_1 = (fcomplex){ B1*j1*(j1+1.f), 0.0f };
-        state_add(&output_bra, psi_L2_1, A_psi_L2_1);
-
-        versor psi_L2_2 = psi;
-        float j2 = (float)(psi.j2);
-        fcomplex A_psi_L2_2 = (fcomplex){ B2*j2*(j2+1.f), 0.0f };
-        state_add(&output_bra, psi_L2_2, A_psi_L2_2);
-
-        // An artifitial off-diagonal term
-        const float qpie = 1.0;
-
-        versor psi_a1 = psi;
-        psi_a1.n1++;
-        fcomplex A_psi_a1 = {0.0f, 0.0f};
-        A_psi_a1.re = sqrt(psi.n1+1);
-        A_psi_a1.re*= qpie;
-        state_add(&output_bra, psi_a1, A_psi_a1);
-
-        versor psi_a1dagger = psi;
-        psi_a1dagger.n1--;
-        fcomplex A_psi_a1dagger = {0.0f, 0.0f};
-        A_psi_a1dagger.re = sqrt(psi.n1);
-        A_psi_a1dagger.re*= qpie;
-        state_add(&output_bra, psi_a1dagger, A_psi_a1dagger);
-        */
+        apply_rotational_kinetic_energy(psi, &output_bra);
+        //apply_dz1_m_dz2(psi, &output_bra);
+        state result;
+        state_init(&result);
+        apply_a1_plus_a1dagger(psi, &result);
+        state_add_state(&output_bra, &result);
+        state_free(&result);
 
         return output_bra;
 }

@@ -24,7 +24,7 @@ int state_cnt(state *psi)
     return psi->length;
 }
 
-void state_add(state* psi, versor ket,  fcomplex amplitude)
+void state_add(state* psi, const versor ket, const fcomplex amplitude)
 {
     if(psi->length == 0)
     {
@@ -70,4 +70,19 @@ fcomplex state_get_amplitude(state* psi, int idx)
     }
 
     return psi->amplitudes[idx];
+}
+
+void state_times_float(state * input, const float factor)
+{
+    for(int l=0; l < input->length; l++)
+    {
+        input->amplitudes[l].re *= factor;
+        input->amplitudes[l].im *= factor;
+    }
+}
+
+void state_add_state(state * sum, const state * component)
+{
+    for(int l=0; l<component->length; l++)
+        state_add(sum, component->kets[l], component->amplitudes[l]);
 }
