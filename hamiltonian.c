@@ -215,6 +215,155 @@ void apply_a1_plus_a1dagger(state * input, state * output)
         state_times_float(output, sqrt_omega_1_inv);
 }
 
+
+/*
+$$
+\bra{output} = \bra{input} hat{d}_1^z 
+$$
+*/
+void apply_dz1(state * input, state * output)
+{
+        const float d = 1.0f;
+        /*
+        constant factors
+        dzij_kl = \bra{i,j}d^z\ket{k,l};
+        the following holds
+        dzij_kl = dzkl_ij;
+        */
+        const float dz00_10 = 1.0/sqrt(3.0),
+        dz11_21 = 1.0/sqrt(5.0),
+        dz10_20 = sqrt(4.0/15.0),
+        dz22_32 = 1.0/sqrt(7.0),
+        dz21_31 = sqrt(8.0/35.0),
+        dz20_30 = sqrt(9.0/35.0);
+
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                versor psi_dz1 = psi;
+                switch(psi.j1){
+                        case 0:
+                                psi_dz1.j1++;
+                                state_add(output, psi_dz1, 
+                                        fcomplex_times_float(&A, dz00_10));
+                        break;
+                        case 1:
+                                if(psi.m1 == 0)
+                                {
+                                        psi_dz1.j1 = psi.j1-1;
+                                        state_add(output, psi_dz1, 
+                                                fcomplex_times_float(&A, dz00_10));
+                                        psi_dz1.j1 = psi.j1+1;
+                                        state_add(output, psi_dz1, 
+                                                fcomplex_times_float(&A, dz10_20));
+                                }
+                                else
+                                {
+                                        psi_dz1.j1 = psi.j1+1;
+                                        state_add(output, psi_dz1, 
+                                                fcomplex_times_float(&A, dz11_21));
+                                }
+                        break;
+                        case 2:
+                                switch(psi.m1)
+                                {
+                                        case 0:
+                                                psi_dz1.j1 = psi.j1-1;
+                                                state_add(output, psi_dz1, 
+                                                        fcomplex_times_float(&A, dz10_20));
+                                                psi_dz1.j1 = psi.j1+1;
+                                                state_add(output, psi_dz1, 
+                                                        fcomplex_times_float(&A, dz20_30));
+                                        break;
+                                        case 1:
+                                                psi_dz1.j1 = psi.j1-1;
+                                                state_add(output, psi_dz1, 
+                                                        fcomplex_times_float(&A, dz11_21));
+                                                psi_dz1.j1 = psi.j1+1;
+                                                state_add(output, psi_dz1, 
+                                                        fcomplex_times_float(&A, dz21_31));
+                                        break;
+                                        case 2:
+                                                psi_dz1.j1 = psi.j1+1;
+                                                state_add(output, psi_dz1, 
+                                                        fcomplex_times_float(&A, dz22_32));
+                                        break;
+                                }
+                        break;
+                }
+        }
+}
+
+/*
+$$
+\bra{output} = \bra{input} hat{d}_1^z 
+$$
+*/
+void apply_dz2(state * input, state * output)
+{
+        const float d = 1.0f;
+        /*
+        constant factors
+        dzij_kl = \bra{i,j}d^z\ket{k,l};
+        the following holds
+        dzij_kl = dzkl_ij;
+        */
+
+        // list of all the transition probalibities 
+        // \bra{ja,ma}\hat{d}^z\ket{jb,mb}
+        // it's a real number which don't depend on the sign of m.
+        // So all of those products can be referred to by the index of the 
+        // smaller j and by the absolute value of the corresponding m.
+        float dz[6] = {
+                // j=0, |m| = 0 
+                sqrt(1.0/3.0),                        
+                // j=1, |m| = 0,1 
+                sqrt(4.0/15.0), sqrt(1.0/5.0),        
+                // j=2, |m| = 0,1,2 
+                sqrt(9.0/35.0), sqrt(8.0/35.0), sqrt(1.0/7.0)
+        };
+
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                if(psi.j2 > 2)
+                        continue;
+                
+                versor psi_dz2 = psi;
+                int j = psi.j2;
+                int m = abs(psi.m2);
+                if( m == j )
+                {
+                        int idx_j = j+1;
+                        int idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j,|j|} in the dz list
+                        psi_dz2.j2 = j+1;
+                        state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
+                }
+                else if(m < j)
+                {
+                        // go down with j
+                        psi_dz2.j2 = j-1;
+                        int idx_j = j;
+                        int idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j-1,|j-1|} in the dz list
+                        idx = idx - (j-1) + m; // a trick I like which returns the \ket{j-1,|m|}
+                        state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
+
+                        // go up with j
+                        psi_dz2.j2 = j+1;
+                        idx_j = j+1;
+                        idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j,|j|}
+                        idx = idx - j + m ; // \ket{j, |m|}
+                        state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
+                }
+                else
+                        continue; // incorrect value of m;
+        }
+}
+
 void apply_a3_plus_a3dagger(state * input, state * output)
 {
         float omega_3 = 0.1;
@@ -274,14 +423,23 @@ state bra_H(state* psi)
         state output_bra;
         state_init(&output_bra);
 
-        apply_harmonic_oscillator(psi, &output_bra);
-        apply_rotational_kinetic_energy(psi, &output_bra);
+        //apply_harmonic_oscillator(psi, &output_bra);
+        //apply_rotational_kinetic_energy(psi, &output_bra);
+
         //apply_dz1_m_dz2(psi, &output_bra);
-        state result;
-        state_init(&result);
-        apply_a1_plus_a1dagger(psi, &result);
-        state_add_state(&output_bra, &result);
-        state_free(&result);
+        /*state aadagger;
+        state_init(&aadagger);
+        apply_a1_plus_a1dagger(psi, &aadagger);
+        state_add_state(&output_bra, &aadagger);
+        state_free(&aadagger);
+        */
+
+        state dz;
+        printf("Apply_dz2.\n");
+        state_init(&dz);
+        apply_dz2(psi, &dz);
+        state_add_state(&output_bra, &dz);
+        state_free(&dz);
 
         return output_bra;
 }
@@ -324,7 +482,7 @@ void construct_Hamiltonian(fcomplex* a, basis b)
                 a[i] = zero;
 
         // scan through the matrix rows and replace all the non-zero elements
-        for(int i =0; i<basis_size; i++)
+        for(int i = 0; i<basis_size; i++)
         {
                 // scan through rows
                 versor psi0 = get_versor_from_index(i, b);
@@ -333,6 +491,7 @@ void construct_Hamiltonian(fcomplex* a, basis b)
                 state_add(&state0, psi0, (fcomplex){1.0f, 0.0f});
 
                 // act with H from the left
+                printf("bra_H.\n");
                 state psiH = bra_H(&state0);
 
                 versor loop_versor;
@@ -380,17 +539,18 @@ void print_only_versor(const versor psi)
 
 void test_bra_H() 
 {
-        const basis b = {1000, 2, 3, 3, 3};
+        const basis b = {1, 1, 1, 0, 2};
 
-        versor psi1 = get_versor_from_index(29942, b);
+        versor psi1 = get_versor_from_index(0, b);
 
         state state0;
         state_init(&state0);
 
         state_add(&state0, psi1, (fcomplex){1.0f, 0.0f});
-        print_versor(psi1, b);
-
-        printf("Okay now the real test begins\n\n");
+        printf("Initial state is only a single versor.\n");
+        printf("Amplitude = %4.2f+i%4.2f\t",1.0f,0.0f);
+        print_only_versor(psi1);
+        printf("\t\tidx = %7d\n", get_index_from_versor(psi1, b));
 
         state sps = bra_H(&state0);
         versor loop_versor;
@@ -399,7 +559,7 @@ void test_bra_H()
         {
                 loop_versor = state_get_versor(&sps, l);
                 loop_amplitude = state_get_amplitude(&sps, l);
-                printf("Amplitude = %6.2f+i%6.2f\t", 
+                printf("Amplitude = %4.2f+i%4.2f\t", 
                 loop_amplitude.re, loop_amplitude.im);
                 print_only_versor(loop_versor);
                 printf("\t\tidx = %7d\n", get_index_from_versor(loop_versor, b));

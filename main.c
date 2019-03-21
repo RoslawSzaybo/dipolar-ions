@@ -90,9 +90,9 @@ int main(int argc, char *argv[]) {
         }
         /* Print eigenvalues */
         print_rmatrix( "Five smallest eigenvalues:", 1, 5, w, 1 );
-        //print_rmatrix( "Eigenvalues", 1, n, w, 1 );
+        print_rmatrix( "Eigenvalues", 1, n, w, 1 );
         /* Print eigenvectors */
-        //print_matrix( "Eigenvectors (stored columnwise)", n, n, a, n );
+        print_matrix( "Eigenvectors (stored columnwise)", n, n, a, n );
         /* Free workspace */
         free( (void*)work );
         free( w );
