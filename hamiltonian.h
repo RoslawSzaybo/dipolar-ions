@@ -46,6 +46,7 @@ void apply_rotational_kinetic_energy(state *input, state *output);
 void apply_a1_plus_a1dagger(state *input, state *output);
 void apply_a3_plus_a3dagger(state *input, state *output);
 void apply_a5_plus_a5dagger(state *input, state *output);
+void apply_charge_dipole_zero(state *input, state *output);
 state bra_H(state* psi);
 void test_bra_H();
 void construct_Hamiltonian(fcomplex* a, basis b);

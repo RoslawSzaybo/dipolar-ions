@@ -216,6 +216,56 @@ void apply_a1_plus_a1dagger(state * input, state * output)
 }
 
 
+void apply_a3_plus_a3dagger(state * input, state * output)
+{
+        float omega_3 = 0.1;
+        float sqrt_omega_3 = sqrt(omega_3);
+        float sqrt_omega_3_inv = 1.0f/sqrt_omega_3;
+
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                versor psi_a3 = psi;
+                psi_a3.n3++;
+                float a3_factor = sqrt(psi.n3 + 1.0);
+                state_add(output, psi_a3, fcomplex_times_float(&A, a3_factor));
+
+                versor psi_a3dagger = psi;
+                psi_a3dagger.n3--;
+                float a3_dagger_factor = sqrt(psi.n3);
+                state_add(output, psi_a3dagger, fcomplex_times_float(&A, a3_dagger_factor));
+        }
+        state_times_float(output, sqrt_omega_3_inv);
+}
+
+
+void apply_a5_plus_a5dagger(state * input, state * output)
+{
+        float omega_5 = 0.1;
+        float sqrt_omega_5 = sqrt(omega_5);
+        float sqrt_omega_5_inv = 1.0f/sqrt_omega_5;
+
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                versor psi_a5 = psi;
+                psi_a5.n5++;
+                float a5_factor = sqrt(psi.n5 + 1.0);
+                state_add(output, psi_a5, fcomplex_times_float(&A, a5_factor));
+
+                versor psi_a5dagger = psi;
+                psi_a5dagger.n5--;
+                float a5_dagger_factor = sqrt(psi.n5);
+                state_add(output, psi_a5dagger, fcomplex_times_float(&A, a5_dagger_factor));
+        }
+        state_times_float(output, sqrt_omega_5_inv);
+}
+
+
 /*
 $$
 \bra{output} = \bra{input} hat{d}_1^z 
@@ -224,97 +274,73 @@ $$
 void apply_dz1(state * input, state * output)
 {
         const float d = 1.0f;
-        /*
-        constant factors
-        dzij_kl = \bra{i,j}d^z\ket{k,l};
-        the following holds
-        dzij_kl = dzkl_ij;
-        */
-        const float dz00_10 = 1.0/sqrt(3.0),
-        dz11_21 = 1.0/sqrt(5.0),
-        dz10_20 = sqrt(4.0/15.0),
-        dz22_32 = 1.0/sqrt(7.0),
-        dz21_31 = sqrt(8.0/35.0),
-        dz20_30 = sqrt(9.0/35.0);
+
+        // list of all the constant factors
+        // \bra{ja,m}\hat{d}^z\ket{jb,m}.
+        // Each of them is a real number which don't depend on the sign of m.
+        // So all of those products can be referred to by the  
+        // smaller j and by the absolute value of the corresponding m.
+        float dz[6] = {
+                // j=0, |m| = 0 
+                sqrt(1.0/3.0),                        
+                // j=1, |m| = 0,1 
+                sqrt(4.0/15.0), sqrt(1.0/5.0),        
+                // j=2, |m| = 0,1,2 
+                sqrt(9.0/35.0), sqrt(8.0/35.0), sqrt(1.0/7.0)
+        };
 
         for (int p=0; p < input->length; p++)
         {
                 versor psi = input->kets[p];
                 fcomplex A = input->amplitudes[p];
 
-                versor psi_dz1 = psi;
-                switch(psi.j1){
-                        case 0:
-                                psi_dz1.j1++;
-                                state_add(output, psi_dz1, 
-                                        fcomplex_times_float(&A, dz00_10));
-                        break;
-                        case 1:
-                                if(psi.m1 == 0)
-                                {
-                                        psi_dz1.j1 = psi.j1-1;
-                                        state_add(output, psi_dz1, 
-                                                fcomplex_times_float(&A, dz00_10));
-                                        psi_dz1.j1 = psi.j1+1;
-                                        state_add(output, psi_dz1, 
-                                                fcomplex_times_float(&A, dz10_20));
-                                }
-                                else
-                                {
-                                        psi_dz1.j1 = psi.j1+1;
-                                        state_add(output, psi_dz1, 
-                                                fcomplex_times_float(&A, dz11_21));
-                                }
-                        break;
-                        case 2:
-                                switch(psi.m1)
-                                {
-                                        case 0:
-                                                psi_dz1.j1 = psi.j1-1;
-                                                state_add(output, psi_dz1, 
-                                                        fcomplex_times_float(&A, dz10_20));
-                                                psi_dz1.j1 = psi.j1+1;
-                                                state_add(output, psi_dz1, 
-                                                        fcomplex_times_float(&A, dz20_30));
-                                        break;
-                                        case 1:
-                                                psi_dz1.j1 = psi.j1-1;
-                                                state_add(output, psi_dz1, 
-                                                        fcomplex_times_float(&A, dz11_21));
-                                                psi_dz1.j1 = psi.j1+1;
-                                                state_add(output, psi_dz1, 
-                                                        fcomplex_times_float(&A, dz21_31));
-                                        break;
-                                        case 2:
-                                                psi_dz1.j1 = psi.j1+1;
-                                                state_add(output, psi_dz1, 
-                                                        fcomplex_times_float(&A, dz22_32));
-                                        break;
-                                }
-                        break;
+                if(psi.j1 > 2)
+                        continue;
+                
+                versor psi_dz2 = psi;
+                int j = psi.j1;
+                int m = abs(psi.m1);
+                if( m == j )
+                {
+                        int idx_j = j+1;
+                        int idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j,|j|} in the dz list
+                        psi_dz2.j1 = j+1;
+                        state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
                 }
+                else if(m < j)
+                {
+                        // go down with j
+                        psi_dz2.j1 = j-1;
+                        int idx_j = j;
+                        int idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j-1,|j-1|} in the dz list
+                        idx = idx - (j-1) + m; // a trick I like which returns the \ket{j-1,|m|}
+                        state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
+
+                        // go up with j
+                        psi_dz2.j1 = j+1;
+                        idx_j = j+1;
+                        idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j,|j|}
+                        idx = idx - j + m ; // \ket{j, |m|}
+                        state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
+                }
+                else
+                        continue; // incorrect value of m;
         }
 }
 
 /*
 $$
-\bra{output} = \bra{input} hat{d}_1^z 
+\bra{output} = \bra{input} hat{d}_2^z 
 $$
 */
 void apply_dz2(state * input, state * output)
 {
         const float d = 1.0f;
-        /*
-        constant factors
-        dzij_kl = \bra{i,j}d^z\ket{k,l};
-        the following holds
-        dzij_kl = dzkl_ij;
-        */
 
-        // list of all the transition probalibities 
-        // \bra{ja,ma}\hat{d}^z\ket{jb,mb}
-        // it's a real number which don't depend on the sign of m.
-        // So all of those products can be referred to by the index of the 
+        // list of all the constant factors
+        // \bra{ja,m}\hat{d}^z\ket{jb,m}.
+        // Each of them is a real number which don't depend on the sign of m.
+        // So all of those products can be referred to by the  
         // smaller j and by the absolute value of the corresponding m.
         float dz[6] = {
                 // j=0, |m| = 0 
@@ -348,8 +374,10 @@ void apply_dz2(state * input, state * output)
                         // go down with j
                         psi_dz2.j2 = j-1;
                         int idx_j = j;
-                        int idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j-1,|j-1|} in the dz list
-                        idx = idx - (j-1) + m; // a trick I like which returns the \ket{j-1,|m|}
+                        // the index of the element ket{j-1,|j-1|} in the dz list
+                        int idx = (idx_j*idx_j+idx_j)/2-1; 
+                        // a trick I like. It returns the index of \ket{j-1,|m|}
+                        idx = idx - (j-1) + m; 
                         state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
 
                         // go up with j
@@ -364,67 +392,52 @@ void apply_dz2(state * input, state * output)
         }
 }
 
-void apply_a3_plus_a3dagger(state * input, state * output)
-{
-        float omega_3 = 0.1;
-        float sqrt_omega_3 = sqrt(omega_3);
-        float sqrt_omega_3_inv = 1.0f/sqrt_omega_3;
-
-        for (int p=0; p < input->length; p++)
-        {
-                versor psi = input->kets[p];
-                fcomplex A = input->amplitudes[p];
-
-                versor psi_a3 = psi;
-                psi_a3.n3++;
-                float a3_factor = sqrt(psi.n3 + 1.0);
-                state_add(output, psi_a3, fcomplex_times_float(&A, a3_factor));
-
-                versor psi_a3dagger = psi;
-                psi_a3dagger.n3--;
-                float a3_dagger_factor = sqrt(psi.n3);
-                state_add(output, psi_a3dagger, fcomplex_times_float(&A, a3_dagger_factor));
-        }
-        state_times_float(output, sqrt_omega_3_inv);
-}
-
-void apply_a5_plus_a5dagger(state * input, state * output)
-{
-        float omega_5 = 0.1;
-        float sqrt_omega_5 = sqrt(omega_5);
-        float sqrt_omega_5_inv = 1.0f/sqrt_omega_5;
-
-        for (int p=0; p < input->length; p++)
-        {
-                versor psi = input->kets[p];
-                fcomplex A = input->amplitudes[p];
-
-                versor psi_a5 = psi;
-                psi_a5.n5++;
-                float a5_factor = sqrt(psi.n5 + 1.0);
-                state_add(output, psi_a5, fcomplex_times_float(&A, a5_factor));
-
-                versor psi_a5dagger = psi;
-                psi_a5dagger.n5--;
-                float a5_dagger_factor = sqrt(psi.n5);
-                state_add(output, psi_a5dagger, fcomplex_times_float(&A, a5_dagger_factor));
-        }
-        state_times_float(output, sqrt_omega_5_inv);
-}
-
 
 /*
-This function returns a BRA state (it's not ket)
+$$
+\bra{output} 
+= 
+\bra{input} \frac{q}{4\pi\epsilon_0} \frac{hat{d}_1^z -\hat{d}_2^z}{D_0^2}
+$$
+*/
+void apply_charge_dipole_zero(state *input, state *output)
+{
+        const float q = 1.f;
+        const float pie = 1.f; // \frac{1}{4\pi\epsilon_0}
+        const float D0_2_inv = 1.f/2.f/2.f;
+
+        state work_state;
+        state_init(&work_state);
+        
+        // dz_1
+        apply_dz1(input, &work_state);
+        state_times_float(&work_state, q*pie*D0_2_inv);
+        state_add_state(output, &work_state);
+        state_free(&work_state);
+
+        // -dz_2
+        apply_dz2(input, &work_state);
+        state_times_float(&work_state, -q*pie*D0_2_inv);
+        state_add_state(output, &work_state);
+        state_free(&work_state);
+}
+
+/*
+This function returns a BRA state (it's not a ket)
 which is a result of acting with bra called psi
 on the Hamiltonian.
+$$
+\bra{return} = \bra{psi}\hat{H}
+$$
 */
 state bra_H(state* psi)
 {
         state output_bra;
         state_init(&output_bra);
 
-        //apply_harmonic_oscillator(psi, &output_bra);
-        //apply_rotational_kinetic_energy(psi, &output_bra);
+        apply_harmonic_oscillator(psi, &output_bra);
+        apply_rotational_kinetic_energy(psi, &output_bra);
+        apply_charge_dipole_zero(psi, &output_bra);
 
         //apply_dz1_m_dz2(psi, &output_bra);
         /*state aadagger;
@@ -434,12 +447,13 @@ state bra_H(state* psi)
         state_free(&aadagger);
         */
 
+       /*
         state dz;
-        printf("Apply_dz2.\n");
         state_init(&dz);
-        apply_dz2(psi, &dz);
+        apply_dz1(psi, &dz);
         state_add_state(&output_bra, &dz);
         state_free(&dz);
+        */
 
         return output_bra;
 }
@@ -491,7 +505,6 @@ void construct_Hamiltonian(fcomplex* a, basis b)
                 state_add(&state0, psi0, (fcomplex){1.0f, 0.0f});
 
                 // act with H from the left
-                printf("bra_H.\n");
                 state psiH = bra_H(&state0);
 
                 versor loop_versor;
