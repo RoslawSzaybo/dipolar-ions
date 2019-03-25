@@ -81,6 +81,23 @@ void state_times_float(state * input, const float factor)
     }
 }
 
+void state_times_i_float(state * input, const float factor)
+{
+    // (re + i im) * i factor = - im*factor + i re*factor
+    float re;
+    float im;
+
+    for(int l=0; l < input->length; l++)
+    {
+        re = input->amplitudes[l].re;
+        im = input->amplitudes[l].im;
+
+        input->amplitudes[l].re = - im*factor;
+        input->amplitudes[l].im =   re*factor;
+    }
+}
+
+
 void state_add_state(state * sum, const state * component)
 {
     for(int l=0; l<component->length; l++)

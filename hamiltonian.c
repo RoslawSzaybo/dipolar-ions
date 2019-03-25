@@ -447,6 +447,88 @@ void apply_dz2(state * input, state * output)
 }
 
 
+void apply_dy1(state * input, state * output)
+{
+        const float d = 1.0f;
+        // WARNING, all of them have to be multiplied by 
+        // the imaginary unit i
+        // list of all the constant factors
+        float dy[6] = {
+                // 0
+                // \ket{0,0} down to \ket{1,-1}, \ket{1,1}
+                sqrt(1.0/6.0),sqrt(1.0/6.0),
+                // 1
+                // \ket{1,-1} down to \ket{2,-2}, \ket{2,0}
+                sqrt(1.0/5.0), sqrt(1.0/30.0),
+                // \ket{1,0} down to \ket{2,-1}, \ket{2,1}
+                sqrt(1.0/10.0), sqrt(1.0/10.0),
+                // \ket{1,1} down to \ket{2,0}, \ket{2,2}
+                sqrt(1.0/30.0), sqrt(1.0/5.0),
+                // 2
+                // \ket{2,-2} down to \ket{3,-3} \ket{3,-1}
+                sqrt(3.0/14.0), sqrt(1.0/70.0),
+                // \ket{2,-1} down to \ket{3,-2} \ket{3,0}
+                sqrt(1.0/7.0), sqrt(3.0/70.0),
+                // \ket{2,0} down to \ket{3,-1} \ket{3,1}
+                sqrt(3.0/35.0), sqrt(3.0/35.0),
+                // \ket{2,1} down to \ket{3,0} \ket{3,2}
+                sqrt(3.0/70.0), sqrt(1.0/7.0), 
+                // \ket{2,2} down to \ket{3,1} \ket{3,3}
+                sqrt(1.0/70.0), sqrt(3.0/14.0)
+        };
+
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                // minus comes from the complex conjugation
+                // going up add another minus from the 
+                // state_add(output, psi_dy1, fcomplex_times_i_float(&A, -dy[idx]));
+        }
+}
+
+
+
+void apply_dx1(state * input, state * output)
+{
+        const float d = 1.0f;
+        // WARNING, all of them have to be multiplied by 
+        // the imaginary unit i
+        // list of all the constant factors
+        float dx[18] = {
+                // 0
+                // \ket{0,0} down to \ket{1,-1}, \ket{1,1}
+                sqrt(1.0/6.0), -sqrt(1.0/6.0),
+                // 1
+                // \ket{1,-1} down to \ket{2,-2}, \ket{2,0}
+                sqrt(1.0/5.0), -sqrt(1.0/30.0),
+                // \ket{1,0} down to \ket{2,-1}, \ket{2,1}
+                sqrt(1.0/10.0), -sqrt(1.0/10.0),
+                // \ket{1,1} down to \ket{2,0}, \ket{2,2}
+                sqrt(1.0/30.0), -sqrt(1.0/5.0),
+                // 2
+                // \ket{2,-2} down to \ket{3,-3} \ket{3,-1}
+                sqrt(1.0/14.0), -sqrt(1.0/70.0),                 // HERE \ket{2,-2} to \ket{3,-3} should be checked
+                // \ket{2,-1} down to \ket{3,-2} \ket{3,0}
+                sqrt(1.0/7.0), -sqrt(3.0/70.0),
+                // \ket{2,0} down to \ket{3,-1} \ket{3,1}
+                sqrt(3.0/35.0), -sqrt(3.0/35.0),
+                // \ket{2,1} down to \ket{3,0} \ket{3,2}
+                sqrt(3.0/70.0), -sqrt(1.0/7.0), 
+                // \ket{2,2} down to \ket{3,1} \ket{3,3}
+                sqrt(1.0/70.0), -sqrt(1.0/14.0)                 // here is the same point
+        };
+
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                // state_add(output, psi_dy1, fcomplex_times_float(&A, dx[idx]));
+        }
+}
+
 /*
 $$
 \bra{output} 
