@@ -4,6 +4,7 @@
 #include "find-spectrum.h"
 #include "state.h"
 
+int test_input(int n1, int n3, int n5, int j1, int j2);
 
 int jm_jump(int j, int m);
 /* 

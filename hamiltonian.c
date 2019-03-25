@@ -4,6 +4,25 @@
 #include "hamiltonian.h"
 #include "state.h"
 
+int test_input(int n1, int n3, int n5, int j1, int j2)
+{
+        const int jmax = 2; // maximal implemented j
+        int is_OK = 1;
+        if( !(n1*n3*n5) )
+        {
+                printf("There has to be at least one mode of each allowed.\n");
+                is_OK =0;
+        }
+        
+        if(j1<0 || j1 > jmax || j2 < 0 || j2 > jmax)
+        {
+                printf("At least j=0 has to be in the basis.\n");
+                is_OK =0;
+        }
+
+        return is_OK;
+}
+
 int jm_jump(int j, int m)
 {
         /* returns the number of rotational states behind $\ket{j,m}$ */
@@ -209,7 +228,16 @@ void apply_a1_plus_a1dagger(state * input, state * output)
 
                 versor psi_a1dagger = psi;
                 psi_a1dagger.n1--;
-                float a1_dagger_factor = sqrt(psi.n1);
+                float a1_dagger_factor;
+                if( psi.n1 >= 0)
+                {
+                        a1_dagger_factor = sqrt(psi.n1);
+                }
+                else
+                {
+                        a1_dagger_factor = 0.f;
+                }
+                
                 state_add(output, psi_a1dagger, fcomplex_times_float(&A, a1_dagger_factor));
         }
         state_times_float(output, sqrt_omega_1_inv);
@@ -234,7 +262,15 @@ void apply_a3_plus_a3dagger(state * input, state * output)
 
                 versor psi_a3dagger = psi;
                 psi_a3dagger.n3--;
-                float a3_dagger_factor = sqrt(psi.n3);
+                float a3_dagger_factor;
+                if( psi.n3 >= 0)
+                {
+                        a3_dagger_factor = sqrt(psi.n3);
+                }
+                else
+                {
+                        a3_dagger_factor = 0.f;
+                }
                 state_add(output, psi_a3dagger, fcomplex_times_float(&A, a3_dagger_factor));
         }
         state_times_float(output, sqrt_omega_3_inv);
@@ -259,7 +295,15 @@ void apply_a5_plus_a5dagger(state * input, state * output)
 
                 versor psi_a5dagger = psi;
                 psi_a5dagger.n5--;
-                float a5_dagger_factor = sqrt(psi.n5);
+                float a5_dagger_factor;
+                if( psi.n5 >= 0)
+                {
+                        a5_dagger_factor = sqrt(psi.n5);
+                }
+                else
+                {
+                        a5_dagger_factor = 0.f;
+                }
                 state_add(output, psi_a5dagger, fcomplex_times_float(&A, a5_dagger_factor));
         }
         state_times_float(output, sqrt_omega_5_inv);
@@ -294,34 +338,38 @@ void apply_dz1(state * input, state * output)
                 versor psi = input->kets[p];
                 fcomplex A = input->amplitudes[p];
 
-                if(psi.j1 > 2)
-                        continue;
-                
-                versor psi_dz2 = psi;
                 int j = psi.j1;
                 int m = abs(psi.m1);
+
+                // If the input is incorrect then skip it.
+                // We limit the computations to max(j) = 2;
+                // m value is tested below
+                if(j > 2 || j < 0 )
+                        continue;
+                
+                versor psi_dz1 = psi;
                 if( m == j )
                 {
                         int idx_j = j+1;
                         int idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j,|j|} in the dz list
-                        psi_dz2.j1 = j+1;
-                        state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
+                        psi_dz1.j1 = j+1;
+                        state_add(output, psi_dz1, fcomplex_times_float(&A, dz[idx]));
                 }
                 else if(m < j)
                 {
                         // go down with j
-                        psi_dz2.j1 = j-1;
+                        psi_dz1.j1 = j-1;
                         int idx_j = j;
                         int idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j-1,|j-1|} in the dz list
                         idx = idx - (j-1) + m; // a trick I like which returns the \ket{j-1,|m|}
-                        state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
+                        state_add(output, psi_dz1, fcomplex_times_float(&A, dz[idx]));
 
                         // go up with j
-                        psi_dz2.j1 = j+1;
+                        psi_dz1.j1 = j+1;
                         idx_j = j+1;
                         idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j,|j|}
                         idx = idx - j + m ; // \ket{j, |m|}
-                        state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
+                        state_add(output, psi_dz1, fcomplex_times_float(&A, dz[idx]));
                 }
                 else
                         continue; // incorrect value of m;
@@ -356,12 +404,16 @@ void apply_dz2(state * input, state * output)
                 versor psi = input->kets[p];
                 fcomplex A = input->amplitudes[p];
 
-                if(psi.j2 > 2)
+                int j = psi.j2;
+                int m = abs(psi.m2);
+
+                // If the input is incorrect then skip it.
+                // We limit the computations to max(j) = 2;
+                // m value is tested below
+                if(j > 2 || j < 0 )
                         continue;
                 
                 versor psi_dz2 = psi;
-                int j = psi.j2;
-                int m = abs(psi.m2);
                 if( m == j )
                 {
                         int idx_j = j+1;
@@ -371,6 +423,8 @@ void apply_dz2(state * input, state * output)
                 }
                 else if(m < j)
                 {
+                        // if(j!= 0) - it's useless because of what is above
+                        // for m<j, j has to be larger than 0;
                         // go down with j
                         psi_dz2.j2 = j-1;
                         int idx_j = j;
@@ -388,7 +442,7 @@ void apply_dz2(state * input, state * output)
                         state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
                 }
                 else
-                        continue; // incorrect value of m;
+                        continue; // incorrect value of m; double check xd
         }
 }
 

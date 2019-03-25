@@ -23,6 +23,7 @@ int main(int argc, char *argv[]) {
         /* Locals */
         int n, info, lwork;
         int n1, n3, n5, j1, j2;
+        int is_input_OK = 0;
         if(argc != 6)
         {
                 printf( "This is how you can execute the program:\n" );
@@ -36,13 +37,15 @@ int main(int argc, char *argv[]) {
                 n5 = atoi(argv[3]);
                 j1 = atoi(argv[4]);
                 j2 = atoi(argv[5]);
+
         }
         n = n1*n3*n5*(j1*j1+2*j1+1)*(j2*j2+2*j2+1);
-        if( n==0 )
+        // input test
+        is_input_OK = test_input(n1, n3, n5, j1, j2);
+        if( !is_input_OK )
         {
-                printf("Input |%d,%d,%d,%d,%d>\n",n1,n3,n5,j1,j2);
-                printf("Basis size  %d\n",n);
-                printf("Basis size is 0. Change the basis.\n");
+                printf("Input basis |%d,%d,%d,%d,%d> is incorrect. \n",n1,n3,n5,j1,j2);
+                exit(0);
         }
         basis b = {n1, n3, n5, j1, j2};
         //test_bra_H();
