@@ -78,26 +78,28 @@ int main(int argc, char *argv[]) {
         /* Print matrix to be diagonalised */
         print_matrix( "Hamiltonian", n, n, a, n );
         /* Executable statements */
-        printf( " Results of the diagonalisation\n" );
+        //printf( " Results of the diagonalisation\n" );
         /* Query and allocate the optimal workspace */
-        lwork = -1;
-        cheev( "Vectors", "Lower", &n, a, &n, w, &wkopt, &lwork, rwork, &info );
-        lwork = (int)wkopt.re;
-        work = (fcomplex*)malloc( lwork*sizeof(fcomplex) );
+        //lwork = -1;
+        //cheev( "Vectors", "Lower", &n, a, &n, w, &wkopt, &lwork, rwork, &info );
+        //lwork = (int)wkopt.re;
+        //work = (fcomplex*)malloc( lwork*sizeof(fcomplex) );
         /* Solve eigenproblem */
-        cheev( "Vectors", "Lower", &n, a, &n, w, work, &lwork, rwork, &info );
+        //cheev( "Vectors", "Lower", &n, a, &n, w, work, &lwork, rwork, &info );
         /* Check for convergence */
+        /*
         if( info > 0 ) {
                 printf( "The algorithm failed to compute eigenvalues.\n" );
                 exit( 1 );
         }
+        */
         /* Print eigenvalues */
-        print_rmatrix( "Five smallest eigenvalues:", 1, 5, w, 1 );
-        print_rmatrix( "Eigenvalues", 1, n, w, 1 );
+        //print_rmatrix( "Five smallest eigenvalues:", 1, 5, w, 1 );
+        //print_rmatrix( "Eigenvalues", 1, n, w, 1 );
         /* Print eigenvectors */
-        print_matrix( "Eigenvectors (stored columnwise)", n, n, a, n );
+        //print_matrix( "Eigenvectors (stored columnwise)", n, n, a, n );
         /* Free workspace */
-        free( (void*)work );
+        //free( (void*)work );
         free( w );
         free( rwork );
         free( a );

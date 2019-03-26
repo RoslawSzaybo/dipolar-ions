@@ -8,7 +8,7 @@ int test_input(int n1, int n3, int n5, int j1, int j2)
 {
         const int jmax = 2; // maximal implemented j
         int is_OK = 1;
-        if( !(n1*n3*n5) )
+        if( n1<1 || n3<1 || n5<1 )
         {
                 printf("There has to be at least one mode of each allowed.\n");
                 is_OK =0;
@@ -207,15 +207,11 @@ void apply_rotational_kinetic_energy(state * input, state * output)
 
 /*
 $$
-\bra{output} = \bra{input} \omega_1^{-1/2}(\hat{a}_1 + hat{a}_1^\dagger )
+\bra{output} = \bra{input} (\hat{a}_1 + hat{a}_1^\dagger )
 $$
 */
 void apply_a1_plus_a1dagger(state * input, state * output)
 {
-        float omega_1 = 0.1;
-        float sqrt_omega_1 = sqrt(omega_1);
-        float sqrt_omega_1_inv = 1.0f/sqrt_omega_1;
-
         for (int p=0; p < input->length; p++)
         {
                 versor psi = input->kets[p];
@@ -240,16 +236,11 @@ void apply_a1_plus_a1dagger(state * input, state * output)
                 
                 state_add(output, psi_a1dagger, fcomplex_times_float(&A, a1_dagger_factor));
         }
-        state_times_float(output, sqrt_omega_1_inv);
 }
 
 
 void apply_a3_plus_a3dagger(state * input, state * output)
 {
-        float omega_3 = 0.1;
-        float sqrt_omega_3 = sqrt(omega_3);
-        float sqrt_omega_3_inv = 1.0f/sqrt_omega_3;
-
         for (int p=0; p < input->length; p++)
         {
                 versor psi = input->kets[p];
@@ -273,16 +264,11 @@ void apply_a3_plus_a3dagger(state * input, state * output)
                 }
                 state_add(output, psi_a3dagger, fcomplex_times_float(&A, a3_dagger_factor));
         }
-        state_times_float(output, sqrt_omega_3_inv);
 }
 
 
 void apply_a5_plus_a5dagger(state * input, state * output)
 {
-        float omega_5 = 0.1;
-        float sqrt_omega_5 = sqrt(omega_5);
-        float sqrt_omega_5_inv = 1.0f/sqrt_omega_5;
-
         for (int p=0; p < input->length; p++)
         {
                 versor psi = input->kets[p];
@@ -306,7 +292,6 @@ void apply_a5_plus_a5dagger(state * input, state * output)
                 }
                 state_add(output, psi_a5dagger, fcomplex_times_float(&A, a5_dagger_factor));
         }
-        state_times_float(output, sqrt_omega_5_inv);
 }
 
 
@@ -348,7 +333,7 @@ void apply_dz1(state * input, state * output)
                         continue;
                 
                 versor psi_dz1 = psi;
-                if( m == j )
+                if( m == j ) // maximal/minimal m so only jump up in j
                 {
                         int idx_j = j+1;
                         int idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j,|j|} in the dz list
@@ -442,18 +427,45 @@ void apply_dz2(state * input, state * output)
                         state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
                 }
                 else
-                        continue; // incorrect value of m; double check xd
+                        continue; // incorrect value of m;
         }
 }
 
+
+int get_dy_idx(int j, int m)
+{
+        // function which determines the index
+        // of the factor $\bra{j+1,m-1}\hat{d}^y\ket{j,m}$
+        // in the list dy
+
+        // \sum_j=0^J (2j+1) = (J+1) + 2 \sum_j=0^J j 
+        // = (J+1) + (J+1)J = (J+1)(J+1);
+        // number of $|ket{j,j}$ in the states list
+        int idx = (j+1)*(j+1); 
+        // number of $\ket{j,m}$ in the rotations states list
+        // number of states in given J 
+        // minus 
+        // the positon of the $\ket{j,m}$ state in a list of J=const states
+        idx -= 2*j+1 - (m+j+1);
+        // there are twice as many entires in dy
+        idx *= 2;
+        // but the one which takes to j+1, m-1 is first, and we count from 0
+        idx -= 2;
+        return idx;
+}
+
+// highest implemented input j
+const int jmax = 2;
 
 void apply_dy1(state * input, state * output)
 {
         const float d = 1.0f;
         // WARNING, all of them have to be multiplied by 
         // the imaginary unit i
+
         // list of all the constant factors
-        float dy[6] = {
+        // 2*(jmax+1)^2 = 18
+        float dy[18] = {
                 // 0
                 // \ket{0,0} down to \ket{1,-1}, \ket{1,1}
                 sqrt(1.0/6.0),sqrt(1.0/6.0),
@@ -485,6 +497,131 @@ void apply_dy1(state * input, state * output)
                 // minus comes from the complex conjugation
                 // going up add another minus from the 
                 // state_add(output, psi_dy1, fcomplex_times_i_float(&A, -dy[idx]));
+                int j = psi.j1;
+                int m = psi.m1;
+
+                // check if the input state is correct
+                if(j<0 || j > jmax || m > j || m < -j)
+                        continue;
+
+                // always add j+1, m-1 
+                versor psi_work = psi;
+                psi_work.j1=j+1;
+                psi_work.m1=m-1;
+
+                int idx = get_dy_idx(j, m);
+                // I work with bra so there is one conjugation -> -i
+                state_add(output, psi_work, fcomplex_times_i_float(&A, -dy[idx]));
+
+                // always add j+1, m+1;
+                // almost like in the previous case but I go to m+1
+                psi_work.m1=m+1;
+                idx += 1;
+                state_add(output, psi_work, fcomplex_times_i_float(&A, -dy[idx]));
+
+                // sometimes j-1, m-1 is also included
+                if(m > -(j-1))
+                {
+                        psi_work.j1=j-1;
+                        psi_work.m1=m-1;
+
+                        idx = get_dy_idx(j-1,m-1)+1; // going to larger m so +1
+                        // here there is a second conjugation as the 
+                        // bracket goes in the other direction
+                        state_add(output, psi_work, fcomplex_times_i_float(&A, dy[idx]));
+                }
+
+                // similarily, j-1, m+1 is also sometimes included
+                if(m < j-1)
+                {
+                        psi_work.j1=j-1;
+                        psi_work.m1=m+1;
+
+                        idx = get_dy_idx(j-1,m+1);
+                        state_add(output, psi_work, fcomplex_times_i_float(&A, dy[idx]));
+                }
+        }
+}
+
+void apply_dy2(state * input, state * output)
+{
+        const float d = 1.0f;
+        // WARNING, all of them have to be multiplied by 
+        // the imaginary unit i
+
+        // list of all the constant factors
+        // 2*(jmax+1)^2 = 18
+        float dy[18] = {
+                // 0
+                // \ket{0,0} down to \ket{1,-1}, \ket{1,1}
+                sqrt(1.0/6.0),sqrt(1.0/6.0),
+                // 1
+                // \ket{1,-1} down to \ket{2,-2}, \ket{2,0}
+                sqrt(1.0/5.0), sqrt(1.0/30.0),
+                // \ket{1,0} down to \ket{2,-1}, \ket{2,1}
+                sqrt(1.0/10.0), sqrt(1.0/10.0),
+                // \ket{1,1} down to \ket{2,0}, \ket{2,2}
+                sqrt(1.0/30.0), sqrt(1.0/5.0),
+                // 2
+                // \ket{2,-2} down to \ket{3,-3} \ket{3,-1}
+                sqrt(3.0/14.0), sqrt(1.0/70.0),
+                // \ket{2,-1} down to \ket{3,-2} \ket{3,0}
+                sqrt(1.0/7.0), sqrt(3.0/70.0),
+                // \ket{2,0} down to \ket{3,-1} \ket{3,1}
+                sqrt(3.0/35.0), sqrt(3.0/35.0),
+                // \ket{2,1} down to \ket{3,0} \ket{3,2}
+                sqrt(3.0/70.0), sqrt(1.0/7.0), 
+                // \ket{2,2} down to \ket{3,1} \ket{3,3}
+                sqrt(1.0/70.0), sqrt(3.0/14.0)
+        };
+
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                int j = psi.j2;
+                int m = psi.m2;
+                versor psi_work = psi;
+
+                // check if the input state is correct
+                if(j<0 || j > jmax || m > j || m < -j)
+                        continue;
+
+                // always add j+1, m-1 
+                psi_work.j2=j+1;
+                psi_work.m2=m-1;
+                int idx = get_dy_idx(j, m);
+                // I work with bra so there is one conjugation -> -i
+                state_add(output, psi_work, fcomplex_times_i_float(&A, -dy[idx]));
+
+                // always add j+1, m+1;
+                // almost like in the previous case but I go to m+1
+                psi_work.m2=m+1;
+                idx += 1;
+                state_add(output, psi_work, fcomplex_times_i_float(&A, -dy[idx]));
+
+                // sometimes j-1, m-1 is also included
+                if(m > -(j-1))
+                {
+                        psi_work.j2=j-1;
+                        psi_work.m2=m-1;
+
+                        idx = get_dy_idx(j-1,m-1)+1;// going to larger m so +1
+                        // here there is a second conjugation as the 
+                        // bracket goes in the other direction
+                        state_add(output, psi_work, fcomplex_times_i_float(&A, dy[idx]));
+                }
+
+                // similarily, j-1, m+1 is also sometimes included
+                if(m < j-1)
+                {
+                        psi_work.j2=j-1;
+                        psi_work.m2=m+1;
+
+                        idx = get_dy_idx(j-1,m+1); 
+                        state_add(output, psi_work, fcomplex_times_i_float(&A, dy[idx]));
+                }
         }
 }
 
@@ -509,7 +646,7 @@ void apply_dx1(state * input, state * output)
                 sqrt(1.0/30.0), -sqrt(1.0/5.0),
                 // 2
                 // \ket{2,-2} down to \ket{3,-3} \ket{3,-1}
-                sqrt(1.0/14.0), -sqrt(1.0/70.0),                 // HERE \ket{2,-2} to \ket{3,-3} should be checked
+                sqrt(3.0/14.0), -sqrt(1.0/70.0),
                 // \ket{2,-1} down to \ket{3,-2} \ket{3,0}
                 sqrt(1.0/7.0), -sqrt(3.0/70.0),
                 // \ket{2,0} down to \ket{3,-1} \ket{3,1}
@@ -517,7 +654,7 @@ void apply_dx1(state * input, state * output)
                 // \ket{2,1} down to \ket{3,0} \ket{3,2}
                 sqrt(3.0/70.0), -sqrt(1.0/7.0), 
                 // \ket{2,2} down to \ket{3,1} \ket{3,3}
-                sqrt(1.0/70.0), -sqrt(1.0/14.0)                 // here is the same point
+                sqrt(1.0/70.0), -sqrt(3.0/14.0) 
         };
 
         for (int p=0; p < input->length; p++)
@@ -525,9 +662,181 @@ void apply_dx1(state * input, state * output)
                 versor psi = input->kets[p];
                 fcomplex A = input->amplitudes[p];
 
-                // state_add(output, psi_dy1, fcomplex_times_float(&A, dx[idx]));
+                int j = psi.j1;
+                int m = psi.m1;
+                versor psi_work = psi;
+
+                // check if the input state is correct
+                if(j<0 || j > jmax || m > j || m < -j)
+                        continue;
+
+                // always add j+1, m-1 
+                psi_work.j1=j+1;
+                psi_work.m1=m-1;
+                int idx = get_dy_idx(j, m);
+                state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+
+                // always add j+1, m+1 
+                psi_work.j1=j+1;
+                psi_work.m1=m+1;
+                idx += 1;
+                state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+
+                // j-1,m-1
+                if(m > -(j-1))
+                {
+                        idx = get_dy_idx(j-1,m-1)+1;
+                        psi_work.j1=j-1;
+                        psi_work.m1=m-1;
+                        state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+                }
+                // j-1,m+1
+                if(m < j-1)
+                {
+                        idx = get_dy_idx(j-1,m+1);
+                        psi_work.j1=j-1;
+                        psi_work.m1=m+1;
+                        state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+                }
         }
 }
+
+
+void apply_dx2(state * input, state * output)
+{
+        const float d = 1.0f;
+        // WARNING, all of them have to be multiplied by 
+        // the imaginary unit i
+        // list of all the constant factors
+        float dx[18] = {
+                // 0
+                // \ket{0,0} down to \ket{1,-1}, \ket{1,1}
+                sqrt(1.0/6.0), -sqrt(1.0/6.0),
+                // 1
+                // \ket{1,-1} down to \ket{2,-2}, \ket{2,0}
+                sqrt(1.0/5.0), -sqrt(1.0/30.0),
+                // \ket{1,0} down to \ket{2,-1}, \ket{2,1}
+                sqrt(1.0/10.0), -sqrt(1.0/10.0),
+                // \ket{1,1} down to \ket{2,0}, \ket{2,2}
+                sqrt(1.0/30.0), -sqrt(1.0/5.0),
+                // 2
+                // \ket{2,-2} down to \ket{3,-3} \ket{3,-1}
+                sqrt(3.0/14.0), -sqrt(1.0/70.0),
+                // \ket{2,-1} down to \ket{3,-2} \ket{3,0}
+                sqrt(1.0/7.0), -sqrt(3.0/70.0),
+                // \ket{2,0} down to \ket{3,-1} \ket{3,1}
+                sqrt(3.0/35.0), -sqrt(3.0/35.0),
+                // \ket{2,1} down to \ket{3,0} \ket{3,2}
+                sqrt(3.0/70.0), -sqrt(1.0/7.0), 
+                // \ket{2,2} down to \ket{3,1} \ket{3,3}
+                sqrt(1.0/70.0), -sqrt(3.0/14.0)
+        };
+
+        for (int p=0; p < input->length; p++)
+        {
+                versor psi = input->kets[p];
+                fcomplex A = input->amplitudes[p];
+
+                int j = psi.j2;
+                int m = psi.m2;
+                versor psi_work = psi;
+
+                // check if the input state is correct
+                if(j<0 || j > jmax || m > j || m < -j)
+                        continue;
+
+                // always add j+1, m-1 
+                psi_work.j2=j+1;
+                psi_work.m2=m-1;
+                int idx = get_dy_idx(j, m);
+                state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+
+                // always add j+1, m+1 
+                psi_work.j2=j+1;
+                psi_work.m2=m+1;
+                idx += 1;
+                state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+
+                // j-1,m-1
+                if(m > -(j-1))
+                {
+                        idx = get_dy_idx(j-1,m-1)+1;
+                        psi_work.j2=j-1;
+                        psi_work.m2=m-1;
+                        state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+                }
+                // j-1,m+1
+                if(m < j-1)
+                {
+                        idx = get_dy_idx(j-1,m+1);
+                        psi_work.j2=j-1;
+                        psi_work.m2=m+1;
+                        state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+                }
+        }
+}
+
+
+/*
+$$
+\bra{output} = \bra{input}(\hat{d}^y_1 - \hat{d}^y_2)
+$$
+*/
+void apply_dx1_m_dx2(state *input, state *output)
+{
+        state work_state;
+        state_init(&work_state);
+        
+        apply_dx1(input, &work_state);
+        state_add_state(output, &work_state);
+        state_free(&work_state);
+
+        apply_dx2(input, &work_state);
+        state_times_float(input, -1.f);
+        state_add_state(output, &work_state);
+        state_free(&work_state);
+}
+
+/*
+$$
+\bra{output} = \bra{input}(\hat{d}^y_1 - \hat{d}^y_2)
+$$
+*/
+void apply_dy1_m_dy2(state *input, state *output)
+{
+        state work_state;
+        state_init(&work_state);
+        
+        apply_dy1(input, &work_state);
+        state_add_state(output, &work_state);
+        state_free(&work_state);
+
+        apply_dy2(input, &work_state);
+        state_times_float(input, -1.f);
+        state_add_state(output, &work_state);
+        state_free(&work_state);
+}
+
+/*
+$$
+\bra{output} = \bra{input}(\hat{d}^y_1 - \hat{d}^y_2)
+$$
+*/
+void apply_dz1_m_dz2(state *input, state *output)
+{
+        state work_state;
+        state_init(&work_state);
+        
+        apply_dz1(input, &work_state);
+        state_add_state(output, &work_state);
+        state_free(&work_state);
+
+        apply_dz2(input, &work_state);
+        state_times_float(input, -1.f);
+        state_add_state(output, &work_state);
+        state_free(&work_state);
+}
+
 
 /*
 $$
@@ -559,6 +868,129 @@ void apply_charge_dipole_zero(state *input, state *output)
 }
 
 /*
+$$
+\bra{output} 
+= 
+\bra{input} 
+\frac{q}{4\pi\epsilon_0}
+\frac{1}{|2z_0|^3}
+(\frac{\hbar}{m})^(1/2)
+\begin{pmatrix}
+\omega_3^{-1/2}(a3 + a3^dagger)\\
+\omega_5^{-1/2}(a5 + a5^dagger)\\
+\omega_1^{-1/2}(a1 + a1^dagger)
+\end{pmatrix}
+\cdot
+(\vec{hat{d}}_1 -\vec{\hat{d}_2})
+$$
+*/
+void apply_charge_dipole_first(state *input, state *output)
+{
+        const float factor = 1.f; // all the constatns
+
+        state sum_container;
+        state_init(&sum_container);
+
+        state work_state;
+
+        /* z-part */
+        state_init(&work_state);
+        apply_dz1_m_dz2(input, &work_state);
+        state_times_float(&work_state, factor);
+        apply_a1_plus_a1dagger(&work_state, &sum_container);
+        state_free(&work_state);
+
+        /* y-part */
+        state_init(&work_state);
+        apply_dy1_m_dy2(input, &work_state);
+        state_times_float(&work_state, factor);
+        apply_a5_plus_a5dagger(&work_state, &sum_container);
+        state_free(&work_state);
+
+        /* x-part */
+        state_init(&work_state);
+        apply_dx1_m_dx2(input, &work_state);
+        state_times_float(&work_state, factor);
+        apply_a3_plus_a3dagger(&work_state, &sum_container);
+        state_free(&work_state);
+
+        state_add_state(output, &sum_container);
+        state_free(&sum_container);
+}
+
+
+
+/*
+$$
+\bra{output} 
+= 
+\bra{input} 
+\frac{1}{4\pi\epsilon_0}
+\frac{1}{|2z_0|^3}
+\vec{\hat{d}}_1
+\cdot
+\vec{\hat{d}}_2
+-
+3
+\hat{d}^z_1\hat{d}^z_2
+=
+\bra{input} 
+\frac{1}{4\pi\epsilon_0}
+\frac{1}{|2z_0|^3}
+(
+\hat{d}^x_1
+\hat{d}^x_2
++
+\hat{d}^y_1
+\hat{d}^y_2
+-2
+\hat{d}^z_1
+\hat{d}^z_2
+)
+$$
+*/
+void apply_dipole_dipole_zero(state *input, state *output)
+{
+        const float factor;
+        state sum_container;
+        state_init(&sum_container);
+
+        state work_state;
+        state second_work_state;
+
+        /* x-part */
+        state_init(&work_state);
+        apply_dx1(input, &work_state);
+        state_init(&second_work_state);
+        apply_dx2(&work_state, &second_work_state);
+        state_free(&work_state);
+        state_add_state(&sum_container, &second_work_state);
+        state_free(&second_work_state);
+
+        /* y-part */
+        state_init(&work_state);
+        apply_dy1(input, &work_state);
+        state_init(&second_work_state);
+        apply_dy2(&work_state, &second_work_state);
+        state_free(&work_state);
+        state_add_state(&sum_container, &second_work_state);
+        state_free(&second_work_state);
+
+        /* z-part */
+        state_init(&work_state);
+        apply_dz1(input, &work_state);
+        state_init(&second_work_state);
+        apply_dz2(&work_state, &second_work_state);
+        state_free(&work_state);
+        state_times_float(&second_work_state, -2.0f);
+        state_add_state(&sum_container, &second_work_state);
+        state_free(&second_work_state);
+
+        state_add_state(output, &sum_container);
+        state_free(&sum_container);
+}
+
+/*
 This function returns a BRA state (it's not a ket)
 which is a result of acting with bra called psi
 on the Hamiltonian.
@@ -574,23 +1006,9 @@ state bra_H(state* psi)
         apply_harmonic_oscillator(psi, &output_bra);
         apply_rotational_kinetic_energy(psi, &output_bra);
         apply_charge_dipole_zero(psi, &output_bra);
+        apply_charge_dipole_first(psi, &output_bra);
 
-        //apply_dz1_m_dz2(psi, &output_bra);
-        /*state aadagger;
-        state_init(&aadagger);
-        apply_a1_plus_a1dagger(psi, &aadagger);
-        state_add_state(&output_bra, &aadagger);
-        state_free(&aadagger);
-        */
-
-       /*
-        state dz;
-        state_init(&dz);
-        apply_dz1(psi, &dz);
-        state_add_state(&output_bra, &dz);
-        state_free(&dz);
-        */
-
+        apply_dipole_dipole_zero(psi, &output_bra);
         return output_bra;
 }
 

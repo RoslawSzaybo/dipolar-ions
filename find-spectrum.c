@@ -41,6 +41,15 @@ fcomplex fcomplex_times_float(const fcomplex* a, float b)
         return (fcomplex){re, im};
 }
 
+fcomplex fcomplex_times_i_float(const fcomplex* a, float b)
+{
+        // (re + i im)* i b = -im*b + i re*b
+        float re = a->re;
+        float im = a->im;
+
+        return (fcomplex){-im*b, re*b};
+}
+
 void test_fcomplex_multiply()
 {
         printf("Test fcomplex_multiply\n");

@@ -7,6 +7,7 @@ typedef struct _fcomplex fcomplex;
 
 fcomplex fcomplex_multiply(const fcomplex* a, const fcomplex* b);
 fcomplex fcomplex_times_float(const fcomplex* a, float b);
+fcomplex fcomplex_times_i_float(const fcomplex* a, float b);
 
 /* CHEEV prototype */
 extern void cheev( char* jobz, char* uplo, int* n, fcomplex* a, int* lda,
