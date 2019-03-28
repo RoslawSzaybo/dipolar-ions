@@ -323,7 +323,7 @@ $$
 void apply_dz1(state * input, state * output,
                 const parameters pars)
 {
-        const float d = 1.0f;
+        const float d = pars.dipole;
 
         // list of all the constant factors
         // \bra{ja,m}\hat{d}^z\ket{jb,m}.
@@ -390,7 +390,7 @@ $$
 void apply_dz2(state * input, state * output,
                 const parameters pars)
 {
-        const float d = 1.0f;
+        const float d = pars.dipole;
 
         // list of all the constant factors
         // \bra{ja,m}\hat{d}^z\ket{jb,m}.
@@ -482,7 +482,7 @@ const int jmax = 2;
 void apply_dy1(state * input, state * output,
                         const parameters pars)
 {
-        const float d = 1.0f;
+        const float d = pars.dipole;
         // WARNING, all of them have to be multiplied by 
         // the imaginary unit i
 
@@ -569,7 +569,7 @@ void apply_dy1(state * input, state * output,
 void apply_dy2(state * input, state * output,
                         const parameters pars)
 {
-        const float d = 1.0f;
+        const float d = pars.dipole;
         // WARNING, all of them have to be multiplied by 
         // the imaginary unit i
 
@@ -654,7 +654,7 @@ void apply_dy2(state * input, state * output,
 void apply_dx1(state * input, state * output,
                         const parameters pars)
 {
-        const float d = 1.0f;
+        const float d = pars.dipole;
         // WARNING, all of them have to be multiplied by 
         // the imaginary unit i
         // list of all the constant factors
@@ -730,7 +730,7 @@ void apply_dx1(state * input, state * output,
 void apply_dx2(state * input, state * output,
                         const parameters pars)
 {
-        const float d = 1.0f;
+        const float d = pars.dipole;
         // WARNING, all of them have to be multiplied by 
         // the imaginary unit i
         // list of all the constant factors
@@ -871,28 +871,79 @@ void apply_dz1_m_dz2(state *input, state *output,
 $$
 \bra{output} 
 = 
-\bra{input} \frac{q}{4\pi\epsilon_0} \frac{hat{d}_1^z -\hat{d}_2^z}{D_0^2}
+\bra{input} \frac{q}{4\pi\epsilon_0} \frac{hat{d}_1^z -\hat{d}_2^z}{|2z_0^2}
 $$
+
+the factor "reduces" to
+(\omega_1/q)^{1/3}
+(4m/3)^{2/3}
+(d/4\hbar)
+(1/4\pi\epsilon_0)^{1/3}
+
+pie := \frac{1}{4\pi\epsilon_0}
+= by def = \frac{\mu_0 c^2}{4\pi}
+= 10^{-7} c^2 N/A^2
+= 8987551787.368176 (kg*m^3/s^4/A^2)
+= 0.138931 (m^2 u / s^2 /e^2)
+= (0.517925 (m^2 u / s^2 /e^2)^{1/3})^{3}
+
+1kg = 6.022 * 10^{26} u
+
+\hbar \approx 1.0545718 J\cdot s
+
+\frac{1}{\hbar} \approx 
+1.574555188 \cdot 10^7 s/(m^2 u)
+
+1/\hbar (pie)^{1/3}
+\approx
+8.155 * 10^6 [s^{1/3} m/ (u^{2/3} e^{2/3} )]
+
+[electric dipole moment unit]
+1D 
+\approx 
+0.20819 *10^{-10} e m
+
+so the final formula for the prefactor
+which allows to use the units described in the main funcion
+gives to numeric value 
+$$
+100(1/(se)^(1/3))*
+8.155 * 10^6 s^{1/3} m/ (u^{2/3} e^{2/3} )
+0.20819*10^{-10}em*
+(1/4)*(4/3)^(2/3)
+u^{2/3}
+=
+2.06*10^{-2}
+
+\approx
+0.186476 [m*e] * [\frac{s^{4/3}}{ m u^{2/3} e^{2/3} }]
+$$
+
+and the formula for the prefactor becomes
+(|omega_1|/|q|)^{1/3}
+|mass|^{2/3}
+|dipole|
 */
 void apply_charge_dipole_zero(state *input, state *output,
                         const parameters pars)
 {
-        const float q = 1.f;
-        const float pie = 1.f; // \frac{1}{4\pi\epsilon_0}
-        const float D0_2_inv = 1.f/2.f/2.f;
+        const float units_and_constants = 0.0206f;
+
+        float factor = pow(pars.omega_1/pars.charge, 1.0/3.0);
+        factor *= pow(pars.mass, 2.0/3.0);
 
         state work_state;
         state_init(&work_state);
         
         // dz_1
         apply_dz1(input, &work_state, pars);
-        state_times_float(&work_state, q*pie*D0_2_inv);
+        state_times_float(&work_state, factor*units_and_constants);
         state_add_state(output, &work_state);
         state_free(&work_state);
 
         // -dz_2
         apply_dz2(input, &work_state, pars);
-        state_times_float(&work_state, -q*pie*D0_2_inv);
+        state_times_float(&work_state, factor*units_and_constants);
         state_add_state(output, &work_state);
         state_free(&work_state);
 }
@@ -978,12 +1029,17 @@ $$
 \hat{d}^z_1
 \hat{d}^z_2
 )
+
+the and units give and constants give the following prefactor
+|d|^2/|q|^2 |m| |omega_1| 
+*1.136*10^{-9}
 $$
 */
 void apply_dipole_dipole_zero(state *input, state *output,
                         const parameters pars)
 {
-        const float factor;
+        float factor = 1.136e-09f;
+        factor *= pars.mass * pars.omega_1 / pars.charge / pars.charge;
         state sum_container;
         state_init(&sum_container);
 
@@ -1018,6 +1074,8 @@ void apply_dipole_dipole_zero(state *input, state *output,
         state_add_state(&sum_container, &second_work_state);
         state_free(&second_work_state);
 
+        state_times_float(&sum_container, factor);
+
         state_add_state(output, &sum_container);
         state_free(&sum_container);
 }
@@ -1038,7 +1096,9 @@ state bra_H(state* psi, const parameters pars)
         apply_harmonic_oscillator(psi, &output_bra, pars);
         apply_rotational_kinetic_energy(psi, &output_bra, pars);
         apply_charge_dipole_zero(psi, &output_bra, pars);
+        /* warning: units not implemented
         apply_charge_dipole_first(psi, &output_bra, pars);
+        */
 
         apply_dipole_dipole_zero(psi, &output_bra, pars);
         return output_bra;
