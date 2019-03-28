@@ -4,7 +4,8 @@
 #include "hamiltonian.h"
 #include "state.h"
 
-int test_input(int n1, int n3, int n5, int j1, int j2)
+int test_input(int n1, int n3, int n5, int j1, int j2, 
+                float omega_rho, float omega_z)
 {
         const int jmax = 2; // maximal implemented j
         int is_OK = 1;
@@ -18,6 +19,13 @@ int test_input(int n1, int n3, int n5, int j1, int j2)
         {
                 printf("At least j=0 has to be in the basis.\n");
                 is_OK =0;
+        }
+
+        // this two will be v different
+        if( omega_z > omega_rho)
+        {
+                printf(" Omega_z > omega_rho.\n");
+                is_OK = 0;
         }
 
         return is_OK;
@@ -139,7 +147,8 @@ void test_idx_to_versor_translation() {
 }
 
 
-void apply_harmonic_oscillator(state * input, state * output)
+void apply_harmonic_oscillator(state * input, state * output, 
+                                const parameters pars)
 {
         for (int p=0; p < input->length; p++)
         {
@@ -147,9 +156,9 @@ void apply_harmonic_oscillator(state * input, state * output)
                 fcomplex A = input->amplitudes[p];
 
                 // Harminic oscillator terms
-                const float homega1 = 1.1f;
-                const float homega3 = 100.0f;
-                const float homega5 = 100.0f;
+                const float homega1 = 1.0;
+                const float homega3 = pars.omega_3/pars.omega_1;
+                const float homega5 = pars.omega_3/pars.omega_1;
 
                 versor psi_n1 = psi;
                 fcomplex A_psi_n1 = (fcomplex){
@@ -183,10 +192,18 @@ $$
 \bra{output} = \bra{input} B(\hat{L}_1^2 + hat{L}_2^2 )
 $$
 */
-void apply_rotational_kinetic_energy(state * input, state * output)
+void apply_rotational_kinetic_energy(state * input, state * output, 
+                                        const parameters pars)
 {
-        const float B1 = 1.0f;
-        const float B2 = 1.0f;
+        // B is in units of MHz so in fact is $\nu$
+        // to get the factor $B= \frac{\hbar^2}{2I}$
+        // one has to multiply it by $h$. 
+        // 
+        // everything is in the units of $\hbar \omega_1$
+        // so dividing $\nu h$ by $\hbar \omega_1$ 
+        // one ends up with 2.pi*parsB/pars.omega_1
+        const float B1 = 2*M_PI*pars.B/pars.omega_1;
+        const float B2 = 2*M_PI*pars.B/pars.omega_1;
 
         for (int p=0; p < input->length; p++)
         {
@@ -210,7 +227,8 @@ $$
 \bra{output} = \bra{input} (\hat{a}_1 + hat{a}_1^\dagger )
 $$
 */
-void apply_a1_plus_a1dagger(state * input, state * output)
+void apply_a1_plus_a1dagger(state * input, state * output,
+                                    const parameters pars)
 {
         for (int p=0; p < input->length; p++)
         {
@@ -239,7 +257,8 @@ void apply_a1_plus_a1dagger(state * input, state * output)
 }
 
 
-void apply_a3_plus_a3dagger(state * input, state * output)
+void apply_a3_plus_a3dagger(state * input, state * output,
+                                    const parameters pars)
 {
         for (int p=0; p < input->length; p++)
         {
@@ -267,7 +286,8 @@ void apply_a3_plus_a3dagger(state * input, state * output)
 }
 
 
-void apply_a5_plus_a5dagger(state * input, state * output)
+void apply_a5_plus_a5dagger(state * input, state * output,
+                                    const parameters pars)
 {
         for (int p=0; p < input->length; p++)
         {
@@ -300,7 +320,8 @@ $$
 \bra{output} = \bra{input} hat{d}_1^z 
 $$
 */
-void apply_dz1(state * input, state * output)
+void apply_dz1(state * input, state * output,
+                const parameters pars)
 {
         const float d = 1.0f;
 
@@ -366,7 +387,8 @@ $$
 \bra{output} = \bra{input} hat{d}_2^z 
 $$
 */
-void apply_dz2(state * input, state * output)
+void apply_dz2(state * input, state * output,
+                const parameters pars)
 {
         const float d = 1.0f;
 
@@ -457,7 +479,8 @@ int get_dy_idx(int j, int m)
 // highest implemented input j
 const int jmax = 2;
 
-void apply_dy1(state * input, state * output)
+void apply_dy1(state * input, state * output,
+                        const parameters pars)
 {
         const float d = 1.0f;
         // WARNING, all of them have to be multiplied by 
@@ -543,7 +566,8 @@ void apply_dy1(state * input, state * output)
         }
 }
 
-void apply_dy2(state * input, state * output)
+void apply_dy2(state * input, state * output,
+                        const parameters pars)
 {
         const float d = 1.0f;
         // WARNING, all of them have to be multiplied by 
@@ -627,7 +651,8 @@ void apply_dy2(state * input, state * output)
 
 
 
-void apply_dx1(state * input, state * output)
+void apply_dx1(state * input, state * output,
+                        const parameters pars)
 {
         const float d = 1.0f;
         // WARNING, all of them have to be multiplied by 
@@ -702,7 +727,8 @@ void apply_dx1(state * input, state * output)
 }
 
 
-void apply_dx2(state * input, state * output)
+void apply_dx2(state * input, state * output,
+                        const parameters pars)
 {
         const float d = 1.0f;
         // WARNING, all of them have to be multiplied by 
@@ -782,16 +808,17 @@ $$
 \bra{output} = \bra{input}(\hat{d}^y_1 - \hat{d}^y_2)
 $$
 */
-void apply_dx1_m_dx2(state *input, state *output)
+void apply_dx1_m_dx2(state *input, state *output,
+                        const parameters pars)
 {
         state work_state;
         state_init(&work_state);
         
-        apply_dx1(input, &work_state);
+        apply_dx1(input, &work_state, pars);
         state_add_state(output, &work_state);
         state_free(&work_state);
 
-        apply_dx2(input, &work_state);
+        apply_dx2(input, &work_state, pars);
         state_times_float(input, -1.f);
         state_add_state(output, &work_state);
         state_free(&work_state);
@@ -802,16 +829,17 @@ $$
 \bra{output} = \bra{input}(\hat{d}^y_1 - \hat{d}^y_2)
 $$
 */
-void apply_dy1_m_dy2(state *input, state *output)
+void apply_dy1_m_dy2(state *input, state *output,
+                        const parameters pars)
 {
         state work_state;
         state_init(&work_state);
         
-        apply_dy1(input, &work_state);
+        apply_dy1(input, &work_state, pars);
         state_add_state(output, &work_state);
         state_free(&work_state);
 
-        apply_dy2(input, &work_state);
+        apply_dy2(input, &work_state, pars);
         state_times_float(input, -1.f);
         state_add_state(output, &work_state);
         state_free(&work_state);
@@ -822,16 +850,17 @@ $$
 \bra{output} = \bra{input}(\hat{d}^y_1 - \hat{d}^y_2)
 $$
 */
-void apply_dz1_m_dz2(state *input, state *output)
+void apply_dz1_m_dz2(state *input, state *output,
+                        const parameters pars)
 {
         state work_state;
         state_init(&work_state);
         
-        apply_dz1(input, &work_state);
+        apply_dz1(input, &work_state, pars);
         state_add_state(output, &work_state);
         state_free(&work_state);
 
-        apply_dz2(input, &work_state);
+        apply_dz2(input, &work_state, pars);
         state_times_float(input, -1.f);
         state_add_state(output, &work_state);
         state_free(&work_state);
@@ -845,7 +874,8 @@ $$
 \bra{input} \frac{q}{4\pi\epsilon_0} \frac{hat{d}_1^z -\hat{d}_2^z}{D_0^2}
 $$
 */
-void apply_charge_dipole_zero(state *input, state *output)
+void apply_charge_dipole_zero(state *input, state *output,
+                        const parameters pars)
 {
         const float q = 1.f;
         const float pie = 1.f; // \frac{1}{4\pi\epsilon_0}
@@ -855,13 +885,13 @@ void apply_charge_dipole_zero(state *input, state *output)
         state_init(&work_state);
         
         // dz_1
-        apply_dz1(input, &work_state);
+        apply_dz1(input, &work_state, pars);
         state_times_float(&work_state, q*pie*D0_2_inv);
         state_add_state(output, &work_state);
         state_free(&work_state);
 
         // -dz_2
-        apply_dz2(input, &work_state);
+        apply_dz2(input, &work_state, pars);
         state_times_float(&work_state, -q*pie*D0_2_inv);
         state_add_state(output, &work_state);
         state_free(&work_state);
@@ -884,7 +914,8 @@ $$
 (\vec{hat{d}}_1 -\vec{\hat{d}_2})
 $$
 */
-void apply_charge_dipole_first(state *input, state *output)
+void apply_charge_dipole_first(state *input, state *output,
+                        const parameters pars)
 {
         const float factor = 1.f; // all the constatns
 
@@ -895,23 +926,23 @@ void apply_charge_dipole_first(state *input, state *output)
 
         /* z-part */
         state_init(&work_state);
-        apply_dz1_m_dz2(input, &work_state);
+        apply_dz1_m_dz2(input, &work_state, pars);
         state_times_float(&work_state, factor);
-        apply_a1_plus_a1dagger(&work_state, &sum_container);
+        apply_a1_plus_a1dagger(&work_state, &sum_container, pars);
         state_free(&work_state);
 
         /* y-part */
         state_init(&work_state);
-        apply_dy1_m_dy2(input, &work_state);
+        apply_dy1_m_dy2(input, &work_state, pars);
         state_times_float(&work_state, factor);
-        apply_a5_plus_a5dagger(&work_state, &sum_container);
+        apply_a5_plus_a5dagger(&work_state, &sum_container, pars);
         state_free(&work_state);
 
         /* x-part */
         state_init(&work_state);
-        apply_dx1_m_dx2(input, &work_state);
+        apply_dx1_m_dx2(input, &work_state, pars);
         state_times_float(&work_state, factor);
-        apply_a3_plus_a3dagger(&work_state, &sum_container);
+        apply_a3_plus_a3dagger(&work_state, &sum_container, pars);
         state_free(&work_state);
 
         state_add_state(output, &sum_container);
@@ -949,7 +980,8 @@ $$
 )
 $$
 */
-void apply_dipole_dipole_zero(state *input, state *output)
+void apply_dipole_dipole_zero(state *input, state *output,
+                        const parameters pars)
 {
         const float factor;
         state sum_container;
@@ -960,27 +992,27 @@ void apply_dipole_dipole_zero(state *input, state *output)
 
         /* x-part */
         state_init(&work_state);
-        apply_dx1(input, &work_state);
+        apply_dx1(input, &work_state, pars);
         state_init(&second_work_state);
-        apply_dx2(&work_state, &second_work_state);
+        apply_dx2(&work_state, &second_work_state, pars);
         state_free(&work_state);
         state_add_state(&sum_container, &second_work_state);
         state_free(&second_work_state);
 
         /* y-part */
         state_init(&work_state);
-        apply_dy1(input, &work_state);
+        apply_dy1(input, &work_state, pars);
         state_init(&second_work_state);
-        apply_dy2(&work_state, &second_work_state);
+        apply_dy2(&work_state, &second_work_state, pars);
         state_free(&work_state);
         state_add_state(&sum_container, &second_work_state);
         state_free(&second_work_state);
 
         /* z-part */
         state_init(&work_state);
-        apply_dz1(input, &work_state);
+        apply_dz1(input, &work_state, pars);
         state_init(&second_work_state);
-        apply_dz2(&work_state, &second_work_state);
+        apply_dz2(&work_state, &second_work_state, pars);
         state_free(&work_state);
         state_times_float(&second_work_state, -2.0f);
         state_add_state(&sum_container, &second_work_state);
@@ -998,17 +1030,17 @@ $$
 \bra{return} = \bra{psi}\hat{H}
 $$
 */
-state bra_H(state* psi)
+state bra_H(state* psi, const parameters pars)
 {
         state output_bra;
         state_init(&output_bra);
 
-        apply_harmonic_oscillator(psi, &output_bra);
-        apply_rotational_kinetic_energy(psi, &output_bra);
-        apply_charge_dipole_zero(psi, &output_bra);
-        apply_charge_dipole_first(psi, &output_bra);
+        apply_harmonic_oscillator(psi, &output_bra, pars);
+        apply_rotational_kinetic_energy(psi, &output_bra, pars);
+        apply_charge_dipole_zero(psi, &output_bra, pars);
+        apply_charge_dipole_first(psi, &output_bra, pars);
 
-        apply_dipole_dipole_zero(psi, &output_bra);
+        apply_dipole_dipole_zero(psi, &output_bra, pars);
         return output_bra;
 }
 
@@ -1040,7 +1072,7 @@ int valid_versor(versor psi, basis b)
 }
 
 
-void construct_Hamiltonian(fcomplex* a, basis b)
+void construct_Hamiltonian(fcomplex* a, const basis b, const parameters pars)
 {
         // fill-in with zeroes
         int basis_size = b.n1*b.n3*b.n5*(b.j1*b.j1+2*b.j1+1)*(b.j2*b.j2+2*b.j2+1);
@@ -1059,7 +1091,7 @@ void construct_Hamiltonian(fcomplex* a, basis b)
                 state_add(&state0, psi0, (fcomplex){1.0f, 0.0f});
 
                 // act with H from the left
-                state psiH = bra_H(&state0);
+                state psiH = bra_H(&state0, pars);
 
                 versor loop_versor;
                 fcomplex loop_amplitude;
@@ -1097,7 +1129,6 @@ void construct_Hamiltonian(fcomplex* a, basis b)
         }
 }
 
-
 void print_only_versor(const versor psi)
 {
         printf("|%5d,%5d,%5d;%d,%3d;%d,%3d>",
@@ -1106,7 +1137,8 @@ void print_only_versor(const versor psi)
 
 void test_bra_H() 
 {
-        const basis b = {1, 1, 1, 0, 2};
+        const basis b = {1, 1, 1, 1, 3};
+        const parameters pars = {20.f, 1.f, 5.f, 150.f, 1600.f, 150.f};
 
         versor psi1 = get_versor_from_index(0, b);
 
@@ -1114,19 +1146,33 @@ void test_bra_H()
         state_init(&state0);
 
         state_add(&state0, psi1, (fcomplex){1.0f, 0.0f});
-        printf("Initial state is only a single versor.\n");
-        printf("Amplitude = %4.2f+i%4.2f\t",1.0f,0.0f);
+        printf(" Initial state is only a single versor.\n");
+        printf("Amplitude = (%8.2f,%8.2f)\t",1.0f,0.0f);
         print_only_versor(psi1);
         printf("\t\tidx = %7d\n", get_index_from_versor(psi1, b));
 
-        state sps = bra_H(&state0);
+        state sps = bra_H(&state0, pars);
         versor loop_versor;
         fcomplex loop_amplitude;
+        printf("\n The end state is a superposition\n");
         for(int l=0; l < sps.length; l++)
         {
                 loop_versor = state_get_versor(&sps, l);
                 loop_amplitude = state_get_amplitude(&sps, l);
-                printf("Amplitude = %4.2f+i%4.2f\t", 
+                printf("Amplitude = (%8.2f,%8.2f)\t", 
+                loop_amplitude.re, loop_amplitude.im);
+                print_only_versor(loop_versor);
+                printf("\t\tidx = %7d\n", get_index_from_versor(loop_versor, b));
+        }
+        printf("\n But the valid states are only\n");
+        for(int l=0; l < sps.length; l++)
+        {
+                loop_versor = state_get_versor(&sps, l);
+                loop_amplitude = state_get_amplitude(&sps, l);
+                if(!valid_versor(loop_versor, b))
+                        continue;
+
+                printf("Amplitude = (%8.2f,%8.2f)\t", 
                 loop_amplitude.re, loop_amplitude.im);
                 print_only_versor(loop_versor);
                 printf("\t\tidx = %7d\n", get_index_from_versor(loop_versor, b));

@@ -19,6 +19,10 @@ typedef struct {
 } basis;
 
 typedef struct {
+    float mass, charge, dipole, B, omega_1, omega_3;
+} parameters;
+
+typedef struct {
     int n1, n3, n5, j1, m1, j2, m2;
 } versor;
 

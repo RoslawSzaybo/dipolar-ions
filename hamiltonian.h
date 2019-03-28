@@ -4,7 +4,8 @@
 #include "find-spectrum.h"
 #include "state.h"
 
-int test_input(int n1, int n3, int n5, int j1, int j2);
+int test_input(int n1, int n3, int n5, int j1, int j2, 
+                float omega_rho, float omega_z);
 
 int jm_jump(int j, int m);
 /* 
@@ -42,17 +43,26 @@ on the Hamiltonian one gets a superposition of many bras.
 Those bras are stored in the output state.
 */
 
-void apply_harmonic_oscillator(state *input, state *output);
-void apply_rotational_kinetic_energy(state *input, state *output);
-void apply_a1_plus_a1dagger(state *input, state *output);
-void apply_a3_plus_a3dagger(state *input, state *output);
-void apply_a5_plus_a5dagger(state *input, state *output);
-void apply_dz1(state * input, state * output);
-void apply_dz2(state * input, state * output);
-void apply_dy1(state * input, state * output);
-void apply_charge_dipole_zero(state *input, state *output);
-state bra_H(state* psi);
+void apply_harmonic_oscillator(state * input, state * output, 
+                                const parameters pars);
+void apply_rotational_kinetic_energy(state * input, state * output, 
+                                        const parameters pars);
+void apply_a1_plus_a1dagger(state *input, state *output, 
+                                    const parameters pars);
+void apply_a3_plus_a3dagger(state *input, state *output,
+                                    const parameters pars);
+void apply_a5_plus_a5dagger(state *input, state *output,
+                                    const parameters pars);
+void apply_dz1(state * input, state * output,
+                                    const parameters pars);
+void apply_dz2(state * input, state * output,
+                                    const parameters pars);
+void apply_dy1(state * input, state * output,
+                                    const parameters pars);
+void apply_charge_dipole_zero(state *input, state *output,
+                                    const parameters pars);
+state bra_H(state* psi, const parameters pars);
 void test_bra_H();
-void construct_Hamiltonian(fcomplex* a, basis b);
+void construct_Hamiltonian(fcomplex* a, const basis b, const parameters pars);
 
 #endif // hamiltonian_h
