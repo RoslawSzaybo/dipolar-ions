@@ -11,13 +11,16 @@ int test_input(int n1, int n3, int n5, int j1, int j2,
         int is_OK = 1;
         if( n1<1 || n3<1 || n5<1 )
         {
-                printf("There has to be at least one mode of each allowed.\n");
+                printf(" Warning.\n");
+                printf(" There has to be at least one mode of each allowed.\n\n");
                 is_OK =0;
         }
         
         if(j1<0 || j1 > jmax || j2 < 0 || j2 > jmax)
         {
-                printf("At least j=0 has to be in the basis.\n");
+                printf(" Warning.\n");
+                printf(" Jmax has to be no smaller than 0"
+                " and no larger than %d.\n\n", jmax);
                 is_OK =0;
         }
 
@@ -964,11 +967,24 @@ $$
 \cdot
 (\vec{hat{d}}_1 -\vec{\hat{d}_2})
 $$
+
+The units and constants collected together give
+$$
+(1 + \delta_{iz})
+\frac{
+        |omega_1||mass|^{1/2}|dipole|
+}{
+        |omega_i|^{1/2}|charge|
+}
+1.37689e-5;
+$$
 */
 void apply_charge_dipole_first(state *input, state *output,
                         const parameters pars)
 {
-        const float factor = 1.f; // all the constatns
+        float factor = 1.37689e-5f; 
+        factor *= pars.omega_1/pars.charge;
+        factor *= pow(pars.mass, 1.0/2.0);
 
         state sum_container;
         state_init(&sum_container);
@@ -979,6 +995,8 @@ void apply_charge_dipole_first(state *input, state *output,
         state_init(&work_state);
         apply_dz1_m_dz2(input, &work_state, pars);
         state_times_float(&work_state, factor);
+        float loc_omega = 2.0/pow(pars.omega_1, 1.0/2.0);
+        state_times_float(&work_state, loc_omega);
         apply_a1_plus_a1dagger(&work_state, &sum_container, pars);
         state_free(&work_state);
 
@@ -986,6 +1004,8 @@ void apply_charge_dipole_first(state *input, state *output,
         state_init(&work_state);
         apply_dy1_m_dy2(input, &work_state, pars);
         state_times_float(&work_state, factor);
+        loc_omega = 1.0/pow(pars.omega_3, 1.0/2.0);
+        state_times_float(&work_state, loc_omega);
         apply_a5_plus_a5dagger(&work_state, &sum_container, pars);
         state_free(&work_state);
 
@@ -993,6 +1013,8 @@ void apply_charge_dipole_first(state *input, state *output,
         state_init(&work_state);
         apply_dx1_m_dx2(input, &work_state, pars);
         state_times_float(&work_state, factor);
+        loc_omega = 1.0/pow(pars.omega_3, 1.0/2.0);
+        state_times_float(&work_state, loc_omega);
         apply_a3_plus_a3dagger(&work_state, &sum_container, pars);
         state_free(&work_state);
 
@@ -1096,9 +1118,7 @@ state bra_H(state* psi, const parameters pars)
         apply_harmonic_oscillator(psi, &output_bra, pars);
         apply_rotational_kinetic_energy(psi, &output_bra, pars);
         apply_charge_dipole_zero(psi, &output_bra, pars);
-        /* warning: units not implemented
         apply_charge_dipole_first(psi, &output_bra, pars);
-        */
 
         apply_dipole_dipole_zero(psi, &output_bra, pars);
         return output_bra;

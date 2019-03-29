@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
         printf(" omega_1:\t\t%7.2f MHz\n", pars.omega_1);
         printf(" omega_3/5:\t\t%7.2f MHz\n", pars.omega_3);
         printf(" Basis truncation:\t|%d,%d,%d,%d,%d>\n",n1,n3,n5,j1,j2);
-        printf(" Basis size:\t%d  \n\n",n);
+        printf(" Basis size:\t\t%d  \n\n",n);
         //test_bra_H();
         fcomplex wkopt;
         fcomplex* work;
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
         // generate some particular matrix for testing
         construct_Hamiltonian(a, b, pars);
         /* Print matrix to be diagonalised */
-        print_matrix( "Hamiltonian", n, n, a, n );
+        // print_matrix( "Hamiltonian", n, n, a, n );
         /* Executable statements */
         printf( " Results of the diagonalisation\n" );
         /* Query and allocate the optimal workspace */
