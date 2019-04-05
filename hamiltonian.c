@@ -1217,10 +1217,10 @@ void print_only_versor(const versor psi)
 
 void test_bra_H() 
 {
-        const basis b = {1, 1, 1, 1, 3};
-        const parameters pars = {20.f, 1.f, 5.f, 150.f, 1600.f, 150.f};
+        const basis b = {1, 1, 1, 0, 2};
+        const parameters pars = {25.3f, 1.f, 3.f, 190000.f, 1600.f, 150.f};
 
-        versor psi1 = get_versor_from_index(0, b);
+        versor psi1 = get_versor_from_index(2, b);
 
         state state0;
         state_init(&state0);

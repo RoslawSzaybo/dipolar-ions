@@ -23,6 +23,7 @@ void print_rmatrix( char* desc, int m, int n, float* a, int lda ) {
         }
 }
 
+/* Multiply two complex numbers stored as fcomplex */
 fcomplex fcomplex_multiply(const fcomplex* a, const fcomplex* b)
 {
     float re=0.f, im=0.f;

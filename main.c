@@ -31,7 +31,6 @@ m = 25.3 u
 /* Main program */
 int main(int argc, char *argv[]) {
         /* Locals */
-        const float hbar = 1.0f;
         int n, info, lwork;
         int n1, n3, n5, j1, j2;
         float mass, charge, dipole, B, omega_rho, omega_z;
@@ -56,13 +55,13 @@ int main(int argc, char *argv[]) {
                 B = atof(argv[9]);
                 omega_rho = atof(argv[10]);
                 omega_z = atof(argv[11]);
-                printf(" Parameters of the model\n");
-                printf("  mass:\t\t%7.2f u\n", mass);
-                printf("  charge:\t%7.2f e\n", charge);
-                printf("  dipole:\t%7.2f D\n", dipole);
-                printf("  B:\t\t%7.2f MHz\n", B);
-                printf("  omega_rho:\t%7.2f MHz\n", omega_rho);
-                printf("  omega_z:\t%7.2f MHz\n\n", omega_z);
+                printf("# Parameters of the model\n");
+                printf("#  mass:\t\t%10.2f u\n", mass);
+                printf("#  charge:\t%10.2f e\n", charge);
+                printf("#  dipole:\t%10.2f D\n", dipole);
+                printf("#  B:\t\t%10.2f MHz\n", B);
+                printf("#  omega_rho:\t%10.2f MHz\n", omega_rho);
+                printf("#  omega_z:\t%10.2f MHz\n\n", omega_z);
         }
         n = n1*n3*n5*(j1*j1+2*j1+1)*(j2*j2+2*j2+1);
         // input test
@@ -77,10 +76,10 @@ int main(int argc, char *argv[]) {
         float omega_1 = sqrt(3.f)*omega_z;
         float omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
         parameters pars = {mass, charge, dipole, B, omega_1, omega_3};
-        printf(" omega_1:\t\t%7.2f MHz\n", pars.omega_1);
-        printf(" omega_3/5:\t\t%7.2f MHz\n", pars.omega_3);
-        printf(" Basis truncation:\t|%d,%d,%d,%d,%d>\n",n1,n3,n5,j1,j2);
-        printf(" Basis size:\t\t%d  \n\n",n);
+        printf("# omega_1:\t%10.2f MHz\n", pars.omega_1);
+        printf("# omega_3/5:\t%10.2f MHz\n", pars.omega_3);
+        printf("# Basis truncation:\t|%d,%d,%d,%d,%d>\n",n1,n3,n5,j1,j2);
+        printf("# Basis size:\t\t%d  \n\n",n);
         //test_bra_H();
         fcomplex wkopt;
         fcomplex* work;
@@ -106,12 +105,12 @@ int main(int argc, char *argv[]) {
                 printf("Not enough memory to allocate a.\n");
                 return 1;
         }
-        // generate some particular matrix for testing
+        // Construct the Hamiltonian matrix
         construct_Hamiltonian(a, b, pars);
         /* Print matrix to be diagonalised */
-        // print_matrix( "Hamiltonian", n, n, a, n );
+        //print_matrix( "# Hamiltonian", n, n, a, n );
         /* Executable statements */
-        printf( " Results of the diagonalisation\n" );
+        printf( "# Results of the diagonalisation\n" );
         /* Query and allocate the optimal workspace */
         lwork = -1;
         cheev( "Vectors", "Lower", &n, a, &n, w, &wkopt, &lwork, rwork, &info );
@@ -125,11 +124,15 @@ int main(int argc, char *argv[]) {
                 exit( 1 );
         }
         /* Print eigenvalues */
-        print_rmatrix( "Eigenvalues", 1, n, w, 1 );
-        /* Print eigenvectors */
+        print_rmatrix( "# 100 smallest eigenvalues", 1, 100, w, 1 );
+		/* Print all eigenvalues */
+        // print_rmatrix( "# 100 smallest eigenvalues", 1, n, w, 1 );
+        /* Print ground state */
+        print_matrix( "# Ground state (stored columnwise)", n, 1, a, n );
+        /* Print all eigenvectors */
         //print_matrix( "Eigenvectors (stored columnwise)", n, n, a, n );
         /* Free workspace */
-        //free( (void*)work );
+        free( (void*)work );
         free( w );
         free( rwork );
         free( a );
