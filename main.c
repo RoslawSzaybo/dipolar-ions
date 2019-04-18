@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
         int is_input_OK = 0;
         if(argc != 12)
         {
+				printf( "argc = %d\n", argc);
                 printf( "This is how you can execute the program:\n" );
                 printf( "\t$ %s n1 n3 n5 j1 j2 "
                 "mass[u] charge[e] dipole[D] B[MHz] omega_rho[MHz] omega_z[MHz]\n", argv[0]);
@@ -128,7 +129,7 @@ int main(int argc, char *argv[]) {
 		/* Print all eigenvalues */
         // print_rmatrix( "# 100 smallest eigenvalues", 1, n, w, 1 );
         /* Print ground state */
-        print_matrix( "# Ground state (stored columnwise)", n, 1, a, n );
+        print_matrix( "# 5 lowest energy eigenstates (stored columnwise)", n, 5, a, n );
         /* Print all eigenvectors */
         //print_matrix( "Eigenvectors (stored columnwise)", n, n, a, n );
         /* Free workspace */
