@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+
 #include "find-spectrum.h"
+
 
 /* Auxiliary routine: printing a matrix */
 void print_matrix( char* desc, int m, int n, fcomplex* a, int lda ) {
@@ -8,7 +10,7 @@ void print_matrix( char* desc, int m, int n, fcomplex* a, int lda ) {
         printf( "\n %s\n", desc );
         for( i = 0; i < m; i++ ) {
                 for( j = 0; j < n; j++ )
-                        printf( " (%6.2f,%6.2f)", a[i+j*lda].re, a[i+j*lda].im );
+                        printf( " (%6.3f,%6.3f)", a[i+j*lda].re, a[i+j*lda].im );
                 printf( "\n" );
         }
 }
@@ -17,46 +19,52 @@ void print_matrix( char* desc, int m, int n, fcomplex* a, int lda ) {
 void print_rmatrix( char* desc, int m, int n, float* a, int lda ) {
         int i, j;
         printf( "\n %s\n", desc );
-        for( i = 0; i < m; i++ ) {
-                for( j = 0; j < n; j++ ) printf( " %6.2f", a[i+j*lda] );
+        for ( i = 0; i < m; i++ ) {
+                for ( j = 0; j < n; j++ ) printf( " %6.3f", a[i+j*lda] );
                 printf( "\n" );
         }
 }
 
-/* Multiply two complex numbers stored as fcomplex */
-fcomplex fcomplex_multiply(const fcomplex* a, const fcomplex* b)
+
+/* Print the most prominent amplitudes with the corresponding kets, 
+for a selected eigenstate. 
+Warning: The amplitudes are not sorted.
+input:
+a - matrix with the diagonalisation result
+n - basis size
+m - which eigenstate do you want to print 
+        (eigenstates are orderd with respect to their eigenvalues, in an 
+        ascending order i.e. 0th eigenvector has the smallest eigenvalue)
+b - descriptor of the basis which was used in the computations */
+void print_eigenvector_summary( fcomplex* a, int n, basis b, int m)
 {
-    float re=0.f, im=0.f;
-
-    re = a->re * b->re - a->im * b->im;
-    im = a->re * b->im  + a->im * b->re;
-
-    return (fcomplex){re, im};
+        const float lower_limit = 1.0e-7f;
+        printf( " |%d> = ", m );
+        int i;
+        fcomplex amp;
+        float abs_amp2;
+        versor ket;
+        for ( i = 0; i < n; i++ )
+        {
+                amp = a[m+i*n];
+                abs_amp2 = fcomplex_amplitude_sqr(&amp);
+                if ( abs_amp2 > lower_limit) 
+                {
+                        printf( "(%6.3f,%6.3f)", amp.re, amp.im );
+                        ket =  get_versor_from_index(i, b);
+                        show_versor(ket, b);
+                        printf(" + ");
+                }
+        }
+        printf("...\n");
 }
 
-fcomplex fcomplex_times_float(const fcomplex* a, float b)
-{
-        float re = a->re * b;
-        float im = a->im * b;
-
-        return (fcomplex){re, im};
-}
-
-fcomplex fcomplex_times_i_float(const fcomplex* a, float b)
-{
-        // (re + i im)* i b = -im*b + i re*b
-        float re = a->re;
-        float im = a->im;
-
-        return (fcomplex){-im*b, re*b};
-}
-
-void test_fcomplex_multiply()
-{
-        printf("Test fcomplex_multiply\n");
-        fcomplex fa = {2.0f, 0.0f}, fb = {1.0f, 1.0f};
-        fcomplex fc = fcomplex_multiply(&fa, &fb);
-        printf("fa = %3.2f+i%3.2f\n", fa.re, fa.im);
-        printf("fb = %3.2f+i%3.2f\n", fb.re, fb.im);
-        printf("fc = %3.2f+i%3.2f\n", fc.re, fc.im);
+void print_lower_spectrum(fcomplex* a, int n, basis b, int m)
+{ 
+        printf("\n Ground state and the lowest excitations:\n");
+        // if the desired number of vectors, m, is greater than
+        // the their total number, n, then print all n vectors.
+        int bound = (m<n) ? m : n ;
+        for (int k=0; k < bound; k++)
+                print_eigenvector_summary( a, n, b, k);
 }

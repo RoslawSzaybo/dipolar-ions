@@ -1,0 +1,7 @@
+where should I put comments - in the header or in the .c file?
+
+
+
+Limitations:
+Default values for function arguments doesn't work in C.
+e.g. `void fun(int m = 50);`

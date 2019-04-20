@@ -1,13 +1,8 @@
 #ifndef find_spectrum_h
 #define find_spectrum_h
 
-/* Complex datatype */
-struct _fcomplex { float re, im; };
-typedef struct _fcomplex fcomplex;
-
-fcomplex fcomplex_multiply(const fcomplex* a, const fcomplex* b);
-fcomplex fcomplex_times_float(const fcomplex* a, float b);
-fcomplex fcomplex_times_i_float(const fcomplex* a, float b);
+#include "fcomplex.h"
+#include "versor.h" // in print_eigenvector_summary
 
 /* CHEEV prototype */
 extern void cheev( char* jobz, char* uplo, int* n, fcomplex* a, int* lda,
@@ -15,5 +10,7 @@ extern void cheev( char* jobz, char* uplo, int* n, fcomplex* a, int* lda,
 /* Auxiliary routines prototypes */
 extern void print_matrix( char* desc, int m, int n, fcomplex* a, int lda );
 extern void print_rmatrix( char* desc, int m, int n, float* a, int lda );
+void print_eigenvector_summary( fcomplex* a, int n, basis b, int m);
+void print_lower_spectrum(fcomplex* a, int n, basis b, int m); 
 
 #endif // find_spectrum_h

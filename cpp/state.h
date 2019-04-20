@@ -1,8 +1,10 @@
 /*
-Customised C-version of a vector. 
+Customised C-version of a vector.
 
-Allows to store states which are in a superposition 
-of a few basis vectors.
+In C++ that would be something linke vector<versor>
+
+Allows to store states which are superpositions (linear combinations)
+of states that can be represented in the product basis (struct versor).
 
 A very good example of a standard vector implementation can be found here:
 https://gist.github.com/EmilHernvall/953968/0fef1b1f826a8c3d8cfb74b2915f17d2944ec1d0
@@ -11,20 +13,8 @@ https://gist.github.com/EmilHernvall/953968/0fef1b1f826a8c3d8cfb74b2915f17d2944e
 #ifndef state_h
 #define state_h
 
-#include "find-spectrum.h"
-
-
-typedef struct {
-    int n1, n3, n5, j1, j2;
-} basis;
-
-typedef struct {
-    float mass, charge, dipole, B, omega_1, omega_3;
-} parameters;
-
-typedef struct {
-    int n1, n3, n5, j1, m1, j2, m2;
-} versor;
+#include "fcomplex.h"
+#include "versor.h"
 
 typedef struct { 
     int length; 

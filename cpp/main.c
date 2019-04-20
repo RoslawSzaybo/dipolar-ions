@@ -17,6 +17,7 @@ an approximation to the ground state of the system.
 #include <math.h>
 #include "find-spectrum.h"
 #include "hamiltonian.h"
+#include "input.h"
 
 
 /*
@@ -126,10 +127,14 @@ int main(int argc, char *argv[]) {
         }
         /* Print eigenvalues */
         print_rmatrix( "# 100 smallest eigenvalues", 1, 100, w, 1 );
-		/* Print all eigenvalues */
+        /* Print all eigenvalues */
         // print_rmatrix( "# 100 smallest eigenvalues", 1, n, w, 1 );
-        /* Print ground state */
-        print_matrix( "# 5 lowest energy eigenstates (stored columnwise)", n, 5, a, n );
+        /*
+        */
+        /* Print all details about the state */
+        // print_matrix( "# 5 lowest energy eigenstates (stored columnwise)", n, 5, a, n );
+        /* Print states more explicitly */
+        print_lower_spectrum(a, n, b, 10);
         /* Print all eigenvectors */
         //print_matrix( "Eigenvectors (stored columnwise)", n, n, a, n );
         /* Free workspace */
