@@ -68,3 +68,88 @@ void print_lower_spectrum(fcomplex* a, int n, basis b, int m)
         for (int k=0; k < bound; k++)
                 print_eigenvector_summary( a, n, b, k);
 }
+
+
+void sort_print_lower_spectrum(fcomplex* a, int n, basis b, int m, fcomplex* work, int* work_int)
+{ 
+        printf("\n Ground state and the lowest excitations:\n");
+        // if the desired number of vectors, m, is greater than
+        // the their total number, n, then print all n vectors.
+        int bound = (m<n) ? m : n ;
+        for (int k=0; k < bound; k++)
+                sort_print_eigenvector_summary( a, work, work_int, n, b, k);
+}
+
+void sort_print_eigenvector_summary( fcomplex* a, fcomplex* work, int* work_int, int n, basis b, int m )
+{
+        // Preselection, the vectors which are of no importance will be neglected;
+        const float lower_limit = 1.0e-7f;
+        int i, length=0;
+        fcomplex amp;
+        float abs_amp2;
+        for ( i = 0; i < n; i++ )
+        {
+                amp = a[ m+i*n ];
+                abs_amp2 = fcomplex_amplitude_sqr( &amp );
+                if ( abs_amp2 > lower_limit ) 
+                {
+                        work[length].re = amp.re;
+                        work[length].im = amp.im;
+                        work_int[length] = i;
+                        length++;
+                }
+        }
+
+        // sorting
+        sort_fcomplex(work, work_int, length);
+
+        // printing
+        printf( " |%d> = ", m );
+        versor ket;
+        for ( i = 0; i < length; i++ )
+        {
+                amp = work[i];
+                printf( "(%6.3f,%6.3f)", amp.re, amp.im );
+                ket =  get_versor_from_index( work_int[i], b );
+                show_versor( ket, b );
+                printf( " + " );
+        }
+        printf( "...\n" );
+}
+
+void sort_fcomplex(fcomplex* data, int* indices, int length)
+{
+        int sorted;
+        int i;
+        float amp0;
+        float amp1;
+        fcomplex temp_fc;
+        int temp_int;
+        while( 1 ) 
+        {
+                sorted = 1;
+                amp0  =  fcomplex_amplitude_sqr( data );
+                for (i=1; i<length; i++)
+                {
+                        amp1 = fcomplex_amplitude_sqr( data+i );
+                        if (amp1 > amp0)
+                        {
+                                // swap data
+                                temp_fc = data[i];
+                                data[i] = data[i-1]; 
+                                data[i-1] = temp_fc;
+                                // swap int
+                                temp_int = indices[i];
+                                indices[i] = indices[i-1];
+                                indices[i-1] = temp_int;
+                                // raise the flag
+                                sorted = 0;
+                        }
+                        amp0 = amp1;
+                }
+                if (sorted == 1)
+                {
+                        break;
+                }
+        } 
+}

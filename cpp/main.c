@@ -33,16 +33,17 @@ m = 25.3 u
 int main(int argc, char *argv[]) {
         /* Locals */
         int n, info, lwork;
+        //void check_input(argc, argv);
         int n1, n3, n5, j1, j2;
         float mass, charge, dipole, B, omega_rho, omega_z;
         int is_input_OK = 0;
         if(argc != 12)
         {
-				printf( "argc = %d\n", argc);
+                printf( " argc = %d\n", argc);
                 printf( "This is how you can execute the program:\n" );
                 printf( "\t$ %s n1 n3 n5 j1 j2 "
                 "mass[u] charge[e] dipole[D] B[MHz] omega_rho[MHz] omega_z[MHz]\n", argv[0]);
-                return 0;
+                exit( 0 );
         }
         else
         {
@@ -65,8 +66,11 @@ int main(int argc, char *argv[]) {
                 printf("#  omega_rho:\t%10.2f MHz\n", omega_rho);
                 printf("#  omega_z:\t%10.2f MHz\n\n", omega_z);
         }
+        //basis b = get_basis(argc, argv);
         n = n1*n3*n5*(j1*j1+2*j1+1)*(j2*j2+2*j2+1);
+        //n = get_basis_size(b);
         // input test
+        // check_parameters(argc, argv);
         is_input_OK = test_input(n1, n3, n5, j1, j2, omega_rho, omega_z);
         if( !is_input_OK )
         {
@@ -77,6 +81,7 @@ int main(int argc, char *argv[]) {
         basis b = {n1, n3, n5, j1, j2};
         float omega_1 = sqrt(3.f)*omega_z;
         float omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
+        // parameters pars = get_parameters(argc, argv);
         parameters pars = {mass, charge, dipole, B, omega_1, omega_3};
         printf("# omega_1:\t%10.2f MHz\n", pars.omega_1);
         printf("# omega_3/5:\t%10.2f MHz\n", pars.omega_3);
@@ -107,6 +112,8 @@ int main(int argc, char *argv[]) {
                 printf("Not enough memory to allocate a.\n");
                 return 1;
         }
+        // necessary in sorting
+        int *work_int = (int*)malloc(sizeof(int)*n);
         // Construct the Hamiltonian matrix
         construct_Hamiltonian(a, b, pars);
         /* Print matrix to be diagonalised */
@@ -134,11 +141,13 @@ int main(int argc, char *argv[]) {
         /* Print all details about the state */
         // print_matrix( "# 5 lowest energy eigenstates (stored columnwise)", n, 5, a, n );
         /* Print states more explicitly */
-        print_lower_spectrum(a, n, b, 10);
+        //print_lower_spectrum(a, n, b, 10);
+        sort_print_lower_spectrum(a, n, b, 10, work, work_int);
         /* Print all eigenvectors */
         //print_matrix( "Eigenvectors (stored columnwise)", n, n, a, n );
         /* Free workspace */
         free( (void*)work );
+        free( work_int );
         free( w );
         free( rwork );
         free( a );

@@ -28,4 +28,3 @@
 
 ### todo
 - implement `void state_clean()`
-- implement state analysis: sort with respect to the amplitude and then later, print only the largest amilitudes
