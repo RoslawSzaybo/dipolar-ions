@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
         int n1, n3, n5, j1, j2;
         float mass, charge, dipole, B, omega_rho, omega_z;
         int is_input_OK = 0;
-        if(argc != 12)
+        if (argc != 12)
         {
                 printf( " argc = %d\n", argc);
                 printf( "This is how you can execute the program:\n" );
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
         // input test
         // check_parameters(argc, argv);
         is_input_OK = test_input(n1, n3, n5, j1, j2, omega_rho, omega_z);
-        if( !is_input_OK )
+        if ( !is_input_OK )
         {
                 printf(" Basis truncation |%d,%d,%d,%d,%d>, or"
                 " trap frequency is incorrect. \n",n1,n3,n5,j1,j2);
@@ -93,20 +93,20 @@ int main(int argc, char *argv[]) {
         /* Local arrays */
         /* rwork dimension should be at least max(1,3*n-2) */
         float *w = (float*)malloc(sizeof(float)*n);
-        if(w == NULL)
+        if (w == NULL)
         {
                 printf("Not enough memory to allocate w.\n");
                 return 1;
         }
         float *rwork = (float*)malloc(sizeof(float)*(3*n-2));
-        if(rwork == NULL)
+        if (rwork == NULL)
         {
                 printf("Not enough memory to allocate rwork.\n");
                 return 1;
         }
 
         fcomplex *a = (fcomplex*)malloc(sizeof(fcomplex)*n*n);
-        if(a == NULL)
+        if (a == NULL)
         {
                 printf("The size of a matirx is %dx%d=%d\n",n,n,n*n);
                 printf("Not enough memory to allocate a.\n");
@@ -114,6 +114,11 @@ int main(int argc, char *argv[]) {
         }
         // necessary in sorting
         int *work_int = (int*)malloc(sizeof(int)*n);
+        if (work_int == NULL)
+        {
+                printf("Not enough memory to allocate work_int.\n");
+                exit( 1 );
+        }
         // Construct the Hamiltonian matrix
         construct_Hamiltonian(a, b, pars);
         /* Print matrix to be diagonalised */

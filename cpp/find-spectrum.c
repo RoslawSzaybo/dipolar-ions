@@ -131,6 +131,8 @@ void sort_fcomplex(fcomplex* data, int* indices, int length)
                 amp0  =  fcomplex_amplitude_sqr( data );
                 for (i=1; i<length; i++)
                 {
+                        // amp0 is the amplitude of data[i-1]
+                        // amp1 is the amplitude of data[i]
                         amp1 = fcomplex_amplitude_sqr( data+i );
                         if (amp1 > amp0)
                         {
@@ -144,8 +146,14 @@ void sort_fcomplex(fcomplex* data, int* indices, int length)
                                 indices[i-1] = temp_int;
                                 // raise the flag
                                 sorted = 0;
+                                // prepare amp0 for the next run of the loop
+                                // amp0 = amp0;
                         }
-                        amp0 = amp1;
+                        else
+                        {
+                                // prepare amp0 for the next run of the loop
+                                amp0 = amp1;
+                        }
                 }
                 if (sorted == 1)
                 {
