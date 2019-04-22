@@ -36,40 +36,6 @@ m - which eigenstate do you want to print
         (eigenstates are orderd with respect to their eigenvalues, in an 
         ascending order i.e. 0th eigenvector has the smallest eigenvalue)
 b - descriptor of the basis which was used in the computations */
-void print_eigenvector_summary( fcomplex* a, int n, basis b, int m)
-{
-        const float lower_limit = 1.0e-7f;
-        printf( " |%d> = ", m );
-        int i;
-        fcomplex amp;
-        float abs_amp2;
-        versor ket;
-        for ( i = 0; i < n; i++ )
-        {
-                amp = a[m+i*n];
-                abs_amp2 = fcomplex_amplitude_sqr(&amp);
-                if ( abs_amp2 > lower_limit) 
-                {
-                        printf( "(%6.3f,%6.3f)", amp.re, amp.im );
-                        ket =  get_versor_from_index(i, b);
-                        show_versor(ket, b);
-                        printf(" + ");
-                }
-        }
-        printf("...\n");
-}
-
-void print_lower_spectrum(fcomplex* a, int n, basis b, int m)
-{ 
-        printf("\n Ground state and the lowest excitations:\n");
-        // if the desired number of vectors, m, is greater than
-        // the their total number, n, then print all n vectors.
-        int bound = (m<n) ? m : n ;
-        for (int k=0; k < bound; k++)
-                print_eigenvector_summary( a, n, b, k);
-}
-
-
 void sort_print_lower_spectrum(fcomplex* a, int n, basis b, int m, fcomplex* work, int* work_int)
 { 
         printf("\n Ground state and the lowest excitations:\n");
@@ -104,17 +70,19 @@ void sort_print_eigenvector_summary( fcomplex* a, fcomplex* work, int* work_int,
         sort_fcomplex(work, work_int, length);
 
         // printing
-        printf( " |%d> = ", m );
+        printf( " |%2d> = ", m );
         versor ket;
         for ( i = 0; i < length; i++ )
         {
+                if(i!=0)
+                        printf("        ");
                 amp = work[i];
                 printf( "(%6.3f,%6.3f)", amp.re, amp.im );
                 ket =  get_versor_from_index( work_int[i], b );
                 show_versor( ket, b );
-                printf( " + " );
+                printf( " +\n" );
         }
-        printf( "...\n" );
+        printf( "         ...\n" );
 }
 
 void sort_fcomplex(fcomplex* data, int* indices, int length)
