@@ -3,7 +3,9 @@
 Plot of a spectrum of two charged dipoles.
 """
 import numpy as np
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+from os import listdir
+from os.path import isfile, join
 
 def get_value(file, name):
     for line in file:
@@ -67,24 +69,40 @@ def get_dataset(filenames, path):
         spectrum = get_spectrum(f)
         f.close()
         dataset += [[descriptors,spectrum]]
-
-        
         
     return dataset
-        
+
+def get_dipole(data):
+    return data[0]['dipole']
+
+"""
+`m` is a number of the largest eigenvalue to display.
+`n` is a number of the smallest eigenvalue to display.
+"""
+def show_dipole(dataset, m=80, n=100):
     
-def show(dataset):
-    for d in dataset:
-        print(d[0])
+    for data in dataset:
+        dipole = get_dipole(data)
+        if m > len(data[1]):
+            m = len(data[1])
+        if n<0 or n >= m:
+            print("Incorrect n - No of the smallest eigenvalue")
+            n = m-1
+        spectrum = data[1][n:m]
+        plt.scatter([dipole]*(m-n), spectrum, 
+                    color='k')
+        plt.title(f"Spectrum: eigenvalues {n} through {m-1}")
     return 0
 
 def main():
     path = "/home/pawel/dipolar-ions/results/"
-    filenames = ["D0.0.txt", "D0.4.txt", "D0.8.txt", "D1.6.txt", "D3.txt",
-                 "D6.0.txt"]
+    path += "04.22-dipole-scan/"
     filenames = [ "test.txt" ]
+    
+    filenames = [f for f in listdir(path) if isfile(join(path, f))]
     dataset = get_dataset(filenames, path)
-    show(dataset)
+    dataset.sort(key=get_dipole)
+    show_dipole(dataset)
     
     return 0
     
