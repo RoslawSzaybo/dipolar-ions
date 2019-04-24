@@ -7,7 +7,7 @@
 /* Auxiliary routine: printing a matrix */
 void print_matrix( char* desc, int m, int n, fcomplex* a, int lda ) {
         int i, j;
-        printf( "\n %s\n", desc );
+        printf( "\n%s\n", desc );
         for( i = 0; i < m; i++ ) {
                 for( j = 0; j < n; j++ )
                         printf( " (%6.3f,%6.3f)", a[i+j*lda].re, a[i+j*lda].im );
@@ -18,7 +18,7 @@ void print_matrix( char* desc, int m, int n, fcomplex* a, int lda ) {
 /* Auxiliary routine: printing a real matrix */
 void print_rmatrix( char* desc, int m, int n, float* a, int lda ) {
         int i, j;
-        printf( "\n %s\n", desc );
+        printf( "\n%s\n", desc );
         for ( i = 0; i < m; i++ ) {
                 for ( j = 0; j < n; j++ ) printf( " %6.3f", a[i+j*lda] );
                 printf( "\n" );
@@ -38,7 +38,7 @@ m - which eigenstate do you want to print
 b - descriptor of the basis which was used in the computations */
 void sort_print_lower_spectrum(fcomplex* a, int n, basis b, int m, fcomplex* work, int* work_int)
 { 
-        printf("\n Ground state and the lowest excitations:\n");
+        printf("\n# Ground state and the lowest excitations:\n");
         // if the desired number of vectors, m, is greater than
         // the their total number, n, then print all n vectors.
         int bound = (m<n) ? m : n ;
