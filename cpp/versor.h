@@ -40,7 +40,9 @@ versor get_versor_from_index(int idx, const basis b);
 int getj(int idx);
 int getm(int idx);
 
+void test_idx_to_versor_translation();
+
 /* prints |n1,n3,n5,j1,m1,j2,m2> */
-void show_versor(const versor psi, const basis b);
+void show_versor(const versor psi);
 
 #endif // versor_h

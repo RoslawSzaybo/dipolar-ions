@@ -1,10 +1,20 @@
 #include <stdio.h>
 #include "versor.h"
 
-void show_versor(const versor psi, const basis b)
+void show_versor(const versor psi)
 {
         printf("|%4d,%2d,%2d;%d,%3d;%d,%3d>",
         psi.n1, psi.n3, psi.n5, psi.j1, psi.m1, psi.j2, psi.m2);
+}
+
+/* For tests.
+Print "|n1,n3,n5,j1,m1,j2,m2>\t index = idx"
+where `idx` is the position of the versor in the 
+list of the basis elements. */
+void print_versor(const versor psi, const basis b)
+{
+        show_versor(psi);
+        printf("\t\t" "index = %d\n", get_index_from_versor(psi, b));
 }
 
 
@@ -22,20 +32,18 @@ int jm_jump(int j, int m)
         return jump;
 }
 
+/* The product basis is undersood in the following way
+$$
+\ket{\psi} = \ket{n1}\ket{n3}\ket{n5}\ket{j1,m1}\ket{j2,m2}
+$$
+order of this basis is as follows:
+- vibrations (nx) (b.n1, b.n3, b.n5)
+- rotations (j1, m1), (j2, m2)
+$$
+\sum_{j=0}^{j=b.j1}(2j+1) = (b.j1)^2 + b.j1 + 1
+$$ */
 int get_index_from_versor(versor psi, const basis b)
 {
-        /*
-        product basis is undersood in the following way
-        $$
-        \ket{\psi} = \ket{n1}\ket{n3}\ket{n5}\ket{j1,m1}\ket{j2,m2}
-        $$
-        order of this basis is as follows:
-        - vibrations (nx) (b.n1, b.n3, b.n5)
-        - rotations (j1, m1), (j2, m2)
-        $$
-        \sum_{j=0}^{j=b.j1}(2j+1) = (b.j1)^2 + b.j1 + 1
-        $$
-        */
         int no_vib35 = b.n3 * b.n5;
         int no_vib5 = b.n5;
         int no_j1_rot = b.j1*b.j1 + 2*b.j1 + 1;
@@ -111,4 +119,16 @@ versor get_versor_from_index(int idx, const basis b)
         psi.m2 = getm(idx);
 
         return psi;
+}
+
+
+/* test */
+void test_idx_to_versor_translation() {
+        const basis b = {1000, 2, 3, 0, 0};
+
+        for(int idx=0; idx<20; idx++)
+        {
+                versor psi1 = get_versor_from_index(idx, b);
+                print_versor(psi1, b);
+        }
 }

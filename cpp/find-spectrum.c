@@ -79,7 +79,7 @@ void sort_print_eigenvector_summary( fcomplex* a, fcomplex* work, int* work_int,
                 amp = work[i];
                 printf( "(%6.3f,%6.3f)", amp.re, amp.im );
                 ket =  get_versor_from_index( work_int[i], b );
-                show_versor( ket, b );
+                show_versor( ket );
                 printf( " +\n" );
         }
         printf( "         ...\n" );

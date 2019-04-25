@@ -32,7 +32,8 @@ m = 25.3 u
 /* Main program */
 int main(int argc, char *argv[]) {
         /* Locals */
-        int n, info, lwork;
+        int info, lwork;
+		int n;
         //void check_input(argc, argv);
         int n1, n3, n5, j1, j2;
         float mass, charge, dipole, B, omega_rho, omega_z;
@@ -47,6 +48,7 @@ int main(int argc, char *argv[]) {
         }
         else
         {
+                omega_z = atof(argv[11]);
                 n1 = atoi(argv[1]);
                 n3 = atoi(argv[2]);
                 n5 = atoi(argv[3]);
@@ -57,7 +59,6 @@ int main(int argc, char *argv[]) {
                 dipole = atof(argv[8]);
                 B = atof(argv[9]);
                 omega_rho = atof(argv[10]);
-                omega_z = atof(argv[11]);
                 printf("# Parameters of the model\n");
                 printf("#  mass:\t\t%10.2f u\n", mass);
                 printf("#  charge:\t%10.2f e\n", charge);
@@ -104,11 +105,15 @@ int main(int argc, char *argv[]) {
                 printf("Not enough memory to allocate rwork.\n");
                 return 1;
         }
-
-        fcomplex *a = (fcomplex*)malloc(sizeof(fcomplex)*n*n);
+		long matrix_size = sizeof(fcomplex);
+		matrix_size *= n;
+		matrix_size *= n;
+		//printf("\n\n" "size of a is = %ld\n", matrix_size);
+		//printf("\n\n" "size of a is = %zu\n", (size_t)matrix_size);
+        fcomplex *a = (fcomplex*)malloc((size_t)matrix_size);
         if (a == NULL)
         {
-                printf("The size of a matirx is %dx%d=%d\n",n,n,n*n);
+				printf("The size of a matirx is %dx%d=%ld\n",n,n,(long)n*(long)n);
                 printf("Not enough memory to allocate a.\n");
                 return 1;
         }
@@ -129,6 +134,7 @@ int main(int argc, char *argv[]) {
         lwork = -1;
         cheev( "Vectors", "Lower", &n, a, &n, w, &wkopt, &lwork, rwork, &info );
         lwork = (int)wkopt.re;
+		printf("\n lwork = %d \n",lwork);
         work = (fcomplex*)malloc( lwork*sizeof(fcomplex) );
         /* Solve eigenproblem */
         cheev( "Vectors", "Lower", &n, a, &n, w, work, &lwork, rwork, &info );
@@ -143,10 +149,7 @@ int main(int argc, char *argv[]) {
         // print_rmatrix( "# 100 smallest eigenvalues", 1, n, w, 1 );
         /*
         */
-        /* Print all details about the state */
-        // print_matrix( "# 5 lowest energy eigenstates (stored columnwise)", n, 5, a, n );
         /* Print states more explicitly */
-        //print_lower_spectrum(a, n, b, 10);
         sort_print_lower_spectrum(a, n, b, 10, work, work_int);
         /* Print all eigenvectors */
         //print_matrix( "Eigenvectors (stored columnwise)", n, n, a, n );

@@ -3,24 +3,6 @@
 #include <math.h>
 #include "hamiltonian.h"
 
-void print_versor(const versor psi, const basis b)
-{
-        show_versor(psi, b);
-        printf("\t\tindex = %d\n", get_index_from_versor(psi, b));
-}
-
-/* test */
-void test_idx_to_versor_translation() {
-        const basis b = {1000, 2, 3, 0, 0};
-
-        for(int idx=0; idx<20; idx++)
-        {
-                versor psi1 = get_versor_from_index(idx, b);
-                print_versor(psi1, b);
-        }
-}
-
-
 void apply_harmonic_oscillator(state * input, state * output, 
                                 const parameters pars)
 {
@@ -1023,13 +1005,29 @@ int valid_versor(versor psi, basis b)
 }
 
 
+/*
+The Hamiltonian Matix is expressed in the product basis 
+$\{\ket{n1,n3,n5,j1,m1,j2,m2}\}$. Its element H_{bra,ket} 
+are scalar products $\bra{...} \hat{H} \ket{...'}$, where 
+dots indicate set of quantum numbers. 
+
+The basis is orthonormal, and the Hamiltonian do not mix too many states
+(a rule of thumb), thus the matrix H has very a few non-zero elements. 
+
+The non-zero elements are found by decomposing the covector 
+$\bra{...}\hat{H}$ in the basis. 
+
+In a loop over all $\bra{...}$ the decomposition of $\bra{...}\hat{H}$ 
+is repetedly computed, and non-zero contributions are added to the 
+matrix H.
+*/
 void construct_Hamiltonian(fcomplex* a, const basis b, const parameters pars)
 {
         // fill-in with zeroes
-        int basis_size = b.n1*b.n3*b.n5*(b.j1*b.j1+2*b.j1+1)*(b.j2*b.j2+2*b.j2+1);
+        long basis_size = b.n1*b.n3*b.n5*(b.j1*b.j1+2*b.j1+1)*(b.j2*b.j2+2*b.j2+1);
         fcomplex zero = {0.0f, 0.0f};
 
-        for(int i = 0; i<basis_size*basis_size; i++)
+        for(long i = 0; i<basis_size*basis_size; i++)
                 a[i] = zero;
 
         // scan through the matrix rows and replace all the non-zero elements
@@ -1080,12 +1078,6 @@ void construct_Hamiltonian(fcomplex* a, const basis b, const parameters pars)
         }
 }
 
-void print_only_versor(const versor psi)
-{
-        printf("|%5d,%5d,%5d;%d,%3d;%d,%3d>",
-        psi.n1, psi.n3, psi.n5, psi.j1, psi.m1, psi.j2, psi.m2);
-}
-
 void test_bra_H() 
 {
         const basis b = {1, 1, 1, 0, 2};
@@ -1099,7 +1091,7 @@ void test_bra_H()
         state_add(&state0, psi1, (fcomplex){1.0f, 0.0f});
         printf(" Initial state is only a single versor.\n");
         printf("Amplitude = (%8.2f,%8.2f)\t",1.0f,0.0f);
-        print_only_versor(psi1);
+        show_versor(psi1);
         printf("\t\tidx = %7d\n", get_index_from_versor(psi1, b));
 
         state sps = bra_H(&state0, pars);
@@ -1112,7 +1104,7 @@ void test_bra_H()
                 loop_amplitude = state_get_amplitude(&sps, l);
                 printf("Amplitude = (%8.2f,%8.2f)\t", 
                 loop_amplitude.re, loop_amplitude.im);
-                print_only_versor(loop_versor);
+                show_versor(loop_versor);
                 printf("\t\tidx = %7d\n", get_index_from_versor(loop_versor, b));
         }
         printf("\n But the valid states are only\n");
@@ -1125,7 +1117,7 @@ void test_bra_H()
 
                 printf("Amplitude = (%8.2f,%8.2f)\t", 
                 loop_amplitude.re, loop_amplitude.im);
-                print_only_versor(loop_versor);
+                show_versor(loop_versor);
                 printf("\t\tidx = %7d\n", get_index_from_versor(loop_versor, b));
         }
 }
