@@ -83,7 +83,10 @@ def get_dataset(filenames, path):
     return dataset
 
 def get_dipole(data):
-    return data[0]['dipole']
+    return float(data[0]['dipole'])
+
+def get_omega_z(data):
+    return float(data[0]['omega_z'])
 
 """
 `m` is a number of the largest eigenvalue to display.
@@ -128,17 +131,48 @@ def show_dipole_lines(dataset, m=10):
     plt.ylabel("Energy of the level ($\hbar \omega_1$)")
     return 0
 
+"""
+m - How many energy levels to display
+"""
+def show_omega_z_lines(dataset, m=10):    
+    omegas = []
+    all_spectra = []
+
+    for data in dataset:
+        omegas += [get_omega_z(data)]
+        all_spectra += [data[1]] 
+        
+    # transpose all_spectra
+    # each row has equal number of elements
+    all_spectra = list(map(list, zip(*all_spectra)))
+    
+    states_no = len(all_spectra)
+    m = states_no if m > states_no else m
+    
+    for i in range(m):
+        plt.plot(omegas, all_spectra[i])
+    plt.xlim([100,700])
+    plt.ylim([5.0,10.0])
+    plt.title(f"First {m} energy levels")
+    plt.xlabel("$\omega_z$ (MHz)")
+    plt.ylabel("Energy of the level ($\hbar \omega_1$)")
+    return 0
+
 def main():
-    path = "/home/pwojcik/ions/results/04.26-omega_z-scan/"
     path = "/home/pawel/dipolar-ions/results/04.22-dipole-scan/"
     path = "/home/pwojcik/ions/results/04.22-dipole-scan/"
-    filenames = [ "test.txt" ]
+    path = "/home/pwojcik/ions/results/04.26-omega_z-scan/"
+    #filenames = [ "test.txt" ]
     
     filenames = [f for f in listdir(path) if isfile(join(path, f))]
     dataset = get_dataset(filenames, path)
-    dataset.sort(key=get_dipole)
+    
     #show_dipole(dataset)
-    show_dipole_lines(dataset)
+    #dataset.sort(key=get_dipole)
+    #show_dipole_lines(dataset)
+    
+    dataset.sort(key=get_omega_z)
+    show_omega_z_lines(dataset)
     
     return 0
     
