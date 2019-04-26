@@ -134,7 +134,6 @@ int main(int argc, char *argv[]) {
         lwork = -1;
         cheev( "Vectors", "Lower", &n, a, &n, w, &wkopt, &lwork, rwork, &info );
         lwork = (int)wkopt.re;
-		printf("\n lwork = %d \n",lwork);
         work = (fcomplex*)malloc( lwork*sizeof(fcomplex) );
         /* Solve eigenproblem */
         cheev( "Vectors", "Lower", &n, a, &n, w, work, &lwork, rwork, &info );

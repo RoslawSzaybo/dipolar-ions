@@ -2,7 +2,6 @@
 """
 Plot of a spectrum of two charged dipoles.
 """
-import numpy as np
 import matplotlib.pyplot as plt
 from os import listdir
 from os.path import isfile, join
@@ -52,7 +51,7 @@ def get_spectrum(f):
             content[3] == 'eigenvalues':
                 eigenvalues = f.readline()
                 f.seek(0)
-                spectrum = eigenvalues.split()
+                spectrum = [float(i) for i in eigenvalues.split()]
                 return spectrum
                     
 
@@ -69,6 +68,17 @@ def get_dataset(filenames, path):
         spectrum = get_spectrum(f)
         f.close()
         dataset += [[descriptors,spectrum]]
+
+    # integrity tests
+    # checks if all spectrums have the same number of elements
+    spectrum_length = len(dataset[0][1])
+    for d in dataset:
+        if len(d[1]) != spectrum_length:
+            print("Error!")
+            print("Not all spectra have the same length.")
+            print("The different element is:")
+            print(d[0])
+            exit( 0 )
         
     return dataset
 
@@ -79,8 +89,7 @@ def get_dipole(data):
 `m` is a number of the largest eigenvalue to display.
 `n` is a number of the smallest eigenvalue to display.
 """
-def show_dipole(dataset, m=80, n=100):
-    
+def show_dipole(dataset, m=100, n=0):    
     for data in dataset:
         dipole = get_dipole(data)
         if m > len(data[1]):
@@ -94,15 +103,42 @@ def show_dipole(dataset, m=80, n=100):
         plt.title(f"Spectrum: eigenvalues {n} through {m-1}")
     return 0
 
+"""
+m - How many energy levels to display
+"""
+def show_dipole_lines(dataset, m=10):    
+    dipoles = []
+    all_spectra = []
+
+    for data in dataset:
+        dipoles += [get_dipole(data)]
+        all_spectra += [data[1]] 
+        
+    # transpose all_spectra
+    # each row has equal number of elements
+    all_spectra = list(map(list, zip(*all_spectra)))
+    
+    states_no = len(all_spectra)
+    m = states_no if m > states_no else m
+    
+    for i in range(m):
+        plt.plot(dipoles, all_spectra[i])
+    plt.title(f"First {m} energy levels")
+    plt.xlabel("electric dipole moment (D)")
+    plt.ylabel("Energy of the level ($\hbar \omega_1$)")
+    return 0
+
 def main():
-    path = "/home/pawel/dipolar-ions/results/"
-    path += "04.22-dipole-scan/"
+    path = "/home/pwojcik/ions/results/04.26-omega_z-scan/"
+    path = "/home/pawel/dipolar-ions/results/04.22-dipole-scan/"
+    path = "/home/pwojcik/ions/results/04.22-dipole-scan/"
     filenames = [ "test.txt" ]
     
     filenames = [f for f in listdir(path) if isfile(join(path, f))]
     dataset = get_dataset(filenames, path)
     dataset.sort(key=get_dipole)
-    show_dipole(dataset)
+    #show_dipole(dataset)
+    show_dipole_lines(dataset)
     
     return 0
     
