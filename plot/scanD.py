@@ -109,7 +109,7 @@ def show_dipole(dataset, m=100, n=0):
 """
 m - How many energy levels to display
 """
-def show_dipole_lines(dataset, m=10):    
+def show_dipole_lines(dataset, m=1):    
     dipoles = []
     all_spectra = []
 
@@ -134,7 +134,7 @@ def show_dipole_lines(dataset, m=10):
 """
 m - How many energy levels to display
 """
-def show_omega_z_lines(dataset, m=10):    
+def show_omega_z_lines(dataset, m=100):    
     omegas = []
     all_spectra = []
 
@@ -151,28 +151,29 @@ def show_omega_z_lines(dataset, m=10):
     
     for i in range(m):
         plt.plot(omegas, all_spectra[i])
-    plt.xlim([100,700])
-    plt.ylim([5.0,10.0])
+    #plt.xlim([100,700])
+    plt.ylim([2.0,20.0])
     plt.title(f"First {m} energy levels")
     plt.xlabel("$\omega_z$ (MHz)")
     plt.ylabel("Energy of the level ($\hbar \omega_1$)")
     return 0
 
 def main():
-    path = "/home/pawel/dipolar-ions/results/04.22-dipole-scan/"
     path = "/home/pwojcik/ions/results/04.22-dipole-scan/"
     path = "/home/pwojcik/ions/results/04.26-omega_z-scan/"
+    path = "/home/pawel/dipolar-ions/results/04.26-omega-scan/"
+    path = "/home/pawel/dipolar-ions/results/04.22-dipole-scan/"
     #filenames = [ "test.txt" ]
     
     filenames = [f for f in listdir(path) if isfile(join(path, f))]
     dataset = get_dataset(filenames, path)
     
     #show_dipole(dataset)
-    #dataset.sort(key=get_dipole)
-    #show_dipole_lines(dataset)
+    dataset.sort(key=get_dipole)
+    show_dipole_lines(dataset)
     
-    dataset.sort(key=get_omega_z)
-    show_omega_z_lines(dataset)
+    #dataset.sort(key=get_omega_z)
+    #show_omega_z_lines(dataset)
     
     return 0
     
