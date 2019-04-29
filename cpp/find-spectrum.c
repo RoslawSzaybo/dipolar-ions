@@ -10,7 +10,7 @@ void print_matrix( char* desc, int m, int n, fcomplex* a, int lda ) {
         printf( "\n%s\n", desc );
         for( i = 0; i < m; i++ ) {
                 for( j = 0; j < n; j++ )
-                        printf( " (%6.3f,%6.3f)", a[i+j*lda].re, a[i+j*lda].im );
+                        printf( " (%6.6f,%6.6f)", a[i+j*lda].re, a[i+j*lda].im );
                 printf( "\n" );
         }
 }
@@ -20,7 +20,7 @@ void print_rmatrix( char* desc, int m, int n, float* a, int lda ) {
         int i, j;
         printf( "\n%s\n", desc );
         for ( i = 0; i < m; i++ ) {
-                for ( j = 0; j < n; j++ ) printf( " %6.3f", a[i+j*lda] );
+                for ( j = 0; j < n; j++ ) printf( " %11.9f", a[i+j*lda] );
                 printf( "\n" );
         }
 }
@@ -127,5 +127,5 @@ void sort_fcomplex(fcomplex* data, int* indices, int length)
                 {
                         break;
                 }
-        } 
+        }
 }
