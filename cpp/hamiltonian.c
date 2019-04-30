@@ -1059,9 +1059,11 @@ void construct_Hamiltonian(fcomplex* a, const basis b, const parameters pars)
                                 continue;
 
                         // check if it is above the diagonal
+                        /*
                         int loc_idx = get_index_from_versor(loop_versor, b);
                         if( loc_idx < i )
                                 continue;
+                        */
 
                         // apply amplitude;
                         fcomplex amp = state_get_amplitude(&psiH, l);
