@@ -10,7 +10,7 @@ void print_matrix( char* desc, int m, int n, fcomplex* a, int lda ) {
         printf( "\n%s\n", desc );
         for( i = 0; i < m; i++ ) {
                 for( j = 0; j < n; j++ )
-                        printf( " (%6.6f,%6.6f)", a[i+j*lda].re, a[i+j*lda].im );
+                        printf( " (%6.2f,%6.2f)", a[i+j*lda].re, a[i+j*lda].im );
                 printf( "\n" );
         }
 }

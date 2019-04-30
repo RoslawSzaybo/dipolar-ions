@@ -1058,9 +1058,9 @@ void construct_Hamiltonian(fcomplex* a, const basis b, const parameters pars)
                         if(!valid_versor(loop_versor, b))
                                 continue;
 
+                        int loc_idx = get_index_from_versor(loop_versor, b);
                         // check if it is above the diagonal
                         /*
-                        int loc_idx = get_index_from_versor(loop_versor, b);
                         if( loc_idx < i )
                                 continue;
                         */
