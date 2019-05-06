@@ -7,6 +7,31 @@ void show_versor(const versor psi)
         psi.n1, psi.n3, psi.n5, psi.j1, psi.m1, psi.j2, psi.m2);
 }
 
+// returns 1 if all the components of two versors are the same
+int versor_equals_versor(versor ket0, versor ket1)
+{
+        int the_same = 1;
+        if ( ket0.n1 != ket1.n1 )
+                return 0;
+        if ( ket0.n3 != ket1.n3 )
+                return 0;
+        if ( ket0.n5 != ket1.n5 )
+                return 0;
+
+        if ( ket0.j1 != ket1.j1 )
+                return 0;
+        if ( ket0.m1 != ket1.m1 )
+                return 0;
+
+        if ( ket0.j2 != ket1.j2 )
+                return 0;
+
+        if ( ket0.m2 != ket1.m2 )
+                return 0;
+
+        return the_same;
+}
+
 /* For tests.
 Print "|n1,n3,n5,j1,m1,j2,m2>\t index = idx"
 where `idx` is the position of the versor in the 
