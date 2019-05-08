@@ -63,7 +63,7 @@ void state_add(state* psi, const versor ket, const fcomplex amplitude)
     // it is enough to sum amplitudes
     if ( state_contains_versor(psi, &ket) ) 
     {
-        int loc = state_versor_location(psi, ket);
+        int loc = state_versor_location(psi, &ket);
         psi->amplitudes[loc].re += amplitude.re;
         psi->amplitudes[loc].im += amplitude.im;
     }
