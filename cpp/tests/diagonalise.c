@@ -53,17 +53,21 @@ int main(int argc, char *argv[]) {
                 printf("Not enough memory to allocate w or rwork.\n");
                 return 1;
         }
-
-        fcomplex *a = (fcomplex*)malloc(sizeof(fcomplex)*lda*lda);
+		
+		long size = lda;
+		size *= size;
+		size *= sizeof(fcomplex);
+		size_t a_size = size;
+        fcomplex *a = (fcomplex*)malloc(a_size);
         if(a == NULL)
         {
                 printf("Not enough memory to allocate a.\n");
                 return 1;
         }
         // generate some particular matrix for testing
-        for(int row=0; row<n; row++)
+        for(long row=0; row<n; row++)
         {
-                for(int column=0; column<n; column++)
+                for(long column=0; column<n; column++)
                 {
                         fcomplex entry = {0.0f, 0.0f};
                         if(row <= column)

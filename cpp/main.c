@@ -49,10 +49,12 @@ int main(int argc, char *argv[]) {
         matrix_size *= n;
         matrix_size *= n;
         fcomplex *a = my_malloc((size_t)matrix_size, "a");
-        /* define it */
+        /* Define the Hamiltonian matrix */
         construct_Hamiltonian(a, b, pars);
-        /* print it */
-        print_matrix( "# Hamiltonian", n, n, a, n );
+        /* WARTNING: Print the Hamiltonian Matrix */
+        /* WARTNING: Usually you don't want to do it! */
+        /* WARTNING: It's mostly for testing purposese */
+        // print_matrix( "# Hamiltonian", n, n, a, n );
 
 
         /* Query and allocate the optimal workspace */
@@ -67,13 +69,18 @@ int main(int argc, char *argv[]) {
 
         /* Solve eigenproblem */
         cheev( "Vectors", "Lower", &n, a, &n, w, work, &lwork, rwork, &info );
-
-        printf( "# Results of the diagonalisation\n" );
         /* Check for convergence */
         if( info > 0 ) {
                 printf( "The algorithm failed to compute eigenvalues.\n" );
                 exit( 1 );
         }
+        /* Free workspace - part I */
+		// It's larger than work_int so it should 'make space' 
+		// for work_int, but you know.
+        free( rwork ); 
+
+		/* Generate the output */
+        printf( "# Results of the diagonalisation\n" );
         /* Print eigenvalues */
         print_rmatrix( "# 100 smallest eigenvalues", 1, (n<100)?n:100 , w, 1 );
         /* Print all eigenvalues */
@@ -84,11 +91,10 @@ int main(int argc, char *argv[]) {
         int *work_int = my_malloc(sizeof(int)*n, "work_int");
         sort_print_lower_spectrum(a, n, b, 25, work, work_int);
 
-        /* Free workspace */
+        /* Free workspace - part II */
+        free( a );
+        free( w );
         free( work );
         free( work_int );
-        free( w );
-        free( rwork );
-        free( a );
         exit( 0 );
 } /* End of diagonalisation. */
