@@ -24,7 +24,7 @@
 - 16k x 16k Hermitian matrix: 2Gb; 51min;
 - 32k x 32k Hermitian matrix: 8Gb; 7h 01min;
 - 44k x 44k Hermitian matrix: 15Gb; 20h 25min;
-
+- 64k x 64k Hermitian matrix: 30.7Gb; 60h (2d 10h 30min);
 
 ### todo
 - implement `void state_clean()`
