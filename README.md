@@ -19,12 +19,15 @@
 	./a.out 7000 # the matirx size
 ```
 
-### Statistics from plgrid:
+### Statistics of diagonalise.c from plgrid:
 - 8000x8000 Hermitian matrix: 500Mb; 7min;
 - 16k x 16k Hermitian matrix: 2Gb; 51min;
 - 32k x 32k Hermitian matrix: 8Gb; 7h 01min;
 - 44k x 44k Hermitian matrix: 15Gb; 20h 25min;
 - 64k x 64k Hermitian matrix: 30.7Gb; 60h (2d 10h 30min);
+
+### Statistics of the main program from plgrid:
+- 42k x 42k Hermitian matrix: 13Gb; 11-22h ;
 
 ### todo
 - implement `void state_clean()`
