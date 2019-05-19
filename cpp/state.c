@@ -61,6 +61,7 @@ void state_add(state* psi, const versor ket, const fcomplex amplitude)
 {
     // the versor `ket` is already present in the state;
     // it is enough to sum amplitudes
+
     if ( state_contains_versor(psi, &ket) ) 
     {
         int loc = state_versor_location(psi, &ket);

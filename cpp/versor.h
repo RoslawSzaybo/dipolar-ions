@@ -44,6 +44,7 @@ void test_idx_to_versor_translation();
 
 /* prints |n1,n3,n5,j1,m1,j2,m2> */
 void show_versor(const versor psi);
+void show_bra_versor(const versor psi);
 int versor_equals_versor(versor ket0, versor ket1);
 
 #endif // versor_h

@@ -7,6 +7,12 @@ void show_versor(const versor psi)
         psi.n1, psi.n3, psi.n5, psi.j1, psi.m1, psi.j2, psi.m2);
 }
 
+void show_bra_versor(const versor psi)
+{
+        printf("<%4d,%2d,%2d;%d,%3d;%d,%3d|",
+        psi.n1, psi.n3, psi.n5, psi.j1, psi.m1, psi.j2, psi.m2);
+}
+
 // returns 1 if all the components of two versors are the same
 int versor_equals_versor(versor ket0, versor ket1)
 {

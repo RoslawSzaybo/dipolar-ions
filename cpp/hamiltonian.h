@@ -1,7 +1,6 @@
 #ifndef hamiltonian_h
 #define hamiltonian_h
 
-
 #include "input.h" 
 #include "versor.h"
 #include "find-spectrum.h"
@@ -10,6 +9,8 @@
 /* prints |n1,n3,n5,j1,m1,j2,m2> and state index */
 void print_versor(const versor psi, const basis b);
 void test_idx_to_versor_translation();
+
+int valid_versor(versor psi, basis b);
 
 /*
 Upon acting with state $\ket{\psi}$ from the left 
@@ -37,8 +38,9 @@ void apply_dy1(state * input, state * output,
                                     const parameters pars);
 void apply_charge_dipole_zero(state *input, state *output,
                                     const parameters pars);
+
 state bra_H(state* psi, const parameters pars);
-void test_bra_H();
+
 void construct_Hamiltonian(fcomplex* a, const basis b, const parameters pars);
 
 #endif // hamiltonian_h

@@ -38,7 +38,9 @@ void check_physical_parameters(char *argv[])
     }
 }
 
-/* not all j are implemented. Not all ns are allowed. */
+/* not all j are implemented. Not all ns are allowed. 
+Incorrect basis truncation prints error message and
+stops the program execution. */
 void check_basis_truncation(basis b)
 {
     int is_OK = 1;

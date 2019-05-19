@@ -11,7 +11,7 @@ void apply_harmonic_oscillator(state * input, state * output,
                 versor psi = input->kets[p];
                 fcomplex A = input->amplitudes[p];
 
-                // Harminic oscillator terms
+                // Harmonic oscillator terms
                 const float homega1 = 1.0;
                 const float homega3 = pars.omega_3/pars.omega_1;
                 const float homega5 = pars.omega_3/pars.omega_1;
@@ -1077,49 +1077,5 @@ void construct_Hamiltonian(fcomplex* a, const basis b, const parameters pars)
                         a[i*basis_size+loc_idx].im += amp.im;
                 }
                state_free(&psiH);
-        }
-}
-
-void test_bra_H() 
-{
-        const basis b = {1, 1, 1, 0, 2};
-        const parameters pars = {25.3f, 1.f, 3.f, 190000.f, 1600.f, 150.f};
-
-        versor psi1 = get_versor_from_index(2, b);
-
-        state state0;
-        state_init(&state0);
-
-        state_add(&state0, psi1, (fcomplex){1.0f, 0.0f});
-        printf(" Initial state is only a single versor.\n");
-        printf("Amplitude = (%8.2f,%8.2f)\t",1.0f,0.0f);
-        show_versor(psi1);
-        printf("\t\tidx = %7d\n", get_index_from_versor(psi1, b));
-
-        state sps = bra_H(&state0, pars);
-        versor loop_versor;
-        fcomplex loop_amplitude;
-        printf("\n The end state is a superposition\n");
-        for(int l=0; l < sps.length; l++)
-        {
-                loop_versor = state_get_versor(&sps, l);
-                loop_amplitude = state_get_amplitude(&sps, l);
-                printf("Amplitude = (%8.2f,%8.2f)\t", 
-                loop_amplitude.re, loop_amplitude.im);
-                show_versor(loop_versor);
-                printf("\t\tidx = %7d\n", get_index_from_versor(loop_versor, b));
-        }
-        printf("\n But the valid states are only\n");
-        for(int l=0; l < sps.length; l++)
-        {
-                loop_versor = state_get_versor(&sps, l);
-                loop_amplitude = state_get_amplitude(&sps, l);
-                if(!valid_versor(loop_versor, b))
-                        continue;
-
-                printf("Amplitude = (%8.2f,%8.2f)\t", 
-                loop_amplitude.re, loop_amplitude.im);
-                show_versor(loop_versor);
-                printf("\t\tidx = %7d\n", get_index_from_versor(loop_versor, b));
         }
 }
