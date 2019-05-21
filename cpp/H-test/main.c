@@ -3,6 +3,7 @@
 #include "../state.h"
 #include "../hamiltonian.h"
 #include <stdio.h>
+#include <math.h>
 
 void choose_test_versor(basis b, parameters p);
 void present_braH(versor psi0, parameters pars, basis b);
@@ -28,7 +29,14 @@ int main(int argc, char *argv[])
         b.n1, b.n3, b.n5, b.j1, b.j2);
 
     // SrYb^+
-    const parameters pars = {261.f, 1.f, 4.75f, 503.7f, 1.4f, 0.16f};
+    // $ \omega_1 = \sqrt{3} 0.16MHz \approx 0.28 MHz $
+    // $ \omega_3 \approx 1.39 MHz $
+    // $ \omega_3 / \omega_1 \approx 5$
+    float omega_rho = 1.4f;
+    float omega_z = 0.16f;
+    float omega_1 = sqrt(3.0)*omega_z;
+    float omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
+    const parameters pars = {261.f, 1.f, 4.75f, 503.7f, omega_1, omega_3};
 
     while(1)
         choose_test_versor(b, pars);
@@ -75,9 +83,11 @@ void present_braH(versor psi0, parameters pars, basis b)
     state_init(&state0);
     state_add(&state0, psi0, (fcomplex){1.0f, 0.0f});
 
+    // apply the Hamiltonian and save the output bra state
     state sps = bra_H(&state0, pars);
-    printf("\n <psi0|H = \n");
 
+    // present the resut state
+    printf("\n <psi0|H = \n");
     versor loop_versor;
     fcomplex loop_amplitude;
     for(int l=0; l < sps.length; l++)
@@ -89,9 +99,9 @@ void present_braH(versor psi0, parameters pars, basis b)
             printf("+\t\tidx = %7d\n", get_index_from_versor(loop_versor, b));
     }
 
+    // present only the important part
     printf("\n But the physical versors (within truncation) give\n");
     printf(" <psi0|H = \n");
-
     for(int l=0; l < sps.length; l++)
     {
             loop_versor = state_get_versor(&sps, l);
@@ -104,6 +114,7 @@ void present_braH(versor psi0, parameters pars, basis b)
             printf("+\t\tidx = %7d\n", get_index_from_versor(loop_versor, b));
     }
 
+    // free memory
     state_free(&sps);
     state_free(&state0);
 }

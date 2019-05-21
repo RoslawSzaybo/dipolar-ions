@@ -11,7 +11,9 @@ void apply_harmonic_oscillator(state * input, state * output,
                 versor psi = input->kets[p];
                 fcomplex A = input->amplitudes[p];
 
-                // Harmonic oscillator terms
+                // Harmonic oscillator energy scale factors
+                // everything is in the units of 
+                // $\hbar \omega_1$
                 const float homega1 = 1.0;
                 const float homega3 = pars.omega_3/pars.omega_1;
                 const float homega5 = pars.omega_3/pars.omega_1;
@@ -43,39 +45,38 @@ void apply_harmonic_oscillator(state * input, state * output,
 }
 
 
-/*
+/* 
 $$
-\bra{output} = \bra{input} B(\hat{L}_1^2 + hat{L}_2^2 )
+\bra{output} = \bra{input} \frac{2\pi}{\hbar} B(\hat{L}_1^2 + hat{L}_2^2 )
 $$
 */
 void apply_rotational_kinetic_energy(state * input, state * output, 
                                         const parameters pars)
 {
-        // B is in units of MHz so in fact is $\nu$
-        // to get the factor $B= \frac{\hbar^2}{2I}$
-        // one has to multiply it by $h$. 
-        // 
-        // everything is in the units of $\hbar \omega_1$
-        // so dividing $\nu h$ by $\hbar \omega_1$ 
-        // one ends up with 2.pi*parsB/pars.omega_1
-        const float B1 = 2*M_PI*pars.B/pars.omega_1;
-        const float B2 = 2*M_PI*pars.B/pars.omega_1;
+    // The kinetic rotational energy of a state of angular quantum 
+    // number j is equal to 2\pi B \hbar j(j+1).
+    // 
+    // Everything is in the units of $\hbar \omega_1$
+    // after dividing the above by $\hbar \omega_1$ 
+    // one ends up with 2.pi*B/\omega_1
+    const float B1 = 2*M_PI*pars.B/pars.omega_1;
+    const float B2 = 2*M_PI*pars.B/pars.omega_1;
 
-        for (int p=0; p < input->length; p++)
-        {
-                versor psi = input->kets[p];
-                fcomplex A = input->amplitudes[p];
+    for (int p=0; p < input->length; p++)
+    {
+        versor psi = input->kets[p];
+        fcomplex A = input->amplitudes[p];
 
-                versor psi_L2_1 = psi;
-                float j1 = (float)(psi.j1);
-                float BJJ1 =  B1*j1*(j1+1.f);
-                state_add(output, psi_L2_1, fcomplex_times_float(&A, BJJ1));
+        versor psi_L2_1 = psi;
+        float j1 = (float)(psi.j1);
+        float BJJ1 =  B1*j1*(j1+1.f);
+        state_add(output, psi_L2_1, fcomplex_times_float(&A, BJJ1));
 
-                versor psi_L2_2 = psi;
-                float j2 = (float)(psi.j2);
-                float BJJ2 =  B2*j2*(j2+1.f);
-                state_add(output, psi_L2_2, fcomplex_times_float(&A, BJJ2));
-        }
+        versor psi_L2_2 = psi;
+        float j2 = (float)(psi.j2);
+        float BJJ2 =  B2*j2*(j2+1.f);
+        state_add(output, psi_L2_2, fcomplex_times_float(&A, BJJ2));
+    }
 }
 
 /*
@@ -215,7 +216,7 @@ void apply_dz1(state * input, state * output,
                         int idx_j = j+1;
                         int idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j,|j|} in the dz list
                         psi_dz1.j1 = j+1;
-                        state_add(output, psi_dz1, fcomplex_times_float(&A, dz[idx]));
+                        state_add(output, psi_dz1, fcomplex_times_float(&A, d*dz[idx]));
                 }
                 else if(m < j)
                 {
@@ -224,14 +225,14 @@ void apply_dz1(state * input, state * output,
                         int idx_j = j;
                         int idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j-1,|j-1|} in the dz list
                         idx = idx - (j-1) + m; // a trick I like which returns the \ket{j-1,|m|}
-                        state_add(output, psi_dz1, fcomplex_times_float(&A, dz[idx]));
+                        state_add(output, psi_dz1, fcomplex_times_float(&A, d*dz[idx]));
 
                         // go up with j
                         psi_dz1.j1 = j+1;
                         idx_j = j+1;
                         idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j,|j|}
                         idx = idx - j + m ; // \ket{j, |m|}
-                        state_add(output, psi_dz1, fcomplex_times_float(&A, dz[idx]));
+                        state_add(output, psi_dz1, fcomplex_times_float(&A, d*dz[idx]));
                 }
                 else
                         continue; // incorrect value of m;
@@ -282,7 +283,7 @@ void apply_dz2(state * input, state * output,
                         int idx_j = j+1;
                         int idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j,|j|} in the dz list
                         psi_dz2.j2 = j+1;
-                        state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
+                        state_add(output, psi_dz2, fcomplex_times_float(&A, d*dz[idx]));
                 }
                 else if(m < j)
                 {
@@ -295,14 +296,14 @@ void apply_dz2(state * input, state * output,
                         int idx = (idx_j*idx_j+idx_j)/2-1; 
                         // a trick I like. It returns the index of \ket{j-1,|m|}
                         idx = idx - (j-1) + m; 
-                        state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
+                        state_add(output, psi_dz2, fcomplex_times_float(&A, d*dz[idx]));
 
                         // go up with j
                         psi_dz2.j2 = j+1;
                         idx_j = j+1;
                         idx = (idx_j*idx_j+idx_j)/2-1; // the index of the element ket{j,|j|}
                         idx = idx - j + m ; // \ket{j, |m|}
-                        state_add(output, psi_dz2, fcomplex_times_float(&A, dz[idx]));
+                        state_add(output, psi_dz2, fcomplex_times_float(&A, d*dz[idx]));
                 }
                 else
                         continue; // incorrect value of m;
@@ -390,13 +391,13 @@ void apply_dy1(state * input, state * output,
 
                 int idx = get_dy_idx(j, m);
                 // I work with bra so there is one conjugation -> -i
-                state_add(output, psi_work, fcomplex_times_i_float(&A, -dy[idx]));
+                state_add(output, psi_work, fcomplex_times_i_float(&A, -d*dy[idx]));
 
                 // always add j+1, m+1;
                 // almost like in the previous case but I go to m+1
                 psi_work.m1=m+1;
                 idx += 1;
-                state_add(output, psi_work, fcomplex_times_i_float(&A, -dy[idx]));
+                state_add(output, psi_work, fcomplex_times_i_float(&A, -d*dy[idx]));
 
                 // sometimes j-1, m-1 is also included
                 if(m > -(j-1))
@@ -407,7 +408,7 @@ void apply_dy1(state * input, state * output,
                         idx = get_dy_idx(j-1,m-1)+1; // going to larger m so +1
                         // here there is a second conjugation as the 
                         // bracket goes in the other direction
-                        state_add(output, psi_work, fcomplex_times_i_float(&A, dy[idx]));
+                        state_add(output, psi_work, fcomplex_times_i_float(&A, d*dy[idx]));
                 }
 
                 // similarily, j-1, m+1 is also sometimes included
@@ -417,7 +418,7 @@ void apply_dy1(state * input, state * output,
                         psi_work.m1=m+1;
 
                         idx = get_dy_idx(j-1,m+1);
-                        state_add(output, psi_work, fcomplex_times_i_float(&A, dy[idx]));
+                        state_add(output, psi_work, fcomplex_times_i_float(&A, d*dy[idx]));
                 }
         }
 }
@@ -473,13 +474,13 @@ void apply_dy2(state * input, state * output,
                 psi_work.m2=m-1;
                 int idx = get_dy_idx(j, m);
                 // I work with bra so there is one conjugation -> -i
-                state_add(output, psi_work, fcomplex_times_i_float(&A, -dy[idx]));
+                state_add(output, psi_work, fcomplex_times_i_float(&A, -d*dy[idx]));
 
                 // always add j+1, m+1;
                 // almost like in the previous case but I go to m+1
                 psi_work.m2=m+1;
                 idx += 1;
-                state_add(output, psi_work, fcomplex_times_i_float(&A, -dy[idx]));
+                state_add(output, psi_work, fcomplex_times_i_float(&A, -d*dy[idx]));
 
                 // sometimes j-1, m-1 is also included
                 if(m > -(j-1))
@@ -490,7 +491,7 @@ void apply_dy2(state * input, state * output,
                         idx = get_dy_idx(j-1,m-1)+1;// going to larger m so +1
                         // here there is a second conjugation as the 
                         // bracket goes in the other direction
-                        state_add(output, psi_work, fcomplex_times_i_float(&A, dy[idx]));
+                        state_add(output, psi_work, fcomplex_times_i_float(&A, d*dy[idx]));
                 }
 
                 // similarily, j-1, m+1 is also sometimes included
@@ -500,7 +501,7 @@ void apply_dy2(state * input, state * output,
                         psi_work.m2=m+1;
 
                         idx = get_dy_idx(j-1,m+1); 
-                        state_add(output, psi_work, fcomplex_times_i_float(&A, dy[idx]));
+                        state_add(output, psi_work, fcomplex_times_i_float(&A, d*dy[idx]));
                 }
         }
 }
@@ -555,13 +556,13 @@ void apply_dx1(state * input, state * output,
                 psi_work.j1=j+1;
                 psi_work.m1=m-1;
                 int idx = get_dy_idx(j, m);
-                state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+                state_add(output, psi_work, fcomplex_times_float(&A, d*dx[idx]));
 
                 // always add j+1, m+1 
                 psi_work.j1=j+1;
                 psi_work.m1=m+1;
                 idx += 1;
-                state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+                state_add(output, psi_work, fcomplex_times_float(&A, d*dx[idx]));
 
                 // j-1,m-1
                 if(m > -(j-1))
@@ -569,7 +570,7 @@ void apply_dx1(state * input, state * output,
                         idx = get_dy_idx(j-1,m-1)+1;
                         psi_work.j1=j-1;
                         psi_work.m1=m-1;
-                        state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+                        state_add(output, psi_work, fcomplex_times_float(&A, d*dx[idx]));
                 }
                 // j-1,m+1
                 if(m < j-1)
@@ -577,7 +578,7 @@ void apply_dx1(state * input, state * output,
                         idx = get_dy_idx(j-1,m+1);
                         psi_work.j1=j-1;
                         psi_work.m1=m+1;
-                        state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+                        state_add(output, psi_work, fcomplex_times_float(&A, d*dx[idx]));
                 }
         }
 }
@@ -631,13 +632,13 @@ void apply_dx2(state * input, state * output,
                 psi_work.j2=j+1;
                 psi_work.m2=m-1;
                 int idx = get_dy_idx(j, m);
-                state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+                state_add(output, psi_work, fcomplex_times_float(&A, d*dx[idx]));
 
                 // always add j+1, m+1 
                 psi_work.j2=j+1;
                 psi_work.m2=m+1;
                 idx += 1;
-                state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+                state_add(output, psi_work, fcomplex_times_float(&A, d*dx[idx]));
 
                 // j-1,m-1
                 if(m > -(j-1))
@@ -645,7 +646,7 @@ void apply_dx2(state * input, state * output,
                         idx = get_dy_idx(j-1,m-1)+1;
                         psi_work.j2=j-1;
                         psi_work.m2=m-1;
-                        state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+                        state_add(output, psi_work, fcomplex_times_float(&A, d*dx[idx]));
                 }
                 // j-1,m+1
                 if(m < j-1)
@@ -653,7 +654,7 @@ void apply_dx2(state * input, state * output,
                         idx = get_dy_idx(j-1,m+1);
                         psi_work.j2=j-1;
                         psi_work.m2=m+1;
-                        state_add(output, psi_work, fcomplex_times_float(&A, dx[idx]));
+                        state_add(output, psi_work, fcomplex_times_float(&A, d*dx[idx]));
                 }
         }
 }
@@ -722,7 +723,6 @@ void apply_dz1_m_dz2(state *input, state *output,
         state_free(&work_state);
 }
 
-
 /*
 $$
 \bra{output} 
@@ -730,11 +730,13 @@ $$
 \bra{input} \frac{q}{4\pi\epsilon_0} \frac{hat{d}_1^z -\hat{d}_2^z}{|2z_0^2}
 $$
 
-the factor "reduces" to
+the factor divided by \hbar\omega_1 "reduces" to
+$
 (\omega_1/q)^{1/3}
-(4m/3)^{2/3}
-(d/4\hbar)
-(1/4\pi\epsilon_0)^{1/3}
+(\frac{m}{6})^{2/3}
+(d/\hbar)
+(frac{1}{4\pi\epsilon_0})^{1/3}
+$
 
 pie := \frac{1}{4\pi\epsilon_0}
 = by def = \frac{\mu_0 c^2}{4\pi}
@@ -761,18 +763,15 @@ pie := \frac{1}{4\pi\epsilon_0}
 
 so the final formula for the prefactor
 which allows to use the units described in the main funcion
-gives to numeric value 
+gives a numeric value 
 $$
 100(1/(se)^(1/3))*
 8.155 * 10^6 s^{1/3} m/ (u^{2/3} e^{2/3} )
 0.20819*10^{-10}em*
-(1/4)*(4/3)^(2/3)
+(1/6)^(2/3)
 u^{2/3}
 =
 2.06*10^{-2}
-
-\approx
-0.186476 [m*e] * [\frac{s^{4/3}}{ m u^{2/3} e^{2/3} }]
 $$
 
 and the formula for the prefactor becomes
@@ -965,16 +964,22 @@ $$
 */
 state bra_H(state* psi, const parameters pars)
 {
-        state output_bra;
-        state_init(&output_bra);
+    state output_bra;
+    state_init(&output_bra);
 
-        apply_harmonic_oscillator(psi, &output_bra, pars);
-        apply_rotational_kinetic_energy(psi, &output_bra, pars);
-        apply_charge_dipole_zero(psi, &output_bra, pars);
-        apply_charge_dipole_first(psi, &output_bra, pars);
+    // quantised $T_tr + V_qq + V_trap$
+    //apply_harmonic_oscillator(psi, &output_bra, pars);
 
-        apply_dipole_dipole_zero(psi, &output_bra, pars);
-        return output_bra;
+    // quantised $T_rot$
+    //apply_rotational_kinetic_energy(psi, &output_bra, pars);
+
+    // quantised $V_{qd}$ in the zeroth order
+    apply_charge_dipole_zero(psi, &output_bra, pars);
+    //apply_charge_dipole_first(psi, &output_bra, pars);
+
+    //apply_dipole_dipole_zero(psi, &output_bra, pars);
+
+    return output_bra;
 }
 
 
@@ -1030,16 +1035,15 @@ void construct_Hamiltonian(fcomplex* a, const basis b, const parameters pars)
         for(long i = 0; i<basis_size*basis_size; i++)
                 a[i] = zero;
 
-        // scan through the matrix rows and replace all the non-zero elements
+        // scan through the matrix rows and insert all the non-zero elements
         for(int i = 0; i<basis_size; i++)
         {
-                // scan through rows
                 versor psi0 = get_versor_from_index(i, b);
                 state state0;
                 state_init(&state0);
                 state_add(&state0, psi0, (fcomplex){1.0f, 0.0f});
 
-                // act with H from the left
+                // act with H from the left on the bra of the state state0
                 state psiH = bra_H(&state0, pars);
 
                 versor loop_versor;
@@ -1047,19 +1051,20 @@ void construct_Hamiltonian(fcomplex* a, const basis b, const parameters pars)
                 for(int l=0; l<psiH.length; l++)
                 {
                         loop_versor = state_get_versor(&psiH, l);
-                        // not sure but I have already put reutrn NULL earlier
-                        /* do something like
-                        if(!loop_versor)
-                                continue;
-                        // or check it another way
-                        */
-
+                        // it could be that state_get_versor returns something
+                        // strange when &psiH[l] is strange.
+                        //
+                        // Here in an attempt to avoid versors which are 
+                        // out of the truncation or don't make sense like
+                        // |-23,1,1;1,0,1,0> (-23 doesn't make any sense)
                         // check if the versor is a valid versor
                         if(!valid_versor(loop_versor, b))
                                 continue;
 
                         int loc_idx = get_index_from_versor(loop_versor, b);
                         // check if it is above the diagonal
+                        // the input for cheev is a hermitian matrix 
+                        // so onnly the part below diagonal matters
                         /*
                         if( loc_idx < i )
                                 continue;
@@ -1067,10 +1072,6 @@ void construct_Hamiltonian(fcomplex* a, const basis b, const parameters pars)
 
                         // apply amplitude;
                         fcomplex amp = state_get_amplitude(&psiH, l);
-                        /* again
-                        if(!amp)
-                                continue;
-                        */
 
                         // add amplitudes
                         a[i*basis_size+loc_idx].re += amp.re;
