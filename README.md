@@ -34,7 +34,13 @@
 
 ### Selected moleules
 - MgH<sup>+</sup>
-q = 1e
-dipole = 3D (Journal of Physics B: AMO, vol 42, no 15 (2009) M. Aymar et al.)
-B = 180 GHz (9K) (New Journal of Physics 11 (2009) 055026)
 m = 25.3 u
+q = 1 e
+dipole = 3 D (Journal of Physics B: AMO, vol 42, no 15 (2009) M. Aymar et al.)
+B = 180 000 MHz (9K) (New Journal of Physics 11 (2009) 055026)
+
+- SrYb<sup>+</sup>
+mass="261.0" u
+charge="1.0" e
+dipole="4.745" D
+B="503.7" MHz
