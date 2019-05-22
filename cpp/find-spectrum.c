@@ -3,7 +3,6 @@
 
 #include "find-spectrum.h"
 
-
 /* Auxiliary routine: printing a matrix */
 void print_matrix( char* desc, int m, int n, fcomplex* a, int lda ) {
         int i, j;
@@ -55,9 +54,9 @@ void sort_print_eigenvector_summary( fcomplex* a, fcomplex* work, int* work_int,
         float abs_amp2;
         for ( i = 0; i < n; i++ )
         {
-                amp = a[ m+i*n ];
+                amp = a[ m*n + i ];
                 abs_amp2 = fcomplex_amplitude_sqr( &amp );
-                if ( abs_amp2 > lower_limit ) 
+                if (abs_amp2 > lower_limit) 
                 {
                         work[length].re = amp.re;
                         work[length].im = amp.im;

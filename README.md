@@ -31,3 +31,10 @@
 
 ### todo
 - implement `void state_clean()`
+
+### Selected moleules
+- MgH<sup>+</sup>
+q = 1e
+dipole = 3D (Journal of Physics B: AMO, vol 42, no 15 (2009) M. Aymar et al.)
+B = 180 GHz (9K) (New Journal of Physics 11 (2009) 055026)
+m = 25.3 u

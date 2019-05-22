@@ -968,16 +968,21 @@ state bra_H(state* psi, const parameters pars)
     state_init(&output_bra);
 
     // quantised $T_tr + V_qq + V_trap$
-    //apply_harmonic_oscillator(psi, &output_bra, pars);
+    if (pars.active_terms.normal_modes)
+        apply_harmonic_oscillator(psi, &output_bra, pars);
 
     // quantised $T_rot$
-    //apply_rotational_kinetic_energy(psi, &output_bra, pars);
+    if (pars.active_terms.T_rot)
+        apply_rotational_kinetic_energy(psi, &output_bra, pars);
 
     // quantised $V_{qd}$ in the zeroth order
-    apply_charge_dipole_zero(psi, &output_bra, pars);
-    //apply_charge_dipole_first(psi, &output_bra, pars);
-
-    //apply_dipole_dipole_zero(psi, &output_bra, pars);
+    if (pars.active_terms.Vqd_zeroth)
+        apply_charge_dipole_zero(psi, &output_bra, pars);
+    if (pars.active_terms.Vqd_first)
+        apply_charge_dipole_first(psi, &output_bra, pars);
+    
+    if (pars.active_terms.Vdd_zeroth)
+        apply_dipole_dipole_zero(psi, &output_bra, pars);
 
     return output_bra;
 }

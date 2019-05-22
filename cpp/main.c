@@ -22,14 +22,6 @@ reffered to as an exact diagonalisation.
 #include <stdlib.h>
 #include <stdio.h>
 
-/*
-MgH+
-q = 1e
-dipole = 3D (Journal of Physics B: AMO, vol 42, no 15 (2009) M. Aymar et al.)
-B = 180 GHz (9K) (New Journal of Physics 11 (2009) 055026)
-m = 25.3 u
-*/
-
 /* Main program */
 int main(int argc, char *argv[]) {
     /* Work with input */
@@ -43,6 +35,7 @@ int main(int argc, char *argv[]) {
     int n = get_basis_size(b);
 
     print_input(b, pars, argv);
+    print_active_terms_of_Hamiltonian(pars);
 
     /* Executable statements */
     /* allocate memory for the matrix */
@@ -84,7 +77,7 @@ int main(int argc, char *argv[]) {
     /* Print eigenvalues */
     print_rmatrix( "# 100 smallest eigenvalues", 1, (n<100)?n:100 , w, 1 );
     /* Print all eigenvalues */
-    // print_rmatrix( "# 100 smallest eigenvalues", 1, n, w, 1 );
+    print_rmatrix( "# 100 smallest eigenvalues", 1, n, w, 1 );
 
     /* Print states more explicitly */
     // Space required in  sorting

@@ -122,7 +122,15 @@ parameters get_system_parameters(char *argv[])
         float omega_1 = sqrt(3.f)*omega_z;
         float omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
 
-        return (parameters){mass, charge, dipole, B, omega_1, omega_3};
+        hamiltonian active_terms;
+        active_terms.normal_modes = 1;
+        active_terms.T_rot = 1;
+        active_terms.Vqd_first = 1;
+        active_terms.Vqd_zeroth = 1;
+        active_terms.Vdd_zeroth = 1;
+
+        return (parameters)
+        {mass, charge, dipole, B, omega_1, omega_3, active_terms};
 }
 
 void print_input(basis b, parameters p, char *argv[])
@@ -140,13 +148,25 @@ void print_input(basis b, parameters p, char *argv[])
         printf("#  omega_z:\t%10.2f MHz\n\n", omega_z);
         printf("# Basis truncation:\t|%d,%d,%d;%d,%d>\n", 
         b.n1, b.n3, b.n5, b.j1, b.j2);
-        // some 
+        // values which are functions of the input
         printf("# omega_1:\t%10.2f MHz\n", p.omega_1);
         printf("# omega_3/5:\t%10.2f MHz\n", p.omega_3);
         int basis_size = get_basis_size(b);
         printf("# Basis size:\t\t%d\n\n", basis_size);
 }
 
+void print_active_terms_of_Hamiltonian(parameters p)
+{
+        // Hamiltonian contains many terms
+        // not always all of them are active
+        printf("# Active terms of the Hamiltionian:\n");
+        printf("# \tNomal modes:\t%d\n", p.active_terms.normal_modes);
+        printf("# \tT_rot:      \t%d\n", p.active_terms.T_rot);
+        printf("# \tV_qd^{(0)}: \t%d\n", p.active_terms.Vqd_zeroth);
+        printf("# \tV_qd^{(1)}: \t%d\n", p.active_terms.Vqd_first);
+        printf("# \tV_dd^{(0)}: \t%d\n", p.active_terms.Vdd_zeroth);
+        printf("\n");
+}
 
 void *my_malloc(size_t size, const char *name)
 {

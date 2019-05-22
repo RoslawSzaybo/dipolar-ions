@@ -10,19 +10,23 @@ void present_braH(versor psi0, parameters pars, basis b);
 
 int main(int argc, char *argv[])
 {
-    int n1=20, n35=4, j=2;
+    int n1=20, 
+    n3 = 4,
+    n5 = 4, 
+    j1 = 2,
+    j2 = 2;
 
     if(argc > 1)
     {
         if(argc == 2 && argv[1][0] == '-' && argv[1][1] == 'b')
         {
             printf("Define basis truncation:\n");
-            scanf("%d %d %d", &n1, &n35, &j);
+            scanf("%d %d %d %d %d", &n1, &n3, &n5, &j1, &j2);
             printf("\n");
         }
     }
 
-    basis b = {n1, n35, n35, j, j};
+    basis b = {n1, n3, n5, j1, j2};
     check_basis_truncation(b);
 
     printf(" Basis truncation: |%d,%d,%d;%d,%d>\n", 
@@ -36,7 +40,14 @@ int main(int argc, char *argv[])
     float omega_z = 0.16f;
     float omega_1 = sqrt(3.0)*omega_z;
     float omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
-    const parameters pars = {261.f, 1.f, 4.75f, 503.7f, omega_1, omega_3};
+
+    hamiltonian activate = {0, 0, 0, 0, 0};
+    activate.normal_modes = 1;
+    
+    const parameters pars = 
+    {261.f, 1.f, 4.75f, 503.7f, omega_1, omega_3, activate};
+
+    print_active_terms_of_Hamiltonian(pars);
 
     while(1)
         choose_test_versor(b, pars);
