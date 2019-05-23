@@ -5,14 +5,16 @@
 #include <stdio.h>
 #include <math.h>
 
-void choose_test_versor(basis b, parameters p);
+void choose_test_versor_idx(basis b, parameters p);
+void choose_test_versor_quantum_numbers(basis b, parameters p);
 void present_braH(versor psi0, parameters pars, basis b);
+void present_versor_contribution(fcomplex amp, versor bra, basis b);
 
 int main(int argc, char *argv[])
 {
     int n1=20, 
-    n3 = 4,
-    n5 = 4, 
+    n3 = 20,
+    n5 = 20, 
     j1 = 2,
     j2 = 2;
 
@@ -41,22 +43,27 @@ int main(int argc, char *argv[])
     float omega_1 = sqrt(3.0)*omega_z;
     float omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
 
-    hamiltonian activate = {0, 0, 0, 0, 0};
+    hamiltonian activate;
     activate.normal_modes = 1;
+    activate.T_rot = 1;
+    activate.Vqd_zeroth = 1;
+    activate.Vqd_first = 1;
+    activate.Vdd_zeroth = 1;
     
     const parameters pars = 
-    {261.f, 1.f, 4.75f, 503.7f, omega_1, omega_3, activate};
+    //{261.f, 1.f, 4.75f, 503.7f, omega_1, omega_3, activate};
+    {100.f, 1.f, 1.f, 500.0f, omega_1, omega_3, activate};
 
     print_active_terms_of_Hamiltonian(pars);
 
     while(1)
-        choose_test_versor(b, pars);
+        choose_test_versor_quantum_numbers(b, pars);
 
     printf("\n");
     return 0;
 }
 
-void choose_test_versor(basis b, parameters p)
+void choose_test_versor_idx(basis b, parameters p)
 {
     int versor_idx;
     int basis_size = get_basis_size(b);
@@ -86,6 +93,39 @@ void choose_test_versor(basis b, parameters p)
 }
 
 
+/*
+Select the initial state (one versor) by exclicitly listing 
+the quantum numbers of the state.
+*/
+void choose_test_versor_quantum_numbers(basis b, parameters p)
+{
+    versor psi0;
+
+    printf("Plise give the numbers of the test state: ");
+    scanf("%d %d %d %d %d %d %d", &psi0.n1, &psi0.n3, &psi0.n5,
+    &psi0.j1, &psi0.m1, &psi0.j2, &psi0.m2);
+
+    while( !valid_versor(psi0, b) )
+    {
+        printf("Incorrect versor.\n");
+        printf("Plise give the numbers of the test state: ");
+        scanf("%d %d %d %d %d %d %d", &psi0.n1, &psi0.n3, &psi0.n5,
+        &psi0.j1, &psi0.m1, &psi0.j2, &psi0.m2);
+    }
+    
+    printf("The input versor is: ");
+    show_versor(psi0);
+    printf("\t\t");
+    printf("index = %d (sanity check)", get_index_from_versor(psi0, b));
+    printf("\n");
+
+    // acts from left with Hamiltonian on the bra `psi0`
+    // prints the result
+    present_braH(psi0, p, b);
+
+    printf("\n");
+}
+
 void present_braH(versor psi0, parameters pars, basis b)
 {
     // initialisation of the `state` structure 
@@ -103,11 +143,9 @@ void present_braH(versor psi0, parameters pars, basis b)
     fcomplex loop_amplitude;
     for(int l=0; l < sps.length; l++)
     {
-            loop_versor = state_get_versor(&sps, l);
-            loop_amplitude = state_get_amplitude(&sps, l);
-            printf("\t(%8.2f,%8.2f)", loop_amplitude.re, loop_amplitude.im);
-            show_bra_versor(loop_versor);
-            printf("+\t\tidx = %7d\n", get_index_from_versor(loop_versor, b));
+        loop_versor = state_get_versor(&sps, l);
+        loop_amplitude = state_get_amplitude(&sps, l);
+        present_versor_contribution(loop_amplitude, loop_versor, b);
     }
 
     // present only the important part
@@ -115,17 +153,24 @@ void present_braH(versor psi0, parameters pars, basis b)
     printf(" <psi0|H = \n");
     for(int l=0; l < sps.length; l++)
     {
-            loop_versor = state_get_versor(&sps, l);
-            loop_amplitude = state_get_amplitude(&sps, l);
-            if(!valid_versor(loop_versor, b))
-                    continue;
+        loop_versor = state_get_versor(&sps, l);
+        loop_amplitude = state_get_amplitude(&sps, l);
+        if(!valid_versor(loop_versor, b))
+            continue;
 
-            printf("\t(%8.2f,%8.2f)", loop_amplitude.re, loop_amplitude.im);
-            show_bra_versor(loop_versor);
-            printf("+\t\tidx = %7d\n", get_index_from_versor(loop_versor, b));
+        present_versor_contribution(loop_amplitude, loop_versor, b);
     }
 
     // free memory
     state_free(&sps);
     state_free(&state0);
+}
+
+void present_versor_contribution(fcomplex amp, versor bra, basis b)
+{
+    printf("\t(%14.11f,%14.11f)", amp.re, amp.im);
+    show_bra_versor(bra);
+    printf("+\t\t");
+    printf("idx = %7d", get_index_from_versor(bra, b));
+    printf("\n");
 }
