@@ -63,7 +63,18 @@ int jm_jump(int j, int m)
         return jump;
 }
 
-/* The product basis is undersood in the following way
+/* 
+We work in a product basis
+$$
+\ket{\psi} = \ket{n1}\ket{n3}\ket{n5}\ket{j1,m1}\ket{j2,m2}.
+$$
+This basis is sorted, so that to each versor there corresponds 
+an index $idx$. The ordering is possible only thanks to the basis 
+is truncated i.e. $n1 < N1, \ldots, j1 <= J1, \ldots, m2 \le M2$.
+This function returns the index of a given set of quantum number 
+and a truncation.
+
+The product basis is undersood in the following way
 $$
 \ket{\psi} = \ket{n1}\ket{n3}\ket{n5}\ket{j1,m1}\ket{j2,m2}
 $$
@@ -91,13 +102,21 @@ int get_index_from_versor(versor psi, const basis b)
         return idx;
 }
 
-/* The two functions defined below serve as a supporting functions for
-the get_versor_from_index function.  
-They output respectively `j` and `m` quantum numbers from the versor
-index `idx`.
-All versors are ordered (indexed):
+/*
+* Returns $j$ or $m$ quantum number of a versor $\ket{j,m}$
+* which is in the position `idx` on a list of all
+* $\ket{j,m}$. The list is sorted so that $j$ 
+* is non-decreasing, and within the same $j$,
+* $m$ increases: $\ket{0,0}, \ket{1,-1},
+* \ket{1,0}, \ket{1,1}, \ket{2,-2}, \ldots$.
+*
+The two functions defined below serve as a supporting 
+functions for the get_versor_from_index function. 
+They output respectively `j` and `m` quantum numbers from 
+the versor of an index `idx`. All versors are ordered 
+(indexed):
 - their `j` number don't decrease, 
-- within the same `j`, `m` numbers are increasing.
+- within the same `j`, `m` numbers increase.
 It is a unique mapping, and here the maps 
 from `idx` to `j,m` are implemented. */
 int getj(int idx)
