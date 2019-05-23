@@ -86,13 +86,13 @@ void sort_print_eigenvector_summary( fcomplex* a, fcomplex* work, int* work_int,
 
 void sort_fcomplex(fcomplex* data, int* indices, int length)
 {
-        int sorted;
+        int sorted = 0;
         int i;
         float amp0;
         float amp1;
         fcomplex temp_fc;
         int temp_int;
-        while( 1 ) 
+        while ( !sorted ) 
         {
                 sorted = 1;
                 amp0  =  fcomplex_amplitude_sqr( data );
@@ -118,13 +118,10 @@ void sort_fcomplex(fcomplex* data, int* indices, int length)
                         }
                         else
                         {
-                                // prepare amp0 for the next run of the loop
+                                // prepare amp0 to compare it with 
+                                // the next element on the list
                                 amp0 = amp1;
                         }
-                }
-                if (sorted == 1)
-                {
-                        break;
                 }
         }
 }

@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
     /* Print eigenvalues */
     print_rmatrix( "# 100 smallest eigenvalues", 1, (n<100)?n:100 , w, 1 );
     /* Print all eigenvalues */
-    print_rmatrix( "# 100 smallest eigenvalues", 1, n, w, 1 );
+    // print_rmatrix( "# 100 smallest eigenvalues", 1, n, w, 1 );
 
     /* Print states more explicitly */
     // Space required in  sorting
