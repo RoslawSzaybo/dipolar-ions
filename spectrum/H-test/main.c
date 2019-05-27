@@ -101,14 +101,14 @@ void choose_test_versor_quantum_numbers(basis b, parameters p)
 {
     versor psi0;
 
-    printf("Plise give the numbers of the test state: ");
+    printf("Please give the numbers of the test state: ");
     scanf("%d %d %d %d %d %d %d", &psi0.n1, &psi0.n3, &psi0.n5,
     &psi0.j1, &psi0.m1, &psi0.j2, &psi0.m2);
 
     while( !valid_versor(psi0, b) )
     {
         printf("Incorrect versor.\n");
-        printf("Plise give the numbers of the test state: ");
+        printf("Please give the numbers of the test state: ");
         scanf("%d %d %d %d %d %d %d", &psi0.n1, &psi0.n3, &psi0.n5,
         &psi0.j1, &psi0.m1, &psi0.j2, &psi0.m2);
     }
