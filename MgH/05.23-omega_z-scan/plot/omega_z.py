@@ -7,6 +7,7 @@ from os import listdir
 from os.path import isfile, join
 from label_lines import *
 import numpy as np
+from os.path import expanduser
 
 # =============================================================================
 # Universal set of functions which serve to read the program oputput and 
@@ -174,9 +175,12 @@ def show_one_energy_level_change_together(dataset, lvl=10):
 # Main
 # =============================================================================
 def main():
-    path = "/home/pawel/ions/MgH/05.08-omega_z-scan/"
-    omegas = ["0.01", "0.02", "0.04", "0.16", "0.18", "0.2"]
-    filenames = ['omega_z-'+str(o)+'.out' for o in omegas]
+    home = expanduser("~")
+    path = home+"/ions/MgH/05.23-omega_z-scan/"
+    omegas = ["0.01", "0.02", "0.03", "0.04", "0.05", "0.06", "0.07", "0.08", 
+              "0.09", "0.10", "0.11", "0.12", "0.13", "0.14", "0.15", "0.16", 
+              "0.17", "0.18", "0.19", "0.20"]
+    filenames = ['MgH-omega_z-'+str(o)+'.out' for o in omegas]
     dataset = get_dataset(filenames, path)
     dataset.sort(key=get_dipole)
 #    show_spectrum(dataset)

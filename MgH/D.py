@@ -5,9 +5,8 @@ Plot of a spectrum of two charged dipoles.
 import matplotlib.pyplot as plt
 from os import listdir
 from os.path import isfile, join
-from os.path import expanduser
-from label_lines import *
 import numpy as np
+
 
 # =============================================================================
 # Universal set of functions which serve to read the program oputput and 
@@ -28,15 +27,14 @@ def get_basis_truncation(file):
             content = line.split()
             if content[1] == 'Basis' and content[2] == 'truncation:':
                 file.seek(0)
-                # content[3] = "|n1,n3,n5;j1,j2>"
+                # content[3] = "|n1,n3,n5,j1,j2>"
                 data = content[3][1:-1]
                 data = data.split(',')
                 truncation['n1'] =  int(data[0])
                 truncation['n3'] =  int(data[1])
-                subdata = data[2].split(';')
-                truncation['n5'] =  int(subdata[0])
-                truncation['j1'] = int(subdata[1])
-                truncation['j2'] = int(data[3])
+                truncation['n5'] =  int(data[2])
+                truncation['j1'] = int(data[3])
+                truncation['j2'] = int(data[4])
                 return truncation
 
 def get_descriptors(f):
@@ -110,81 +108,93 @@ def get_truncation_string(dataset):
     n1 = truncation['n1']
     n3 = truncation['n3']
     j1 = truncation['j1']
-    out_string = f"$n_1$={n1}"+", $n_{3/5}$ = "+f"{n3}, "\
-    "$j_{1/2}$"+f"={j1}"
+    out_string = "$n_{1}$="+f"{n1}"
+    out_string += ", $n_{3/5}$="+f"{n3}"
+    out_string += ", $j_{1/2}$"+f"={j1}"
     return out_string
 
 def show_spectrum(dataset, m=100, n=0):    
     for data in dataset:
-        omega = get_omega_z(data)
-        omega_1 = np.sqrt(3)*omega
-        # collect spectrum, avoid reaching for elements that are not accesible
-        if m > len(data[1]):
-            m = len(data[1])
-        if n<0 or n >= m:
-            print("Incorrect n - No of the smallest eigenvalue")
-            n = m-1
-        spectrum = [ d*omega_1 for d in data[1][n:m] ] # in MHz
+        D = get_dipole(data)
+        spectrum = data[1][n:m]
         # present result
-        plt.scatter([omega]*(m-n), spectrum, color='k')
+        plt.scatter([D]*(m-n), spectrum, color='k')
         plt.title(f"Spectrum: eigenvalues {n} through {m-1}")
     return 0
 
-# Presents how energy of the lvl-th energy level changes with one of the system
-# parameters
-def show_energy_level(dataset, lvl=0):  
-    domain = [] # omega_z
-    spectrum = [] # energy
+def show_one_energy_level(dataset, lvl=0):  
+    domain = [] # dipole moments
+    spectrum = [] # system energy
+    if lvl > len(dataset[0][1]) or lvl < 0:
+        print("Incorrect energy level.\n")
+        exit(0)
 
     for data in dataset:
-        omega_z = get_omega_z(data)
-        domain += [ omega_z ]
+        domain += [ get_dipole(data) ]
         # the selected energy
-        # omega_1 = omega_z * sqrt(3)
-        # program outpus in omega_1
-        spectrum += [ data[1][lvl]*omega_z*np.sqrt(3) ] # in MHz
+        spectrum += [ data[1][lvl] ]
+    
     # present result
     plt.scatter(domain, spectrum, color='k')
     plt.title(f"Energy level {lvl}")
     return 0
 
-# presents  energies of the first `lvl` excited states
-def show_one_energy_level_change_together(dataset, lvl=10):
-    domain = [] # omega_z
-    spectra = [] # energy
-    omega_rho = get_omega_rho(dataset[0])
-    for data in dataset:
-        omega_z = get_omega_z(data)
-        domain += [ omega_z ]
-        # omega_1 = omega_z * sqrt(3)
-        # program outpus in omega_1
-        spectra += [ [data[1][i]*omega_z*np.sqrt(3)  for i in range(lvl)] ]
+def show_one_energy_level_change(dataset, lvl=0):
+    domain = [] # dipole moments
+    spectrum = [] # system energy
     
-    # pic
+    energy0 = dataset[0][1][lvl]
+    for data in dataset:
+        domain += [ get_dipole(data) ]
+        # the selected energy
+        spectrum += [ data[1][lvl] - energy0 ]
+    
+    # present result
+    plt.scatter(domain, spectrum, color='k')
+    plt.title(f"Energy level No {lvl}, relative change")
+    plt.xlabel("$d$ (D)")
+    plt.ylabel("$E_{lvl} - E_0$ ($\hbar \omega_1$)")
+    return 0
+
+def show_one_energy_level_change_together(dataset, lvl=10):
+    domain = [] # dipole moments
+    spectra = [] # system energy
+
+    energy0 = dataset[0][1][0:lvl]
+    for data in dataset:
+        domain += [ get_dipole(data) ]
+        spectra += [ [data[1][i] - energy0[i] for i in range(lvl)] ]
+
+    # present result
     for i in range(lvl):
-        plt.plot(domain, [ sp[i] for sp in spectra ], label=f"{i}" )
-    plt.title("SrYb$^+$ spectrum as a function of $\omega_z$\n"\
-              f"$\omega_\\rho$= {omega_rho}MHz, "\
+        plt.scatter(domain[1:], [ sp[i] for sp in spectra[1:] ], label=f"{i}" )
+
+    omega_rho = get_omega_rho(dataset[0])
+    omega_z = get_omega_z(dataset[0])
+
+    plt.title("SrYb$^+$-alike spectrum\n"\
+              f"$\omega_\\rho$={omega_rho}MHz, $\omega_z$={omega_z} MHz,"\
               "truncation: "+get_truncation_string(dataset))
-    plt.xlabel("$\omega_z$ (MHz)")
-    plt.ylabel("$E$ (MHz)")
-    labelLines(plt.gca().get_lines(),zorder=2.5)
+
+    plt.legend()
+    plt.xlabel("Dipole moment, $d$ (D)")
+    plt.ylabel("$E_{lvl} - E_0$ ($\hbar \omega_0$)")
     return 0
 
 # =============================================================================
 # Main
 # =============================================================================
 def main():
-    home = expanduser("~")
-    path = home+"/ions/SrYb/05.23-omega_z-scan/"
-    omegas = ["0.01", "0.02", "0.04", "0.06", "0.08", "0.1", "0.12", "0.14", 
-              "0.16", "0.18", "0.2"]
-    filenames = ['SrYb_w_z-'+str(o)+'.out' for o in omegas]
+    path = "/home/pawel/ions/MgH/05.03-dipole-scan/"
+    ds = np.arange(11)*4/10.
+    filenames = [ f"{d:.1f}D_dipole.out" for d in ds ]
+
     dataset = get_dataset(filenames, path)
     dataset.sort(key=get_dipole)
 #    show_spectrum(dataset)
-#    show_energy_level(dataset, 1)
-    show_one_energy_level_change_together(dataset, 11)
+#    show_one_energy_level(dataset, 0)
+#    show_one_energy_level_change(dataset, 4)
+    show_one_energy_level_change_together(dataset, 6)
     
     return 0
     

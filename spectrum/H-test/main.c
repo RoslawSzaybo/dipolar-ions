@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
     activate.Vdd_zeroth = 1;
     
     const parameters pars = 
-    //{261.f, 1.f, 4.75f, 503.7f, omega_1, omega_3, activate};
-    {100.f, 1.f, 1.f, 500.0f, omega_1, omega_3, activate};
+    // MgH^+
+    {25.f, 1.f, 4.745f, 503.7f, omega_1, omega_3, activate};
 
     print_active_terms_of_Hamiltonian(pars);
 
