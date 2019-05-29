@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
     /* Print states more explicitly */
     // Space required in  sorting
     int *work_int = my_malloc(sizeof(int)*n, "work_int");
-    // 25 is the number of states which will be printed
+    // 50 is the number of states which will be printed
     sort_print_lower_spectrum(a, n, b, 25, work, work_int);
 
     /* Free workspace - part II */

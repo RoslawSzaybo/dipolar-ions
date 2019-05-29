@@ -4,7 +4,8 @@ Plot of a spectrum of two charged dipoles.
 """
 import matplotlib.pyplot as plt
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, expanduser
+from label_lines import *
 import numpy as np
 
 
@@ -109,93 +110,73 @@ def get_truncation_string(dataset):
     truncation = dataset[0][0]['basis_truncation']
     n3 = truncation['n3']
     j1 = truncation['j1']
-    out_string = f"$n_3$/$n_5$ = {n3}, $j_1$/$j_2$ = {j1}"
+    out_string = "$n_{3/5}= $"+f"{n3}"+", $j_{1/2} = $"+f"{j1}"
     return out_string
 
-def show_spectrum(dataset, m=100, n=0):    
-    for data in dataset:
-        D = get_dipole(data)
-        spectrum = data[1][n:m]
-        # present result
-        plt.scatter([D]*(m-n), spectrum, color='k')
-        plt.title(f"Spectrum: eigenvalues {n} through {m-1}")
-    return 0
-
-def show_one_energy_level(dataset, lvl=0):  
-    domain = [] # dipole moments
-    spectrum = [] # system energy
-    if lvl > len(dataset[0][1]) or lvl < 0:
-        print("Incorrect energy level.\n")
-        exit(0)
-
-    for data in dataset:
-        domain += [ get_dipole(data) ]
-        # the selected energy
-        spectrum += [ data[1][lvl] ]
-    
-    # present result
-    plt.scatter(domain, spectrum, color='k')
-    plt.title(f"Energy level {lvl}")
-    return 0
-
-def show_one_energy_level_change(dataset, lvl=0):
-    domain = [] # dipole moments
-    spectrum = [] # system energy
-    
-    energy0 = dataset[0][1][lvl]
-    for data in dataset:
-        domain += [ get_dipole(data) ]
-        # the selected energy
-        spectrum += [ data[1][lvl] - energy0 ]
-    
-    # present result
-    plt.scatter(domain, spectrum, color='k')
-    plt.title(f"Energy level No {lvl}, relative change")
-    plt.xlabel("$d$ (D)")
-    plt.ylabel("$E_{lvl} - E_0$ ($\hbar \omega_1$)")
-    return 0
-
-def show_one_energy_level_change_together(dataset, lvl=10):
+def show_one_energy_level_change_together(dataset, lvl=10, start = 0):
     domain = [] # dipole moments
     spectra = [] # system energy
 
     energy0 = dataset[0][1][0:lvl]
     for data in dataset:
         domain += [ get_dipole(data) ]
-        spectra += [ [data[1][i] - energy0[i] for i in range(lvl)] ]
+        spectra += [ [data[1][i] - energy0[i] for i in range(start, lvl)] ]
 
     # present result
-    for i in range(lvl):
-        plt.scatter(domain[1:], [ sp[i] for sp in spectra[1:] ], label=f"{i}" )
+    for i in range(start, lvl):
+        plt.plot(domain, [ sp[i-start] for sp in spectra ], label=f"{i}" )
 
     omega_rho = get_omega_rho(dataset[0])
     omega_z = get_omega_z(dataset[0])
 
-    plt.title("SrYb$^+$-alike spectrum\n"\
-              f"$\omega_\\rho$={omega_rho}MHz, $\omega_z$={omega_z} MHz,"\
+    plt.title("Change in the $i$th level energy of a SrYb$^+$-alike system\n"\
+              f"$\omega_\\rho$={omega_rho} MHz, $\omega_z$={omega_z} MHz,"\
               "truncation: "+get_truncation_string(dataset))
-
-    plt.legend()
     plt.xlabel("Dipole moment, $d$ (D)")
     plt.ylabel("$E_{lvl} - E_0$ ($\hbar \omega_0$)")
+    labelLines(plt.gca().get_lines(),zorder=2.5)
+    return 0
+
+def show_spectrum(dataset, lvl=10, start = 0):
+    domain = [] # dipole moments
+    spectra = [] # system energy
+    
+
+    for data in dataset:
+        domain += [ get_dipole(data) ]
+        spectra += [ [data[1][i] for i in range(start,lvl)] ]
+
+    # present result
+    for i in range(start,lvl):
+        plt.plot(domain, [ sp[i-start] for sp in spectra ], label=f"{i}" )
+
+#    plt.legend()
+    omega_rho = get_omega_rho(dataset[0])
+    omega_z = get_omega_z(dataset[0])
+
+    plt.title("Energy of the $i$th level a SrYb$^+$-alike system\n"\
+              f"$\omega_\\rho$={omega_rho} MHz, $\omega_z$={omega_z} MHz,"\
+              "truncation: "+get_truncation_string(dataset))
+    plt.xlabel("Dipole moment, $d$ (D)")
+    plt.ylabel("$E_{lvl} - E_0$ ($\hbar \omega_0$)")
+    labelLines(plt.gca().get_lines(),zorder=2.5)
     return 0
 
 # =============================================================================
 # Main
 # =============================================================================
 def main():
-    path = "/home/pawel/ions/SrYb/05.10-dipole-scan/"
-    filenames = ["0.000D.out","1.700D.out","1.725D.out","1.750D.out",\
-                 "1.775D.out","1.800D.out","1.825D.out","1.850D.out",\
-                 "1.900D.out"]
+    home = expanduser("~")
+    path = home+"/ions/SrYb/05.22-dipole-scan/"
+    Ds=["0.0", "1.0", "2.0", "3.0", "4.0", "4.745", "5.0", "6.0", "7.0"]
+    filenames = [ "D"+D+".out" for D in Ds ]
     dataset = get_dataset(filenames, path)
     dataset.sort(key=get_dipole)
-#    show_spectrum(dataset)
-#    show_one_energy_level(dataset, 0)
-#    show_one_energy_level_change(dataset, 4)
-    show_one_energy_level_change_together(dataset, 6)
-    
+#    show_one_energy_level(dataset,5)
+    show_one_energy_level_change_together(dataset, 26, 20)
+#    show_spectrum(dataset, 26, 20)
+
     return 0
-    
+
 if __name__ == '__main__':
     main()

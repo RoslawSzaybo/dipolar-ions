@@ -1,0 +1,18 @@
+Start of 0.0 czw, 23 maj 2019, 22:31:45 CEST
+End of 0.0   pią, 24 maj 2019, 00:28:09 CEST 1:57h
+Start of 1.0 pią, 24 maj 2019, 00:28:09 CEST
+End of 1.0   pią, 24 maj 2019, 05:37:09 CEST 5:08h
+Start of 2.0 pią, 24 maj 2019, 05:37:09 CEST
+End of 2.0   pią, 24 maj 2019, 10:45:14 CEST 5:08h
+Start of 3.0 pią, 24 maj 2019, 10:45:14 CEST
+End of 3.0   pią, 24 maj 2019, 15:53:36 CEST 5:08h
+Start of 4.0 pią, 24 maj 2019, 15:53:36 CEST
+End of 4.0   pią, 24 maj 2019, 21:02:34 CEST 5:09h
+Start of 4.745 pią, 24 maj 2019, 21:02:34 CEST
+End of 4.745   sob, 25 maj 2019, 02:10:37 CEST 5:08h
+Start of 5.0 sob, 25 maj 2019, 02:10:37 CEST
+End of 5.0   sob, 25 maj 2019, 07:20:28 CEST 5:10h
+Start of 6.0 sob, 25 maj 2019, 07:20:28 CEST
+End of 6.0   sob, 25 maj 2019, 13:00:12 CEST 5:40h
+Start of 7.0 sob, 25 maj 2019, 13:00:12 CEST
+End of 7.0   nie, 26 maj 2019, 00:08:46 CEST 11:08h

@@ -152,6 +152,7 @@ def show_energy_level(dataset, lvl=0):
 def show_one_energy_level_change_together(dataset, lvl=10):
     domain = [] # omega_z
     spectra = [] # energy
+    
     omega_rho = get_omega_rho(dataset[0])
     for data in dataset:
         omega_z = get_omega_z(data)
