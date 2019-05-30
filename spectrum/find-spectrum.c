@@ -48,7 +48,7 @@ void sort_print_lower_spectrum(fcomplex* a, int n, basis b, int m, fcomplex* wor
 void sort_print_eigenvector_summary( fcomplex* a, fcomplex* work, int* work_int, int n, basis b, int m )
 {
         // Preselection, the vectors which are of no importance will be neglected;
-        const float lower_limit = 1.0e-7f;
+        const float lower_limit = 1.0e-12f;
         int i, length=0;
         fcomplex amp;
         float abs_amp2;
@@ -76,7 +76,7 @@ void sort_print_eigenvector_summary( fcomplex* a, fcomplex* work, int* work_int,
                 if(i!=0)
                         printf("        ");
                 amp = work[i];
-                printf( "(%9.6f,%9.6f)", amp.re, amp.im );
+                printf( "(%10.7f,%10.7f)", amp.re, amp.im );
                 ket =  get_versor_from_index( work_int[i], b );
                 show_versor( ket );
                 printf( " +\n" );
