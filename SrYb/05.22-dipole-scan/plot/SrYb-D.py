@@ -2,12 +2,12 @@
 """
 Plot of a spectrum of two charged dipoles.
 """
-import matplotlib.pyplot as plt
-from os import listdir
-from os.path import isfile, join, expanduser
-from label_lines import *
 import numpy as np
-
+import matplotlib.pyplot as plt
+from os.path import expanduser
+import sys 
+sys.path.insert(0, expanduser('~')+'/ions/lib')
+from label_lines import *
 
 # =============================================================================
 # Universal set of functions which serve to read the program oputput and 
@@ -137,7 +137,7 @@ def show_one_energy_level_change_together(dataset, lvl=10, start = 0):
     labelLines(plt.gca().get_lines(),zorder=2.5)
     return 0
 
-def show_spectrum(dataset, lvl=10, start = 0):
+def show_spectrum(dataset, lvl=10, start = 0, fname='test.eps'):
     domain = [] # dipole moments
     spectra = [] # system energy
     
@@ -154,12 +154,14 @@ def show_spectrum(dataset, lvl=10, start = 0):
     omega_rho = get_omega_rho(dataset[0])
     omega_z = get_omega_z(dataset[0])
 
-    plt.title("Energy of the $i$th level a SrYb$^+$-alike system\n"\
+    plt.title("Energy of the $i$th level of a SrYb$^+$-alike system\n"\
               f"$\omega_\\rho$={omega_rho} MHz, $\omega_z$={omega_z} MHz,"\
               "truncation: "+get_truncation_string(dataset))
     plt.xlabel("Dipole moment, $d$ (D)")
-    plt.ylabel("$E_{lvl} - E_0$ ($\hbar \omega_0$)")
+    plt.ylabel("$E$ ($\hbar \omega_1$)")
     labelLines(plt.gca().get_lines(),zorder=2.5)
+    plt.savefig(fname, dpi=300, orientation='portrait', 
+                format='eps', transparent=True)
     return 0
 
 # =============================================================================
@@ -173,8 +175,8 @@ def main():
     dataset = get_dataset(filenames, path)
     dataset.sort(key=get_dipole)
 #    show_one_energy_level(dataset,5)
-    show_one_energy_level_change_together(dataset, 26, 20)
-#    show_spectrum(dataset, 26, 20)
+#    show_one_energy_level_change_together(dataset, 26, 20)
+    show_spectrum(dataset, 11, fname='SrYb(D)-first-11lvls.eps')
 
     return 0
 
