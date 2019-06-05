@@ -846,7 +846,7 @@ void apply_charge_dipole_first(state *input, state *output,
     state_times_float(&work_state, factor);
     loc_omega = 2.0/pow(pars.omega_1, 1.0/2.0);
     state_times_float(&work_state, loc_omega);
-    apply_a1_plus_a1dagger(&work_state, &sum_container, pars)
+    apply_a1_plus_a1dagger(&work_state, &sum_container, pars);
     state_free(&work_state);
 
     /* y-part */
