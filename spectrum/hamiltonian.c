@@ -805,7 +805,7 @@ $$
 \bra{input} 
 \frac{q}{4\pi\epsilon_0}
 \frac{1}{|2z_0|^3}
-(\frac{\hbar}{m})^(1/2)
+(\frac{\hbar}{2m})^(1/2)
 \begin{pmatrix}
 \omega_3^{-1/2}(a3 + a3^dagger)\\
 \omega_5^{-1/2}(a5 + a5^dagger)\\
@@ -823,13 +823,13 @@ $$
 }{
         |omega_i|^{1/2}|charge|
 }
-1.37689e-5;
+9.73608e-6;
 $$
 */
 void apply_charge_dipole_first(state *input, state *output,
                         const parameters pars)
 {
-    float factor = -1.37689e-5f; 
+    float factor = -9.73608e-6f;
     factor *= pars.omega_1/pars.charge;
     factor *= pow(pars.mass, 1.0/2.0);
 
@@ -846,7 +846,7 @@ void apply_charge_dipole_first(state *input, state *output,
     state_times_float(&work_state, factor);
     loc_omega = 2.0/pow(pars.omega_1, 1.0/2.0);
     state_times_float(&work_state, loc_omega);
-    apply_a1_plus_a1dagger(&work_state, &sum_container, pars);
+    apply_a1_plus_a1dagger(&work_state, &sum_container, pars)
     state_free(&work_state);
 
     /* y-part */
