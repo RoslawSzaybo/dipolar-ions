@@ -108,9 +108,12 @@ def get_n1_truncations(data):
 def get_truncation_string(dataset):
 #    I skip here n_1 as it is the variable of the model
     truncation = dataset[0][0]['basis_truncation']
+    n1 = truncation['n1']
     n3 = truncation['n3']
     j1 = truncation['j1']
-    out_string = "$n_{3/5}= $"+f"{n3}"+", $j_{1/2} = $"+f"{j1}"
+    out_string = "$n_1 = $"+f"{n1}"
+    out_string +=", $n_{3/5}= $"+f"{n3}"
+    out_string +=", $j_{1/2} = $"+f"{j1}"
     return out_string
 
 def show_one_energy_level_change_together(dataset, lvl=10, start = 0):
@@ -154,9 +157,11 @@ def show_spectrum(dataset, lvl=10, start = 0, fname='test.eps'):
     omega_rho = get_omega_rho(dataset[0])
     omega_z = get_omega_z(dataset[0])
 
-    plt.title("Energy of the $i$th level of a SrYb$^+$-alike system\n"\
-              f"$\omega_\\rho$={omega_rho} MHz, $\omega_z$={omega_z} MHz,"\
-              "truncation: "+get_truncation_string(dataset))
+#    plt.title("Energy of the $i$th level of a SrYb$^+$-alike system\n"\
+#              f"$\omega_\\rho$={omega_rho} MHz, $\omega_z$={omega_z} MHz,"\
+#              "truncation: "+get_truncation_string(dataset))
+    plt.title(f"$\omega_\\rho$={omega_rho} MHz, $\omega_z$={omega_z} MHz "\
+              "("+get_truncation_string(dataset)+")")
     plt.xlabel("Dipole moment, $d$ (D)")
     plt.ylabel("$E$ ($\hbar \omega_1$)")
     labelLines(plt.gca().get_lines(),zorder=2.5)
@@ -176,7 +181,7 @@ def main():
     dataset.sort(key=get_dipole)
 #    show_one_energy_level(dataset,5)
 #    show_one_energy_level_change_together(dataset, 26, 20)
-    show_spectrum(dataset, 11, fname='SrYb(D)-first-11lvls.eps')
+    show_spectrum(dataset, 11, fname='fig1.eps')
 
     return 0
 
