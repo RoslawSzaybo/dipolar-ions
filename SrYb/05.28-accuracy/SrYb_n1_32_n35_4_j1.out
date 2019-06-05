@@ -1,6 +1,0 @@
-p0968
- Error!
-  argc = 11
-  argc should be equal to 12
-This is how to execute the program:
-	$ /net/people/plgofemski/ions/SrYb/spectrum.05.23 n1 n3 n5 j1 j2 mass[u] charge[e] dipole[D] B[MHz] omega_rho[MHz] omega_z[MHz]
