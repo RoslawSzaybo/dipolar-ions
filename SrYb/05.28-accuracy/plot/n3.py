@@ -3,10 +3,12 @@
 Plot of a spectrum of two charged dipoles.
 """
 import matplotlib.pyplot as plt
-from os import listdir
-from os.path import isfile, join, expanduser
+from os.path import expanduser
 import numpy as np
 from matplotlib.ticker import MaxNLocator
+import sys
+sys.path.insert(0, expanduser('~')+'/ions/lib')
+from label_lines import *
 
 
 # =============================================================================
@@ -96,6 +98,9 @@ def get_dipole(data):
 def get_omega_z(data):
     return data[0]['omega_z']
 
+def get_omega_rho(data):
+    return data[0]['omega_rho']
+
 def get_n3_truncations(data):
     return data[0]['basis_truncation']['n3']
 
@@ -107,7 +112,13 @@ def get_truncation_string(dataset):
     truncation = dataset[0][0]['basis_truncation']
     n1 = truncation['n1']
     j1 = truncation['j1']
-    out_string = f"$n_3$/$n_5$ = {n1}, $j_1$/$j_2$ = {j1}"
+    out_string = f"$n_1$ = {n1}, $j_1$/$j_2$ = {j1}"
+    return out_string
+
+def get_parameters_string(dataset):
+    omega_z = get_omega_z(dataset[0])
+    omega_rho = get_omega_rho(dataset[0])
+    out_string = f"SrYb @ $\omega_z$ = {omega_z}MHz, $\omega_\\rho$ = {omega_rho}MHz"
     return out_string
 
 def show_spectrum(dataset, m=100, n=0):    
@@ -157,7 +168,7 @@ def show_one_energy_level_change(dataset, lvl=0):
     plt.scatter(ns, spectrum, color='k')
     plt.title(f"Energy level No {lvl}, relative change")
     plt.xlabel("$n_3$/$n_5$ truncation ")
-    plt.ylabel("$E_{lvl} - E_0$ ($\hbar \omega_0$)")
+    plt.ylabel("$E_{lvl} - E_0$ ($\hbar \omega_1$)")
     return 0
 
 def show_one_energy_level_change_together(dataset, lvl=10):
@@ -176,7 +187,29 @@ def show_one_energy_level_change_together(dataset, lvl=10):
               get_truncation_string(dataset))
     plt.legend()
     plt.xlabel("$n_3$ truncation")
-    plt.ylabel("$E_{lvl} - E_0$ ($\hbar \omega_0$)")
+    plt.ylabel("$E_{lvl} - E_0$ ($\hbar \omega_1$)")
+    return 0
+
+def show_one_energy_level_change_together_MHz(dataset, lvl=10):
+    ns = []
+    spectra = []
+    
+    energy0 = dataset[0][1][0:lvl]
+    for data in dataset:
+        ns += [ get_n3_truncations(data) ]
+        omegaz = get_omega_z(data)
+        omega1 = omegaz*np.sqrt(3)
+        spectra += [ [(data[1][i] - energy0[i])*omega1 for i in range(lvl)] ]
+    
+    # present result
+    for i in range(lvl):
+        plt.plot(ns, [ sp[i] for sp in spectra ], label=f"{i}" )
+    plt.title("Energy levels, relative changes\n"+
+              get_parameters_string(dataset)+
+              ", "+get_truncation_string(dataset))
+    plt.xlabel("$n_3$ truncation")
+    plt.ylabel("$(E_{lvl}(n_3) - E_{lvl}("+f"{ns[0]}"+")/\hbar$ (MHz)")
+    labelLines(plt.gca().get_lines(),zorder=2.5)
     return 0
 
 
@@ -193,7 +226,7 @@ def main():
 #    show_spectrum(dataset)
 #    show_one_energy_level(dataset, 0)
 #    show_one_energy_level_change(dataset, 4)
-    show_one_energy_level_change_together(dataset, 10)
+    show_one_energy_level_change_together_MHz(dataset, 10)
 
     return 0
     
