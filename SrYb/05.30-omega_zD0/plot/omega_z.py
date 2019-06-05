@@ -46,7 +46,7 @@ def get_descriptors(f, name):
     pack['dipole'] = get_value(f, 'dipole')
     pack['B'] = get_value(f, 'B')
     pack['omega_rho'] = get_value(f, 'omega_rho')
-    pack['omega_z'] = float(name[12:17])  
+    pack['omega_z'] = float(name[12:17])    
     pack['basis_truncation'] = get_basis_truncation(f)
     
     return pack
@@ -177,7 +177,7 @@ def show_one_energy_level_change_together(dataset, lvl=10):
 # =============================================================================
 def main():
     home = expanduser("~")
-    path = home+"/ions/SrYb/05.29-omega_z/"
+    path = home+"/ions/SrYb/05.30-omega_zD0/"
     omegas = ["0.120", "0.122", "0.124", "0.126", "0.128", "0.130", "0.132", 
               "0.134", "0.136", "0.138", "0.140", "0.142", "0.146", "0.148", 
               "0.150", "0.152", "0.154", "0.156", "0.158", "0.160"]
@@ -186,7 +186,7 @@ def main():
     dataset.sort(key=get_dipole)
 #    show_spectrum(dataset)
 #    show_energy_level(dataset, 1)
-    show_one_energy_level_change_together(dataset, 11)
+    show_one_energy_level_change_together(dataset, 13)
     
     return 0
     
