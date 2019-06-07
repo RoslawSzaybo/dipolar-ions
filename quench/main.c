@@ -9,76 +9,34 @@ versor choose_test_versor_quantum_numbers(basis b, parameters p);
 float get_dt();
 int get_no_of_steps();
 void state_print(state *psi);
-void print_limited_state(state *psi);
+void print_limited_state(state *psi, float threshold);
 void print_the_big_four(state *psi);
+parameters SrYb_parameters();
 
 int main(int argc, char *argv[])
 {
-    int n1=20, 
-    n3 = 20,
-    n5 = 20, 
-    j1 = 2,
-    j2 = 2;
-
-    if (argc > 1)
-    {
-        if (argc == 2 && argv[1][0] == '-' && argv[1][1] == 'b')
-        {
-            printf("Define basis truncation:\n");
-            scanf("%d %d %d %d %d", &n1, &n3, &n5, &j1, &j2);
-            printf("\n");
-        }
-    }
-
-    basis b = {n1, n3, n5, j1, j2};
-    check_basis_truncation(b);
-
-    printf(" Basis truncation: |%d,%d,%d;%d,%d>\n", 
-        b.n1, b.n3, b.n5, b.j1, b.j2);
-
-    // SrYb^+
-    // $ \omega_1 = \sqrt{3} 0.16MHz \approx 0.28 MHz $
-    // $ \omega_3 \approx 1.39 MHz $
-    // $ \omega_3 / \omega_1 \approx 5$
-    float omega_rho = 1.4f;
-    float omega_z = 0.16f;
-    float omega_1 = sqrt(3.0)*omega_z;
-    float omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
-
-    hamiltonian activate;
-    activate.normal_modes = 1;
-    activate.T_rot = 1;
-    activate.Vqd_zeroth = 1;
-    activate.Vqd_first = 1;
-    activate.Vdd_zeroth = 1;
-    
-    const parameters pars = 
-    // SrYb$^+$
-    {261.f, 1.f, 4.745f, 503.7f, omega_1, omega_3, activate};
-
-    print_active_terms_of_Hamiltonian(pars);
-
+    const parameters pars = SrYb_parameters();
     /* 
     versor psi0 = choose_test_versor_quantum_numbers(b, pars);
-    float time_step = get_dt();
+    float time_step_ns = get_dt();
     */
     versor psi0 = (versor){8, 3, 0, 0, 0, 0, 0};
-    float time_step = 100.f;
-    int steps = get_no_of_steps();
+    float time_step_ns = 100.f;
     float ns = 1e-9f;
-    float dt = time_step*ns;
+    int steps = get_no_of_steps();
+    float dt = time_step_ns*ns;
+    float print_threshold = 1e-12;
     float N2 = 0.f;
-    float threshold = 1e-20f;
+
+    printf("# Attention please!\n");
+    printf("#  All printed states below are in fact duals i.e. <psi|,"
+    " so if you want vectors i.e |psi> you have to complex conjugate amplitudes.\n");
 
     state bra;
     state braH;
     state_init(&bra);
     state_init(&braH);
     state_add(&bra, psi0, (fcomplex){1.f, 0.f});
-
-    printf("# Attention please!\n");
-    printf("#  All states below are if fact <psi|,"
-    " so if you want |ket> complex conjugate amplitudes.\n");
 
     printf("t = %f ns\n", 0.f);
     state_sort(&bra);
@@ -106,13 +64,34 @@ int main(int argc, char *argv[])
         printf("N^2 = %f\n", N2);
         // normalisation
         state_times_float(&bra, 1./sqrt(N2));
-        print_the_big_four(&bra);
+        print_limited_state(&bra, print_threshold);
     }
 
     state_free(&bra);
     state_free(&braH);
     return 0;
 }
+
+parameters SrYb_parameters()
+{
+    // SrYb^+
+    // $ \omega_1 = \sqrt{3} \omega_z 
+    // $ \omega_3 = \sqrt{omega_rho^2 - omega_z^2}$
+    float omega_rho = 1.4f;
+    float omega_z = 0.16f;
+    float omega_1 = sqrt(3.0)*omega_z;
+    float omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
+
+    hamiltonian activate;
+    activate.normal_modes = 1;
+    activate.T_rot = 1;
+    activate.Vqd_zeroth = 1;
+    activate.Vqd_first = 1;
+    activate.Vdd_zeroth = 1;
+    
+    return (parameters){261.f, 1.f, 4.745f, 503.7f, omega_1, omega_3, activate};
+}
+
 
 void state_print(state *psi)
 {
@@ -133,31 +112,40 @@ void state_print(state *psi)
     printf( "         ...\n" );
 }
 
-void print_limited_state(state *psi)
+/*  
+ * Print all the states of an amplitude larger than a threshold
+ */
+void print_limited_state(state *psi, float threshold)
 {
     printf("|psi> = ");
-    int i = 0;
     fcomplex amp;
     versor ket;
-    float total_amp2 = 0.0;
-    int cnt = 0;
+    float amp_modulus_2;
 
-    int print_more = 1;
-    
-    while (print_more)
+    int i=0;
+    for (;; i++)
     {
+        // we can not print more versors than 
+        // the number of versors available in the state
+        if ( i>= psi->length )
+            break;
+
+        // if the versors are too insignificant, we skip them
+        amp = psi->amplitudes[i];
+        amp_modulus_2 = fcomplex_amplitude_sqr(&amp);
+
+        if (amp_modulus_2 < threshold)
+            break;
+
+        // spectial formatng for the first line
         if (i!=0)
             printf("        ");
-        amp = psi->amplitudes[i];
+
+        // printing of a versors
         printf( "(%10.7f,%10.7f)", amp.re, amp.im );
         ket = psi->kets[i];
         show_versor( ket );
         printf( " +\n" );
-
-        cnt++;
-        total_amp2 += fcomplex_amplitude_sqr(&amp);
-        if ( (1.0f - total_amp2 < 1e-6f) || cnt > 20 )
-            print_more = 0;
     }
     printf( "         ...\n" );
 }
