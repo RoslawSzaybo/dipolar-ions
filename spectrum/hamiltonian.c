@@ -958,9 +958,8 @@ void apply_dipole_dipole_zero(state *input, state *output,
 }
 
 /*
-This function returns a BRA state (it's not a ket)
-which is a result of acting with bra called psi
-on the Hamiltonian.
+This function returns a BRA state (it's a dual of a ket)
+which is a result of acting with bra called psi on the Hamiltonian.
 $$
 \bra{return} = \bra{psi}\hat{H}
 $$

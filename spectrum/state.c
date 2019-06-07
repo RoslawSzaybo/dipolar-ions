@@ -37,6 +37,47 @@ int state_contains_versor(state *psi, const versor *ket)
     return 0;
 } 
 
+/*
+* Removes from the state an element which is stored 
+* in the local arrays of the state under the index idx.
+*/
+void state_rm(state *psi, const int idx)
+{
+    // indices of the local arrays of the states are
+    // non-negative integers and are no larger than
+    // the number of stored elements
+    if ( idx < 0 || idx >= psi->length )
+    {
+        printf("Error in state_rm(state *psi, %d).\n", idx);
+        printf("Requested index do not point to any element.\n");
+        exit(0);
+    }
+
+    // we shift all the vectors with index larger than idx 
+    // to a slot in the local array of in index smaller by one
+
+    // versors
+    int i = idx;
+    for(; i < psi->length-1; i++)
+    {
+        psi->kets[i] = psi->kets[i+1];
+    }
+
+    // amplitudes
+    i = idx;
+    for(; i < psi->length-1; i++)
+    {
+        psi->amplitudes[i] = psi->amplitudes[i+1];
+    }
+
+    // we forget about the last element
+    //psi->kets[psi->length-1] = NULL;
+    //psi->amplitudes[psi->length-1] = NULL;
+
+    // the number of stored elements decreased
+    psi->length--;
+}
+
 // returns the location of a versor `ket` on the list
 // of all member versors of the state `psi`
 // WARNING:
@@ -61,7 +102,6 @@ void state_add(state* psi, const versor ket, const fcomplex amplitude)
 {
     // the versor `ket` is already present in the state;
     // it is enough to sum amplitudes
-
     if ( state_contains_versor(psi, &ket) ) 
     {
         int loc = state_versor_location(psi, &ket);
@@ -83,7 +123,19 @@ void state_add(state* psi, const versor ket, const fcomplex amplitude)
         {
             psi->cap *= 2;
             psi->kets = (versor*)realloc(psi->kets, sizeof(versor)*psi->cap);
+            if(psi->kets == NULL)
+            {
+                printf("The state cannot fit into the memory.\n");
+                printf("The requested number of versors: %d\n", psi->cap);
+                exit(0);
+            }
             psi->amplitudes = (fcomplex*)realloc(psi->amplitudes, sizeof(fcomplex)*psi->cap);
+            if(psi->kets == NULL)
+            {
+                printf("The state cannot fit into the memory.\n");
+                printf("The requested number of versors: %d\n", psi->cap);
+                exit(0);
+            }
         }
         psi->kets[psi->length] = ket;
         psi->amplitudes[psi->length].re = amplitude.re;

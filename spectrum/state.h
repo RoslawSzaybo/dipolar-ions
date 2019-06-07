@@ -27,6 +27,7 @@ void state_init(state* psi);
 void state_free(state* psi);
 int state_cnt(state* psi);
 int state_versor_location(state *psi, const versor *ket);
+void state_rm(state *psi, const int idx);
 int state_contains_versor(state *psi, const versor *ket);
 void state_add(state* psi, versor ket, fcomplex amplitude);
 versor state_get_versor(state* psi, int idx);
