@@ -9,6 +9,8 @@ versor choose_test_versor_quantum_numbers(basis b, parameters p);
 float get_dt();
 int get_no_of_steps();
 void state_print(state *psi);
+void print_limited_state(state *psi);
+void print_the_big_four(state *psi);
 
 int main(int argc, char *argv[])
 {
@@ -18,9 +20,9 @@ int main(int argc, char *argv[])
     j1 = 2,
     j2 = 2;
 
-    if(argc > 1)
+    if (argc > 1)
     {
-        if(argc == 2 && argv[1][0] == '-' && argv[1][1] == 'b')
+        if (argc == 2 && argv[1][0] == '-' && argv[1][1] == 'b')
         {
             printf("Define basis truncation:\n");
             scanf("%d %d %d %d %d", &n1, &n3, &n5, &j1, &j2);
@@ -56,23 +58,59 @@ int main(int argc, char *argv[])
 
     print_active_terms_of_Hamiltonian(pars);
 
+    /* 
     versor psi0 = choose_test_versor_quantum_numbers(b, pars);
-    float dt = get_dt();
+    float time_step = get_dt();
+    */
+    versor psi0 = (versor){8, 3, 0, 0, 0, 0, 0};
+    float time_step = 100.f;
     int steps = get_no_of_steps();
+    float ns = 1e-9f;
+    float dt = time_step*ns;
+    float N2 = 0.f;
+    float threshold = 1e-20f;
 
+    state bra;
+    state braH;
+    state_init(&bra);
+    state_init(&braH);
+    state_add(&bra, psi0, (fcomplex){1.f, 0.f});
 
-    state psi;
-    state_init(&psi);
-    state_add(&psi, psi0, (fcomplex){1.f, 0.f});
+    printf("# Attention please!\n");
+    printf("#  All states below are if fact <psi|,"
+    " so if you want |ket> complex conjugate amplitudes.\n");
 
-    int i=0;
-    for(; i < steps; i++)
+    printf("t = %f ns\n", 0.f);
+    state_sort(&bra);
+    N2 = state_normalisation(&bra);
+    printf("N^2 = %f\n", N2);
+    state_times_float(&bra, 1./sqrt(N2));
+    state_print(&bra);
+
+    int i=1;
+    for (; i<steps; i++)
     {
-        printf("t = %f\n", (float)(i)*dt);
-        state_print(&psi);
+        braH = bra_H(&bra, pars);
+        // i\hbar \ket{psi} = H \ket{psi}
+        // bra{psi} = \frac{i}{\hbar}\bra{psi}H
+        // H is in unit \hbar \omega_1 so you have to multiply it 
+        // \bra{psi} = i \omega_1 bra_H()
+        state_times_i_float(&braH, dt*pars.omega_1); 
+        state_add_state(&bra, &braH);
+
+        printf("t = %f ns\t", (float)(i)*dt/ns);
+        state_sort(&bra);
+        state_keep_only_first_max_versors(&bra, 200);
+        printf("bra->length = %d\t", bra.length);
+        N2 = state_normalisation(&bra);
+        printf("N^2 = %f\n", N2);
+        // normalisation
+        state_times_float(&bra, 1./sqrt(N2));
+        print_the_big_four(&bra);
     }
 
-    state_free(&psi);
+    state_free(&bra);
+    state_free(&braH);
     return 0;
 }
 
@@ -85,6 +123,55 @@ void state_print(state *psi)
     for(; i < psi->length; i++)
     {
         if(i!=0)
+            printf("        ");
+        amp = psi->amplitudes[i];
+        printf( "(%10.7f,%10.7f)", amp.re, amp.im );
+        ket = psi->kets[i];
+        show_versor( ket );
+        printf( " +\n" );
+    }
+    printf( "         ...\n" );
+}
+
+void print_limited_state(state *psi)
+{
+    printf("|psi> = ");
+    int i = 0;
+    fcomplex amp;
+    versor ket;
+    float total_amp2 = 0.0;
+    int cnt = 0;
+
+    int print_more = 1;
+    
+    while (print_more)
+    {
+        if (i!=0)
+            printf("        ");
+        amp = psi->amplitudes[i];
+        printf( "(%10.7f,%10.7f)", amp.re, amp.im );
+        ket = psi->kets[i];
+        show_versor( ket );
+        printf( " +\n" );
+
+        cnt++;
+        total_amp2 += fcomplex_amplitude_sqr(&amp);
+        if ( (1.0f - total_amp2 < 1e-6f) || cnt > 20 )
+            print_more = 0;
+    }
+    printf( "         ...\n" );
+}
+
+void print_the_big_four(state *psi)
+{
+    printf("|psi> = ");
+    int i = 0;
+    fcomplex amp;
+    versor ket;
+
+    for (; i< 4; i++)
+    {
+        if (i!=0)
             printf("        ");
         amp = psi->amplitudes[i];
         printf( "(%10.7f,%10.7f)", amp.re, amp.im );

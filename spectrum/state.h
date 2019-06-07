@@ -26,15 +26,19 @@ typedef struct {
 void state_init(state* psi);
 void state_free(state* psi);
 int state_cnt(state* psi);
+float state_normalisation(state *psi);
+void state_sort(state *psi);
+int state_contains_versor(state *psi, const versor *ket);
 int state_versor_location(state *psi, const versor *ket);
 void state_rm(state *psi, const int idx);
-int state_contains_versor(state *psi, const versor *ket);
 void state_add(state* psi, versor ket, fcomplex amplitude);
 versor state_get_versor(state* psi, int idx);
 fcomplex state_get_amplitude(state* psi, int idx);
 void state_times_float(state * input, const float factor);
 void state_times_i_float(state * input, const float factor);
 void state_add_state(state * sum, const state * compound);
-void state_clean(state* psi, basis b);
+void state_clean_unphysical_versors(state *psi);
+void state_cut(state *psi, float threshold);
+void state_keep_only_first_max_versors(state *psi, int max);
 
 #endif // state_h

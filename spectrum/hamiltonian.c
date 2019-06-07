@@ -987,6 +987,8 @@ state bra_H(state* psi, const parameters pars)
     if (pars.active_terms.Vdd_zeroth)
         apply_dipole_dipole_zero(psi, &output_bra, pars);
 
+    state_clean_unphysical_versors(&output_bra);
+
     return output_bra;
 }
 

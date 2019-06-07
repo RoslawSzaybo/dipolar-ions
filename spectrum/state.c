@@ -23,6 +23,29 @@ int state_cnt(state *psi)
     return psi->length;
 }
 
+/*
+* computes a sum of all amplitudes square. This is known as the
+* normalisation factor. The normalisation factor should be equal
+* to unity in for all states that we consider here.
+*
+* If the normalisation facor is different from unity, then the state
+* sould be divided by the sqrt(state_normalisation).
+*/
+float state_normalisation(state *psi)
+{
+    float N2 = 0.f;
+
+    // we add first the small amplitudes
+    // we assume that the state is sorted i.e. 
+    // state_sort(&psi);
+    int i=psi->length-1;
+    for (;i>=0; i--)
+        N2 += fcomplex_amplitude_sqr(&psi->amplitudes[i]);
+
+    return N2;
+}
+
+
 // returns 1 when the state `psi` has as its member versor 
 // a versor exactly the same as `ket`
 int state_contains_versor(state *psi, const versor *ket)
@@ -36,6 +59,51 @@ int state_contains_versor(state *psi, const versor *ket)
     }
     return 0;
 } 
+
+/* 
+* Rearranges all of the versors and amplitudes stored in the local arrays 
+* of the state so that their amplitude don't decrease i.e.
+*  for each 0 <= i <= j < psi->length
+*  |psi->amplitudes[i]|^2 >= |psi->amplitudes[j]|^2
+*/
+void state_sort(state *psi)
+{
+    versor tmp_ket;
+    fcomplex tmp_amp;
+
+    // assume that the state is not sored
+    int is_sorted = 0;
+
+    int i;
+    float amp0, amp1;
+    while (!is_sorted)
+    {
+        // suppose that after some changes the state is sorted
+        is_sorted = 1;
+
+        for (i=0; i<psi->length-1; i++)
+        {
+            amp0 = fcomplex_amplitude_sqr(&psi->amplitudes[i]);
+            amp1 = fcomplex_amplitude_sqr(&psi->amplitudes[i+1]);
+
+            // check if for all pairs amplitudes do not increase
+            if (amp1 > amp0) 
+            {
+                // swap positions so that the state is ordered 
+                is_sorted = 0;
+                // replace versors
+                tmp_ket = psi->kets[i];
+                psi->kets[i] = psi->kets[i+1];
+                psi->kets[i+1] = tmp_ket;
+
+                // replace amplitudes
+                tmp_amp = psi->amplitudes[i];
+                psi->amplitudes[i] = psi->amplitudes[i+1];
+                psi->amplitudes[i+1] = tmp_amp;
+            }
+        }
+    }
+}
 
 /*
 * Removes from the state an element which is stored 
@@ -202,8 +270,62 @@ void state_add_state(state * sum, const state * component)
         state_add(sum, component->kets[l], component->amplitudes[l]);
 }
 
-void state_clean(state* psi, basis b)
+/*
+* This function removes the from the state all the versors which possess:
+* - negative excitations of modes
+* - |mx| larger than jx
+* - negative j
+*
+* Warrning!
+* This function do not remove versors with angular number j larger than 
+* the maximal implemented jmax.
+*/
+void state_clean_unphysical_versors(state *psi)
 {
-    state *clean;
-    state_init(clean);
+    /* it is faster to rm a versor from the end of the state */
+    int i = psi->length-1;
+
+    versor subject;
+    for (; i>= 0; i--)
+    {
+        subject = psi->kets[i];
+
+        if (versor_is_unphysical(subject))
+            state_rm(psi, i);
+    }
+}
+
+/* 
+ * This function removes from the state all the versors which have 
+ * the square of its amplitude smaller than the threshold value.
+ */
+void state_cut(state *psi, float threshold)
+{
+    /* Rm works faster when applied from the end. */
+    int i = psi->length-1;
+    float amp = 0.f;
+
+    for (; i>=0; i--)
+    {
+        // square of an amplitude of the versor in a state
+        amp = fcomplex_amplitude_sqr(&psi->amplitudes[i]);
+        if ( amp < threshold )
+            state_rm(psi, i);
+    }
+}
+
+/* 
+ * This function keeps only the first `max` versors of the sorted state
+ */
+void state_keep_only_first_max_versors(state *psi, int max)
+{
+    // the state is short enough
+    if ( psi->length <= max )
+        return;
+
+    // otherwise we cut
+    /* Rm works faster when applied from the end. */
+    int i = psi->length-1;
+    for (; i>=max; i--)
+        state_rm(psi, i);
 }

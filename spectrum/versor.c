@@ -171,6 +171,30 @@ versor get_versor_from_index(int idx, const basis b)
         return psi;
 }
 
+/* Returns true if:
+ * - any of the normal modes is in a negative excitation
+ * - |mx| > jx, for x in 1,2
+ * - j1 or j2 is negative
+ * 
+ * Returns false if:
+ * - j1 or j2 is larger than jmax
+ */
+int versor_is_unphysical(const versor psi)
+{
+    if ( psi.n1<0 || psi.n3<0 || psi.n5<0 )
+        return 1;
+
+    if ( psi.j1 < 0 || psi.j2 < 0 )
+        return 1;
+
+    if ( psi.m1 > psi.j1 || psi.m1 < -psi.j1 )
+        return 1;
+
+    if ( psi.m2 > psi.j2 || psi.m2 < -psi.j2 )
+        return 1;
+
+    return 0;
+}
 
 /* test */
 void test_idx_to_versor_translation() {

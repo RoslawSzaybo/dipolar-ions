@@ -27,5 +27,6 @@ void test_idx_to_versor_translation();
 void show_versor(const versor psi);
 void show_bra_versor(const versor psi);
 int versor_equals_versor(versor ket0, versor ket1);
+int versor_is_unphysical(const versor psi);
 
 #endif // versor_h
