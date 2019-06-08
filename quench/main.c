@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     versor psi0 = (versor){0, 0, 0, 1, 0, 0, 0};
     float dt = 100e-9f;
     float print_every = 1e-6;
-    float propagation_time = 1e-3;
+    float propagation_time = 50e-3;
     float print_threshold = 1e-4;
     float N2 = 0.f;
 
@@ -41,7 +41,6 @@ int main(int argc, char *argv[])
     printf("t = %f ns\n", 0.f);
     state_sort(&bra);
     N2 = state_normalisation(&bra);
-    printf("N^2 = %f\n", N2);
     state_times_float(&bra, 1./sqrt(N2));
     state_print(&bra);
 
@@ -64,7 +63,7 @@ int main(int argc, char *argv[])
 
         if (!(i % print_divisor))
         {
-            printf("t = %f us\t", (float)(i)*dt*1.e6);
+            printf("t = %f ms\t", (float)(i)*dt*1.e6);
             printf("N^2 = %f\n", N2);
             print_limited_state(&bra, print_threshold);
         }
