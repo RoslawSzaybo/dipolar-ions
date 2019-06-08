@@ -20,13 +20,13 @@ int main(int argc, char *argv[])
     versor psi0 = choose_test_versor_quantum_numbers(b, pars);
     float time_step_ns = get_dt();
     */
-    versor psi0 = (versor){8, 3, 0, 0, 0, 0, 0};
-    float time_step_ns = 100.f;
-    float ns = 1e-9f;
-    int steps = get_no_of_steps();
-    float dt = time_step_ns*ns;
-    float print_threshold = 1e-12;
+    versor psi0 = (versor){0, 0, 0, 1, 0, 0, 0};
+    float dt = 100e-9f;
+    float print_every = 1e-6;
+    float propagation_time = 1e-3;
+    float print_threshold = 1e-4;
     float N2 = 0.f;
+
 
     printf("# Attention please!\n");
     printf("#  All printed states below are in fact duals i.e. <psi|,"
@@ -46,6 +46,8 @@ int main(int argc, char *argv[])
     state_print(&bra);
 
     int i=1;
+    int steps = propagation_time/dt;
+    int print_divisor = print_every/dt;
     for (; i<steps; i++)
     {
         braH = bra_H(&bra, pars);
@@ -55,16 +57,17 @@ int main(int argc, char *argv[])
         // \bra{psi} = i \omega_1 bra_H()
         state_times_i_float(&braH, dt*pars.omega_1); 
         state_add_state(&bra, &braH);
-
-        printf("t = %f ns\t", (float)(i)*dt/ns);
         state_sort(&bra);
         state_keep_only_first_max_versors(&bra, 200);
-        printf("bra->length = %d\t", bra.length);
         N2 = state_normalisation(&bra);
-        printf("N^2 = %f\n", N2);
-        // normalisation
         state_times_float(&bra, 1./sqrt(N2));
-        print_limited_state(&bra, print_threshold);
+
+        if (!(i % print_divisor))
+        {
+            printf("t = %f us\t", (float)(i)*dt*1.e6);
+            printf("N^2 = %f\n", N2);
+            print_limited_state(&bra, print_threshold);
+        }
     }
 
     state_free(&bra);
@@ -77,8 +80,8 @@ parameters SrYb_parameters()
     // SrYb^+
     // $ \omega_1 = \sqrt{3} \omega_z 
     // $ \omega_3 = \sqrt{omega_rho^2 - omega_z^2}$
-    float omega_rho = 1.4f;
-    float omega_z = 0.16f;
+    float omega_rho = 750.f;
+    float omega_z = 97.2f;
     float omega_1 = sqrt(3.0)*omega_z;
     float omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
 
