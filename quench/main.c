@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     state_init(&braH);
     state_add(&bra, psi0, (fcomplex){1.f, 0.f});
 
-    printf("t = %f ns\n", 0.f);
+    printf("t = %f us\n", 0.f);
     state_sort(&bra);
     N2 = state_normalisation(&bra);
     state_times_float(&bra, 1./sqrt(N2));
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 
         if (!(i % print_divisor))
         {
-            printf("t = %f ms\t", (float)(i)*dt*1.e6);
+            printf("t = %f us\t", (float)(i)*dt*1.e6);
             printf("N^2 = %f\n", N2);
             print_limited_state(&bra, print_threshold);
         }
