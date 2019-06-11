@@ -133,26 +133,30 @@ parameters get_system_parameters(char *argv[])
         {mass, charge, dipole, B, omega_1, omega_3, active_terms};
 }
 
-void print_input(basis b, parameters p, char *argv[])
+void print_system_parameters(parameters p)
 {
-        float omega_rho = atof(argv[10]);
-        float omega_z = atof(argv[11]);
+    float omega_z = p.omega_1/sqrt(3);
+    float omega_rho = sqrt(p.omega_3*p.omega_3 + omega_z*omega_z);
 
-        // pure input
-        printf("# Parameters of the model\n");
-        printf("#  mass:\t\t%10.2f u\n", p.mass);
-        printf("#  charge:\t%10.2f e\n", p.charge);
-        printf("#  dipole:\t%10.2f D\n", p.dipole);
-        printf("#  B:\t\t%10.2f MHz\n", p.B);
-        printf("#  omega_rho:\t%10.2f MHz\n", omega_rho);
-        printf("#  omega_z:\t%10.2f MHz\n\n", omega_z);
-        printf("# Basis truncation:\t|%d,%d,%d;%d,%d>\n", 
-        b.n1, b.n3, b.n5, b.j1, b.j2);
-        // values which are functions of the input
-        printf("# omega_1:\t%10.2f MHz\n", p.omega_1);
-        printf("# omega_3/5:\t%10.2f MHz\n", p.omega_3);
-        int basis_size = get_basis_size(b);
-        printf("# Basis size:\t\t%d\n\n", basis_size);
+    // pure input
+    printf("# Parameters of the model\n");
+    printf("#  mass:\t\t%10.4f u\n", p.mass);
+    printf("#  charge:\t%10.4f e\n", p.charge);
+    printf("#  dipole:\t%10.5f D\n", p.dipole);
+    printf("#  B:\t\t%10.2f MHz\n", p.B);
+    printf("#  omega_rho:\t%10.4f MHz\n", omega_rho);
+    printf("#  omega_z:\t%10.6f MHz\n\n", omega_z);
+    // values which are functions of the input
+    printf("# omega_1:\t%10.6f MHz\n", p.omega_1);
+    printf("# omega_3/5:\t%10.5f MHz\n\n", p.omega_3);
+}
+
+void print_basis_details(basis b)
+{
+    printf("# Basis truncation:\t|%d,%d,%d;%d,%d>\n", 
+    b.n1, b.n3, b.n5, b.j1, b.j2);
+    int basis_size = get_basis_size(b);
+    printf("# Basis size:\t\t%d\n\n", basis_size);
 }
 
 void print_active_terms_of_Hamiltonian(parameters p)

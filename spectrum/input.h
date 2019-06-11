@@ -28,7 +28,8 @@ int get_basis_size(basis b);
 basis get_basis_truncation(char *argv[]);
 parameters get_system_parameters(char *argv[]);
 
-void print_input(basis b, parameters p, char *argv[]);
+void print_system_parameters(parameters p);
+void print_basis_details(basis b);
 void print_active_terms_of_Hamiltonian(parameters p);
 
 void *my_malloc(size_t size, const char *name);

@@ -16,6 +16,9 @@ parameters SrYb_parameters();
 int main(int argc, char *argv[])
 {
     const parameters pars = SrYb_parameters();
+
+    print_system_parameters(pars);
+    print_active_terms_of_Hamiltonian(pars);
     /* 
     versor psi0 = choose_test_versor_quantum_numbers(b, pars);
     float time_step_ns = get_dt();
@@ -79,8 +82,8 @@ parameters SrYb_parameters()
     // SrYb^+
     // $ \omega_1 = \sqrt{3} \omega_z 
     // $ \omega_3 = \sqrt{omega_rho^2 - omega_z^2}$
-    float omega_rho = 750.f;
-    float omega_z = 97.2f;
+    float omega_rho = 1.4f;
+    float omega_z = 0.16f;
     float omega_1 = sqrt(3.0)*omega_z;
     float omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
 

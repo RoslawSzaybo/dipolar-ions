@@ -34,7 +34,8 @@ int main(int argc, char *argv[]) {
     check_basis_truncation(b);
     int n = get_basis_size(b);
 
-    print_input(b, pars, argv);
+    print_system_parameters(pars);
+    print_basis_details(b);
     print_active_terms_of_Hamiltonian(pars);
 
     /* Executable statements */
