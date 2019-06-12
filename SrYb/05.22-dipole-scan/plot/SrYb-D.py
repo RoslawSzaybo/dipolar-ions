@@ -12,7 +12,6 @@ from label_lines import *
 # latex font 
 plt.rcParams.update({'font.size': 18})
 plt.rcParams.update({'font.family': 'serif'})
-plt.rcParams.update({'font.weight': 'normal'})
 plt.rcParams.update({'text.usetex': True})
 
 # =============================================================================
