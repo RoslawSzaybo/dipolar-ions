@@ -29,9 +29,6 @@
 ### Statistics of the main program from plgrid:
 - 42k x 42k Hermitian matrix: 13Gb; 11-22h ;
 
-### todo
-- implement `void state_clean()`
-
 ### Selected moleules
 - MgH<sup>+</sup>
 m = 25.3 u
