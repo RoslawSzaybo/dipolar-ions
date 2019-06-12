@@ -1,7 +1,7 @@
 # Matrix diagonalisation.
 
 ### How to use
-1. Install Intel(R) MKL
+1. Install [Intel(R) Math Kernel Library](https://software.intel.com/mkl)
 
 2. Setup local variables, by default it's
 ``` bash

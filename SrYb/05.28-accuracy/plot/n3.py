@@ -5,7 +5,6 @@ Plot of a spectrum of two charged dipoles.
 import matplotlib.pyplot as plt
 from os.path import expanduser
 import numpy as np
-from matplotlib.ticker import MaxNLocator
 import sys
 sys.path.insert(0, expanduser('~')+'/ions/lib')
 from label_lines import *

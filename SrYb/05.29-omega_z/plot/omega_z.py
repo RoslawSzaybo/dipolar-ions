@@ -3,9 +3,9 @@
 Plot of a spectrum of two charged dipoles.
 """
 import matplotlib.pyplot as plt
-from os import listdir
-from os.path import isfile, join
 from os.path import expanduser
+import sys
+sys.path.insert(0, expanduser('~')+'/ions/lib')
 from label_lines import *
 import numpy as np
 
