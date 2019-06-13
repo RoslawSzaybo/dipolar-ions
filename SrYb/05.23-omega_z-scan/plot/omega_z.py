@@ -10,10 +10,9 @@ sys.path.insert(0, expanduser('~')+'/ions/lib')
 from label_lines import *
 
 # latex font 
-plt.rcParams.update({'font.size': 18})
+plt.rcParams.update({'font.size': 22})
 plt.rcParams.update({'font.family': 'serif'})
 plt.rcParams.update({'text.usetex': True})
-
 
 # =============================================================================
 # Universal set of functions which serve to read the program oputput and 
@@ -147,7 +146,7 @@ def show_one_energy_level_change_together(dataset, lvl=10, fname='test.eps'):
 # =============================================================================
     plt.xlabel("$\omega_z$ (MHz)")
     plt.ylabel("$E/2\pi\hbar$ (kHz)")
-    plt.legend(labelspacing=-0.1, loc=2)
+    plt.legend(labelspacing=-0.2, loc=2)
     
     plt.text(0.18, 260, "(a)")
     

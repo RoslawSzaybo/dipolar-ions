@@ -10,7 +10,7 @@ from label_lines import *
 import numpy as np
 
 # latex font 
-plt.rcParams.update({'font.size': 18})
+plt.rcParams.update({'font.size': 22})
 plt.rcParams.update({'font.family': 'serif'})
 plt.rcParams.update({'text.usetex': True})
 
