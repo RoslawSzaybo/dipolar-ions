@@ -5,24 +5,43 @@
 
 /* Auxiliary routine: printing a matrix */
 void print_matrix( char* desc, int m, int n, fcomplex* a, int lda ) {
-        int i, j;
-        printf( "\n%s\n", desc );
-        for( i = 0; i < m; i++ ) {
-                for( j = 0; j < n; j++ )
-                        printf( " (%6.2f,%6.2f)", a[i+j*lda].re, a[i+j*lda].im );
-                printf( "\n" );
-        }
+    int i, j;
+    printf( "\n%s\n", desc );
+    for( i = 0; i < m; i++ ) {
+        for( j = 0; j < n; j++ )
+            printf( " (%6.2f,%6.2f)", a[i+j*lda].re, a[i+j*lda].im );
+        printf( "\n" );
+    }
 }
 
 /* Auxiliary routine: printing a real matrix */
 void print_rmatrix( char* desc, int m, int n, float* a, int lda ) {
-        int i, j;
-        printf( "\n%s\n", desc );
-        for ( i = 0; i < m; i++ ) {
-                for ( j = 0; j < n; j++ ) printf( " %11.9f", a[i+j*lda] );
-                printf( "\n" );
-        }
+    int i, j;
+    printf( "\n%s\n", desc );
+    for ( i = 0; i < m; i++ ) {
+        for ( j = 0; j < n; j++ ) printf( " %11.9f", a[i+j*lda] );
+        printf( "\n" );
+    }
 }
+
+/*  Print eigenvalues in the range [first, last]
+ * 
+ * All eigenvalues are stored in the first row of the matrix `w` i.e. 
+ * in order to print eigenvalues one has to print only the first row 
+ * of the matrix `w`.
+ * 
+ * first - the first column to be printed (first = 0 will start with printing
+ * the ground state energy)
+ * last - the last eigenvalue to be printed (last = 1, only the ground state
+ * energy is be printed)
+ */
+void print_eigenvalues( int first, int last, float* a ) 
+{
+    int i = first;
+    for ( ; i < last; i++ ) printf( " %11.9f", a[i] );
+    printf( "\n" ); 
+}
+
 
 
 /* Print eigenvectors in a compact way i.e. there are printed only those 
@@ -33,18 +52,18 @@ void print_rmatrix( char* desc, int m, int n, float* a, int lda ) {
  * input:
  * a - matrix with the diagonalisation result
  * n - basis size
- * m - the last eigenstate you want to be printed 
+ * last - the last eigenstate you want to be printed 
  *         (eigenstates are orderd with respect to their eigenvalues, in an 
  *         ascending order i.e. 0th eigenvector has the smallest eigenvalue)
  * b - descriptor of the basis which was used in the computations 
  */
-void sort_print_lower_spectrum(fcomplex* a, int n, basis b, int m, 
+void sort_print_lower_spectrum(fcomplex* a, int n, basis b, int last, 
                                 fcomplex* work, int* work_int)
 { 
     printf("\n# Ground state and the lowest excitations:\n");
     // if the desired number of eigenvectors, `m`, is larger than
     // the their total number, `n`, then print all `n` eigenvectors.
-    int bound = (m<n) ? m : n ;
+    int bound = (last<n) ? last : n ;
     for (int k=0; k < bound; k++)
         sort_print_eigenvector_summary( a, work, work_int, n, b, k);
 }

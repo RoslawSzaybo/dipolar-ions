@@ -74,20 +74,30 @@ int main(int argc, char *argv[]) {
     free( rwork ); 
 
     /* Generate the output */
+    /* Print eigenvalues and eigenvectors of the lower spectrum */
     printf( "# Results of the diagonalisation\n" );
-    /* Print eigenvalues */
     print_rmatrix( "# 100 smallest eigenvalues", 1, (n<100)?n:100 , w, 1 );
-    /* Print all eigenvalues */
-    // print_rmatrix( "# 100 smallest eigenvalues", 1, n, w, 1 );
+    printf("# sanity check\n");
+    print_eigenvalues( 0, (n<100)?n:100, w);
 
     /* Print states more explicitly */
-    // Space required in  sorting
+    // Space required for sorting
     int *work_int = my_malloc(sizeof(int)*n, "work_int");
-    // 50 is the number of states which will be printed
-    sort_print_lower_spectrum(a, n, b, 25, work, work_int);
+    int how_many_states = 25;
+    how_many_states = ( n<how_many_states ) ? n : how_many_states;
+    sort_print_lower_spectrum( a, n, b, how_many_states, work, work_int );
+
+    /* Print eigenvalues and eigenvectors of the lower spectrum */
+    // this will also print the last withouth j excited, for 
+    // sanity check
     int first = b.n1*b.n3*b.n5;
     int last = first + 50;
-    sort_print_upper_spectrum(a, n, b, first, last, work, work_int);
+    first = (n < first) ? n : first;
+    last = (n < last) ? n : last;
+    printf( " # The upper part of the spectrum\n" );
+    printf( " # first: %d\t last: %d\n", first, last );
+    print_eigenvalues( first, last, w );
+    sort_print_upper_spectrum( a, n, b, first, last, work, work_int );
 
     /* Free workspace - part II */
     free( a );

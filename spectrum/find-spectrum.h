@@ -10,6 +10,7 @@ extern void cheev( char* jobz, char* uplo, int* n, fcomplex* a, int* lda,
 /* Auxiliary routines prototypes */
 extern void print_matrix( char* desc, int m, int n, fcomplex* a, int lda );
 extern void print_rmatrix( char* desc, int m, int n, float* a, int lda );
+void print_eigenvalues( int first, int last, float* a );
 void sort_print_lower_spectrum(fcomplex* a, int n, basis b, int m, 
                                 fcomplex* work, int* work_int);
 void sort_print_upper_spectrum(fcomplex* a, int n, basis b, int first, 
