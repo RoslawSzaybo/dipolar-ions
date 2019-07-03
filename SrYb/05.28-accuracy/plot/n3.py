@@ -9,6 +9,10 @@ import sys
 sys.path.insert(0, expanduser('~')+'/ions/lib')
 from label_lines import *
 
+# latex font 
+plt.rcParams.update({'font.size': 22})
+plt.rcParams.update({'font.family': 'serif'})
+plt.rcParams.update({'text.usetex': True})
 
 # =============================================================================
 # Universal set of functions which serve to read the program oputput and 
@@ -111,85 +115,18 @@ def get_truncation_string(dataset):
     truncation = dataset[0][0]['basis_truncation']
     n1 = truncation['n1']
     j1 = truncation['j1']
-    out_string = f"$n_1$ = {n1}, $j_1$/$j_2$ = {j1}"
+    out_string = f"$n_1 = {n1}$"+", $j_{1/2} = $"+f"${j1}$"
     return out_string
 
 def get_parameters_string(dataset):
     omega_z = get_omega_z(dataset[0])
     omega_rho = get_omega_rho(dataset[0])
-    out_string = f"SrYb @ $\omega_z$ = {omega_z}MHz, $\omega_\\rho$ = {omega_rho}MHz"
+    out_string = f"$\omega_z = {omega_z}$ MHz, "+\
+    f"$\omega_\\rho = {omega_rho}$ MHz"
     return out_string
 
-def show_spectrum(dataset, m=100, n=0):    
-    for data in dataset:
-        n1 = get_n3_truncations(data)
-        # collect spectrum, avoid reaching for elements that are not accesible
-        if m > len(data[1]):
-            m = len(data[1])
-        if n<0 or n >= m:
-            print("Incorrect n - No of the smallest eigenvalue")
-            n = m-1
-        spectrum = data[1][n:m]
-        # present result
-        plt.scatter([n1]*(m-n), spectrum, 
-                    color='k')
-        plt.title(f"Spectrum: eigenvalues {n} through {m-1}")
-    return 0
 
-def show_one_energy_level(dataset, lvl=0):  
-    ns = []
-    spectrum = []
-    if lvl > len(dataset[0][1]) or lvl < 0:
-        print("Incorrect energy level.\n")
-        exit(0)
-
-    for data in dataset:
-        ns += [ get_n3_truncations(data) ]
-        # the selected energy
-        spectrum += [ data[1][lvl] ]
-    
-    # present result
-    plt.scatter(ns, spectrum, color='k')
-    plt.title(f"Energy level {lvl}")
-    return 0
-
-def show_one_energy_level_change(dataset, lvl=0):
-    ns = []
-    spectrum = []
-    
-    energy0 = dataset[0][1][lvl]
-    for data in dataset:
-        ns += [ get_n3_truncations(data) ]
-        # the selected energy
-        spectrum += [ data[1][lvl] - energy0 ]
-    
-    # present result
-    plt.scatter(ns, spectrum, color='k')
-    plt.title(f"Energy level No {lvl}, relative change")
-    plt.xlabel("$n_3$/$n_5$ truncation ")
-    plt.ylabel("$E_{lvl} - E_0$ ($\hbar \omega_1$)")
-    return 0
-
-def show_one_energy_level_change_together(dataset, lvl=10):
-    ns = []
-    spectra = []
-    
-    energy0 = dataset[0][1][0:lvl]
-    for data in dataset:
-        ns += [ get_n3_truncations(data) ]
-        spectra += [ [data[1][i] - energy0[i] for i in range(lvl)] ]
-    
-    # present result
-    for i in range(lvl):
-        plt.plot(ns, [ sp[i] for sp in spectra ], label=f"{i}" )
-    plt.title("Energy levels, relative changes\n"+
-              get_truncation_string(dataset))
-    plt.legend()
-    plt.xlabel("$n_3$ truncation")
-    plt.ylabel("$E_{lvl} - E_0$ ($\hbar \omega_1$)")
-    return 0
-
-def show_one_energy_level_change_together_MHz(dataset, lvl=10):
+def change_of_energy_levels(dataset, lvl=10):
     ns = []
     spectra = []
     
@@ -198,16 +135,19 @@ def show_one_energy_level_change_together_MHz(dataset, lvl=10):
         ns += [ get_n3_truncations(data) ]
         omegaz = get_omega_z(data)
         omega1 = omegaz*np.sqrt(3)
-        spectra += [ [(data[1][i] - energy0[i])*omega1 for i in range(lvl)] ]
+        omega1_2pi = omega1/2/np.pi
+        MHzTOkHz = 1e3
+        spectra += [ [(data[1][i] - energy0[i])*omega1_2pi*MHzTOkHz
+                      for i in range(lvl)] ]
     
     # present result
     for i in range(lvl):
         plt.plot(ns, [ sp[i] for sp in spectra ], label=f"{i}" )
-    plt.title("Energy levels, relative changes\n"+
+    plt.title("Energy levels of SrYb, relative changes\n"+
               get_parameters_string(dataset)+
               ", "+get_truncation_string(dataset))
     plt.xlabel("$n_3$ truncation")
-    plt.ylabel("$(E_{lvl}(n_3) - E_{lvl}("+f"{ns[0]}"+")/\hbar$ (MHz)")
+    plt.ylabel("$\\frac{E_{i}(5) - E_i(n_3)}{2\pi\hbar}$ (kHz)")
     labelLines(plt.gca().get_lines(),zorder=2.5)
     return 0
 
@@ -222,10 +162,7 @@ def main():
     filenamesA = ['SrYb_n1_34_n35_'+str(n)+'_j1.out' for n in ns]
     dataset = get_dataset(filenamesA, path)
     dataset.sort(key=get_dipole)
-#    show_spectrum(dataset)
-#    show_one_energy_level(dataset, 0)
-#    show_one_energy_level_change(dataset, 4)
-    show_one_energy_level_change_together_MHz(dataset, 10)
+    change_of_energy_levels(dataset, 10)
 
     return 0
     

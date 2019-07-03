@@ -8,11 +8,7 @@ from os.path import expanduser
 import sys 
 sys.path.insert(0, expanduser('~')+'/ions/lib')
 from label_lines import *
-
-# latex font 
-plt.rcParams.update({'font.size': 22})
-plt.rcParams.update({'font.family': 'serif'})
-plt.rcParams.update({'text.usetex': True})
+from latex import *
 
 # =============================================================================
 # Universal set of functions which serve to read the program oputput and 
@@ -204,9 +200,11 @@ def main():
     filenames = [ "D"+D+".out" for D in Ds ]
     dataset = get_dataset(filenames, path)
     dataset.sort(key=get_dipole)
+    latex_fonts()
 #    show_one_energy_level(dataset,5)
-    show_one_energy_level_change_together(dataset, 5, fname="fig1b.eps")
-#    show_spectrum(dataset, 11, fname='fig1a.eps')
+#    show_one_energy_level_change_together(dataset, 5, fname="fig1b.eps")
+#    show_one_energy_level_change_together(dataset, 8, fname="fig1c.eps")
+    show_spectrum(dataset, 11, fname='fig1a.eps')
 
     return 0
 

@@ -58,7 +58,7 @@ def labelLine(line,x,label=None,align=True,**kwargs):
 
     ax.text(x,y,label,rotation=trans_angle,**kwargs)
 
-def labelLines(lines,align=True,xvals=None,**kwargs):
+def labelLines(lines,align=True,xvals=None,reverse=False,**kwargs):
 
     ax = lines[0].axes
     labLines = []
@@ -73,7 +73,10 @@ def labelLines(lines,align=True,xvals=None,**kwargs):
 
     if xvals is None:
         xmin,xmax = ax.get_xlim()
-        xvals = np.linspace(xmin,xmax,len(labLines)+2)[1:-1]
+        if (reverse):
+            xvals = np.linspace(xmax,xmin,len(labLines)+2)[1:-1]
+        else:
+            xvals = np.linspace(xmin,xmax,len(labLines)+2)[1:-1]
 
     for line,x,label in zip(labLines,xvals,labels):
         labelLine(line,x,label,align,**kwargs)
