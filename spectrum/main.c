@@ -19,7 +19,7 @@ reffered to as an exact diagonalisation.
 #include <stdio.h>
 
 #include "find-spectrum.h"
-#include "hamiltonian.h"
+//#include "hamiltonian.h"
 #include "input.h"
 
 /* Main program */
@@ -45,11 +45,25 @@ int main(int argc, char *argv[]) {
     matrix_size *= n;
     dcomplex *a = my_malloc((size_t)matrix_size, "a");
     /* Define the Hamiltonian matrix */
-    construct_Hamiltonian(a, b, pars);
+    // construct_Hamiltonian(a, b, pars);
+    int p,r;
+    for (p=0; p < n; p++)
+        for (r=0; r<n; r++)
+        {
+            a[p*n+r].re = 0.;
+            a[p*n+r].im = 0.;
+        }
+    // upper triangle
+    for (p=0; p < n; p++)
+        for (r=p; r<n; r++)
+        {
+            a[p*n+r].re = p/100.;
+            a[p*n+r].im = r/100.;
+        }
     /* Print the Hamiltonian Matrix */
     /* WARNING: Usually you don't want to do it! */
     /* WARNING: It's mostly for testing purposes */
-    // print_matrix( "# Hamiltonian", n, n, a, n );
+    print_matrix( "# Hamiltonian", n, n, a, n );
 
     /* Query and allocate the optimal workspace */
     double *w = my_malloc(sizeof(double)*n, "w");
@@ -57,7 +71,7 @@ int main(int argc, char *argv[]) {
     /* rwork dimension should be at least max(1,3*n-2) */
     double *rwork = my_malloc(sizeof(double)*(3*n-2), "rwork");
     int lwork = -1, info;
-    cheev( "Vectors", "Lower", &n, a, &n, w, &wkopt, &lwork, rwork, &info );
+    zheev( "Vectors", "Lower", &n, a, &n, w, &wkopt, &lwork, rwork, &info );
     lwork = (int)wkopt.re;
     dcomplex *work = my_malloc( lwork*sizeof(dcomplex), "work" );
 

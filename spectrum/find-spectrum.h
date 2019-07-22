@@ -5,7 +5,7 @@
 #include "versor.h" // in print_eigenvector_summary
 
 /* CHEEV prototype */
-extern void cheev( char* jobz, char* uplo, int* n, dcomplex* a, int* lda,
+extern void zheev( char* jobz, char* uplo, int* n, dcomplex* a, int* lda,
                 double* w, dcomplex* work, int* lwork, double* rwork, int* info );
 /* Auxiliary routines prototypes */
 extern void print_matrix( char* desc, int m, int n, dcomplex* a, int lda );
