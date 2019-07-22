@@ -15,12 +15,12 @@ This method of solving the Schr\"odinger equation in literature is often
 reffered to as an exact diagonalisation.
 */
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "find-spectrum.h"
 #include "hamiltonian.h"
 #include "input.h"
-
-#include <stdlib.h>
-#include <stdio.h>
 
 /* Main program */
 int main(int argc, char *argv[]) {
@@ -40,10 +40,10 @@ int main(int argc, char *argv[]) {
 
     /* Executable statements */
     /* allocate memory for the matrix */
-    long matrix_size = sizeof(fcomplex);
+    long matrix_size = sizeof(dcomplex);
     matrix_size *= n;
     matrix_size *= n;
-    fcomplex *a = my_malloc((size_t)matrix_size, "a");
+    dcomplex *a = my_malloc((size_t)matrix_size, "a");
     /* Define the Hamiltonian matrix */
     construct_Hamiltonian(a, b, pars);
     /* Print the Hamiltonian Matrix */
@@ -52,22 +52,24 @@ int main(int argc, char *argv[]) {
     // print_matrix( "# Hamiltonian", n, n, a, n );
 
     /* Query and allocate the optimal workspace */
-    float *w = my_malloc(sizeof(float)*n, "w");
-    fcomplex wkopt;
+    double *w = my_malloc(sizeof(double)*n, "w");
+    dcomplex wkopt;
     /* rwork dimension should be at least max(1,3*n-2) */
-    float *rwork = my_malloc(sizeof(float)*(3*n-2), "rwork");
+    double *rwork = my_malloc(sizeof(double)*(3*n-2), "rwork");
     int lwork = -1, info;
     cheev( "Vectors", "Lower", &n, a, &n, w, &wkopt, &lwork, rwork, &info );
     lwork = (int)wkopt.re;
-    fcomplex *work = my_malloc( lwork*sizeof(fcomplex), "work" );
+    dcomplex *work = my_malloc( lwork*sizeof(dcomplex), "work" );
 
     /* Solve eigenproblem */
-    cheev( "Vectors", "Lower", &n, a, &n, w, work, &lwork, rwork, &info );
+    zheev( "Vectors", "Lower", &n, a, &n, w, work, &lwork, rwork, &info );
     /* Check for convergence */
     if( info > 0 ) {
             printf( "The algorithm failed to compute eigenvalues.\n" );
             exit( 1 );
     }
+    /* End of diagonalisation. */
+
     /* Free workspace - part I */
     // It's larger than work_int so it should 'make space' 
     // for work_int, but you know.
@@ -105,4 +107,4 @@ int main(int argc, char *argv[]) {
     free( work );
     free( work_int );
     exit( 0 );
-} /* End of diagonalisation. */
+} 

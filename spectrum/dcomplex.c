@@ -1,17 +1,17 @@
 #include <stdio.h>
-#include "fcomplex.h"
+#include "dcomplex.h"
 
 /* 
-* Multiply two complex numbers stored as fcomplex 
+* Multiply two complex numbers stored as dcomplex 
 */
-fcomplex fcomplex_multiply(const fcomplex* a, const fcomplex* b)
+dcomplex dcomplex_multiply(const dcomplex* a, const dcomplex* b)
 {
-    float re=0.f, im=0.f;
+    double re=0., im=0.;
 
     re = a->re * b->re - a->im * b->im;
     im = a->re * b->im  + a->im * b->re;
 
-    return (fcomplex){re, im};
+    return (dcomplex){re, im};
 }
 
 /* 
@@ -19,12 +19,12 @@ fcomplex fcomplex_multiply(const fcomplex* a, const fcomplex* b)
 * return the result
 * No change in the input variable `a`.
 */
-fcomplex fcomplex_times_float(const fcomplex* a, float b)
+dcomplex dcomplex_times_double(const dcomplex* a, double b)
 {
-    float re = a->re * b;
-    float im = a->im * b;
+    double re = a->re * b;
+    double im = a->im * b;
 
-    return (fcomplex){re, im};
+    return (dcomplex){re, im};
 }
 
 
@@ -35,13 +35,13 @@ fcomplex fcomplex_times_float(const fcomplex* a, float b)
 * a * ib, \quad a \in \mathbb{C}, b\in \mathbb{R}.
 * $$ 
 */
-fcomplex fcomplex_times_i_float(const fcomplex* a, float b)
+dcomplex dcomplex_times_i_double(const dcomplex* a, double b)
 {
     // (re + i im)* i b = -im*b + i re*b
-    float re = a->re;
-    float im = a->im;
+    double re = a->re;
+    double im = a->im;
 
-    return (fcomplex){-im*b, re*b};
+    return (dcomplex){-im*b, re*b};
 }
 
 /* 
@@ -50,16 +50,16 @@ fcomplex fcomplex_times_i_float(const fcomplex* a, float b)
 * |a|^2 = \overline{a}a = re(a)^2 + im(a)^2.
 * $$
 */
-float fcomplex_amplitude_sqr(const fcomplex* a)
+double dcomplex_amplitude_sqr(const dcomplex* a)
 {
     return a->im*a->im + a->re*a->re;
 }
 
-void test_fcomplex_multiply()
+void test_dcomplex_multiply()
 {
-    printf("Test fcomplex_multiply\n");
-    fcomplex fa = {2.0f, 0.0f}, fb = {1.0f, 1.0f};
-    fcomplex fc = fcomplex_multiply(&fa, &fb);
+    printf("Test dcomplex_multiply\n");
+    dcomplex fa = {2.0, 0.0}, fb = {1.0, 1.0};
+    dcomplex fc = dcomplex_multiply(&fa, &fb);
     printf("fa = %3.2f+i%3.2f\n", fa.re, fa.im);
     printf("fb = %3.2f+i%3.2f\n", fb.re, fb.im);
     printf("fc = %3.2f+i%3.2f\n", fc.re, fc.im);

@@ -16,7 +16,7 @@ typedef struct {
 } hamiltonian;
 
 typedef struct {
-    float mass, charge, dipole, B, omega_1, omega_3;
+    double mass, charge, dipole, B, omega_1, omega_3;
     hamiltonian active_terms;
 } parameters;
 

@@ -4,7 +4,10 @@
 /* Baisc elements which allow translation between the
 * quantum mechanial terms and linear algebra. */
 
-/* Structure designed to store the basis truncation parameters. */
+/* Structure designed to store the basis truncation parameters. 
+ * The numbers nx, x=1,3,5 denote number of modes allowed i.e. basis.n1=1 
+ * means that only one mode can be excited, the mode withe versor.n1=0. 
+ */
 typedef struct {
     int n1, n3, n5, j1, j2;
 } basis;
