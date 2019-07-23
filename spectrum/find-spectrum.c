@@ -119,7 +119,7 @@ void sort_print_eigenvector_summary( dcomplex* a, dcomplex* work,
                                     int* work_int, int n, basis b, int m )
 {
     // Preselection, the vectors which are of no importance will be neglected;
-    const double lower_limit = 1.0e-12;
+    const double lower_limit = 1.0e-10;
     int i, length=0;
     dcomplex amp;
     double abs_amp2;
