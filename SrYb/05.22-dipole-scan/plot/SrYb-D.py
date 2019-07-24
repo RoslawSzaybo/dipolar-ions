@@ -8,12 +8,7 @@ from os.path import expanduser
 import sys 
 sys.path.insert(0, expanduser('~')+'/ions/lib')
 from label_lines import *
-
-# latex font 
-plt.rcParams.update({'font.size': 18})
-plt.rcParams.update({'font.family': 'serif'})
-plt.rcParams.update({'font.weight': 'normal'})
-plt.rcParams.update({'text.usetex': True})
+from latex import *
 
 # =============================================================================
 # Universal set of functions which serve to read the program oputput and 
@@ -148,7 +143,7 @@ def show_one_energy_level_change_together(dataset, lvl=10, start = 0,
 #              f"$\omega_\\rho$={omega_rho} MHz, $\omega_z$={omega_z} MHz,"\
 #              "truncation: "+get_truncation_string(dataset))
     plt.xlabel("Dipole moment, $d$ (D)")
-    plt.ylabel("$(E_i(D=0) - E_i(D))/2\pi\hbar$ (kHz)")
+    plt.ylabel("$\\frac{E_i(D=0) - E_i(D)}{2\pi\hbar}$ (kHz)")
 
     plt.text(6.3, 8, "(b)")
     
@@ -205,8 +200,10 @@ def main():
     filenames = [ "D"+D+".out" for D in Ds ]
     dataset = get_dataset(filenames, path)
     dataset.sort(key=get_dipole)
+    latex_fonts()
 #    show_one_energy_level(dataset,5)
 #    show_one_energy_level_change_together(dataset, 5, fname="fig1b.eps")
+#    show_one_energy_level_change_together(dataset, 8, fname="fig1c.eps")
     show_spectrum(dataset, 11, fname='fig1a.eps')
 
     return 0

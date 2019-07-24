@@ -31,7 +31,6 @@ int versor_equals_versor(versor ket0, versor ket1)
 
         if ( ket0.j2 != ket1.j2 )
                 return 0;
-
         if ( ket0.m2 != ket1.m2 )
                 return 0;
 

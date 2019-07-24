@@ -4,25 +4,44 @@
 #include "find-spectrum.h"
 
 /* Auxiliary routine: printing a matrix */
-void print_matrix( char* desc, int m, int n, fcomplex* a, int lda ) {
-        int i, j;
-        printf( "\n%s\n", desc );
-        for( i = 0; i < m; i++ ) {
-                for( j = 0; j < n; j++ )
-                        printf( " (%6.2f,%6.2f)", a[i+j*lda].re, a[i+j*lda].im );
-                printf( "\n" );
-        }
+void print_matrix( char* desc, int m, int n, dcomplex* a, int lda ) {
+    int i, j;
+    printf( "\n%s\n", desc );
+    for( i = 0; i < m; i++ ) {
+        for( j = 0; j < n; j++ )
+            printf( " (%6.2f,%6.2f)", a[i+j*lda].re, a[i+j*lda].im );
+        printf( "\n" );
+    }
 }
 
 /* Auxiliary routine: printing a real matrix */
-void print_rmatrix( char* desc, int m, int n, float* a, int lda ) {
-        int i, j;
-        printf( "\n%s\n", desc );
-        for ( i = 0; i < m; i++ ) {
-                for ( j = 0; j < n; j++ ) printf( " %11.9f", a[i+j*lda] );
-                printf( "\n" );
-        }
+void print_rmatrix( char* desc, int m, int n, double* a, int lda ) {
+    int i, j;
+    printf( "\n%s\n", desc );
+    for ( i = 0; i < m; i++ ) {
+        for ( j = 0; j < n; j++ ) printf( " %11.9f", a[i+j*lda] );
+        printf( "\n" );
+    }
 }
+
+/*  Print eigenvalues in the range [first, last]
+ * 
+ * All eigenvalues are stored in the first row of the matrix `w` i.e. 
+ * in order to print eigenvalues one has to print only the first row 
+ * of the matrix `w`.
+ * 
+ * first - the first column to be printed (first = 0 will start with printing
+ * the ground state energy)
+ * last - the last eigenvalue to be printed (last = 1, only the ground state
+ * energy is be printed)
+ */
+void print_eigenvalues( int first, int last, double* a ) 
+{
+    int i = first;
+    for ( ; i < last; i++ ) printf( " %11.9f", a[i] );
+    printf( "\n" ); 
+}
+
 
 
 /* Print eigenvectors in a compact way i.e. there are printed only those 
@@ -33,18 +52,18 @@ void print_rmatrix( char* desc, int m, int n, float* a, int lda ) {
  * input:
  * a - matrix with the diagonalisation result
  * n - basis size
- * m - the last eigenstate you want to be printed 
+ * last - the last eigenstate you want to be printed 
  *         (eigenstates are orderd with respect to their eigenvalues, in an 
  *         ascending order i.e. 0th eigenvector has the smallest eigenvalue)
  * b - descriptor of the basis which was used in the computations 
  */
-void sort_print_lower_spectrum(fcomplex* a, int n, basis b, int m, 
-                                fcomplex* work, int* work_int)
+void sort_print_lower_spectrum(dcomplex* a, int n, basis b, int last, 
+                                dcomplex* work, int* work_int)
 { 
     printf("\n# Ground state and the lowest excitations:\n");
     // if the desired number of eigenvectors, `m`, is larger than
     // the their total number, `n`, then print all `n` eigenvectors.
-    int bound = (m<n) ? m : n ;
+    int bound = (last<n) ? last : n ;
     for (int k=0; k < bound; k++)
         sort_print_eigenvector_summary( a, work, work_int, n, b, k);
 }
@@ -67,13 +86,14 @@ void sort_print_lower_spectrum(fcomplex* a, int n, basis b, int m,
  *         ascending order i.e. 0th eigenvector has the smallest eigenvalue)
  * b - descriptor of the basis which was used in the computations 
  */
-void sort_print_upper_spectrum(fcomplex* a, int n, basis b, int first, 
-                            int last, fcomplex* work, int* work_int)
+void sort_print_upper_spectrum(dcomplex* a, int n, basis b, int first, 
+                            int last, dcomplex* work, int* work_int)
 { 
     printf("\n# Excited states :\n");
     // sanity check
     if (first < 1 || last < 1 || last < first)
     {
+        printf("# Error in sort_print_upper_spectrum.\n");
         printf("# incorrect input first = %d, last = %d.\n", first, last);
         return;
     }
@@ -81,8 +101,9 @@ void sort_print_upper_spectrum(fcomplex* a, int n, basis b, int first,
     // the their total number, `n`, then inform about it and exit
     if (first > n)
     {
+        printf("# Error in sort_print_upper_spectrum.\n");
         printf("# The first of the requested states (%d) is beyond ", first);
-        printf("the total number of states (%d)", n);
+        printf("the total number of states (%d).\n", n);
         return;
     }
     // if the number of the last requested eigenvector, `last`, is larger than
@@ -94,18 +115,18 @@ void sort_print_upper_spectrum(fcomplex* a, int n, basis b, int first,
         sort_print_eigenvector_summary( a, work, work_int, n, b, i);
 }
 
-void sort_print_eigenvector_summary( fcomplex* a, fcomplex* work, 
+void sort_print_eigenvector_summary( dcomplex* a, dcomplex* work, 
                                     int* work_int, int n, basis b, int m )
 {
     // Preselection, the vectors which are of no importance will be neglected;
-    const float lower_limit = 1.0e-12f;
+    const double lower_limit = 1.0e-10;
     int i, length=0;
-    fcomplex amp;
-    float abs_amp2;
+    dcomplex amp;
+    double abs_amp2;
     for ( i = 0; i < n; i++ )
     {
         amp = a[ m*n + i ];
-        abs_amp2 = fcomplex_amplitude_sqr( &amp );
+        abs_amp2 = dcomplex_amplitude_sqr( &amp ); 
         if (abs_amp2 > lower_limit) 
         {
             work[length].re = amp.re;
@@ -116,7 +137,7 @@ void sort_print_eigenvector_summary( fcomplex* a, fcomplex* work,
     }
 
     // sorting
-    sort_fcomplex(work, work_int, length);
+    sort_dcomplex(work, work_int, length);
 
     // printing
     printf( " |%5d> = ", m );
@@ -134,29 +155,29 @@ void sort_print_eigenvector_summary( fcomplex* a, fcomplex* work,
     printf( "            ...\n" );
 }
 
-void sort_fcomplex(fcomplex* data, int* indices, int length)
+void sort_dcomplex(dcomplex* data, int* indices, int length)
 {
     int sorted = 0;
     int i;
-    float amp0;
-    float amp1;
-    fcomplex temp_fc;
+    double amp0;
+    double amp1;
+    dcomplex temp_dc;
     int temp_int;
     while ( !sorted ) 
     {
         sorted = 1;
-        amp0  =  fcomplex_amplitude_sqr( data );
+        amp0 = dcomplex_amplitude_sqr( data );
         for (i=1; i<length; i++)
         {
             // amp0 is the amplitude of data[i-1]
             // amp1 is the amplitude of data[i]
-            amp1 = fcomplex_amplitude_sqr( data+i );
+            amp1 = dcomplex_amplitude_sqr( data+i );
             if (amp1 > amp0)
             {
                 // swap data
-                temp_fc = data[i];
+                temp_dc = data[i];
                 data[i] = data[i-1]; 
-                data[i-1] = temp_fc;
+                data[i-1] = temp_dc;
                 // swap int
                 temp_int = indices[i];
                 indices[i] = indices[i-1];

@@ -2,7 +2,6 @@
 #define hamiltonian_h
 
 #include "input.h" 
-#include "versor.h"
 #include "find-spectrum.h"
 #include "state.h"
 
@@ -30,17 +29,14 @@ void apply_a3_plus_a3dagger(state *input, state *output,
                                     const parameters pars);
 void apply_a5_plus_a5dagger(state *input, state *output,
                                     const parameters pars);
-void apply_dz1(state * input, state * output,
-                                    const parameters pars);
-void apply_dz2(state * input, state * output,
-                                    const parameters pars);
-void apply_dy1(state * input, state * output,
-                                    const parameters pars);
+void apply_dz1(state * input, state * output, const parameters pars);
+void apply_dz2(state * input, state * output, const parameters pars);
+void apply_dy1(state * input, state * output, const parameters pars);
 void apply_charge_dipole_zero(state *input, state *output,
                                     const parameters pars);
 
 state bra_H(state* psi, const parameters pars);
 
-void construct_Hamiltonian(fcomplex* a, const basis b, const parameters pars);
+void construct_Hamiltonian(dcomplex* a, const basis b, const parameters pars);
 
 #endif // hamiltonian_h

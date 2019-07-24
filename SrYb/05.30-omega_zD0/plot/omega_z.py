@@ -3,11 +3,16 @@
 Plot of a spectrum of two charged dipoles.
 """
 import matplotlib.pyplot as plt
-from os import listdir
-from os.path import isfile, join
 from os.path import expanduser
+import sys
+sys.path.insert(0, expanduser('~')+'/ions/lib')
 from label_lines import *
 import numpy as np
+
+# latex font 
+plt.rcParams.update({'font.size': 22})
+plt.rcParams.update({'font.family': 'serif'})
+plt.rcParams.update({'text.usetex': True})
 
 # =============================================================================
 # Universal set of functions which serve to read the program oputput and 
@@ -153,23 +158,31 @@ def show_one_energy_level_change_together(dataset, lvl=10):
     domain = [] # omega_z
     spectra = [] # energy
     
+    MHzTOkHz = 1e3
+    
     omega_rho = get_omega_rho(dataset[0])
     for data in dataset:
         omega_z = get_omega_z(data)
         domain += [ omega_z ]
-        # omega_1 = omega_z * sqrt(3)
-        # program outpus in omega_1
-        spectra += [ [data[1][i]*omega_z*np.sqrt(3)  for i in range(lvl)] ]
+        # program outpus energy in omega_1
+        omega_1 = omega_z*np.sqrt(3)
+        omega_1_2pi = omega_1/2.0/np.pi
+        spectra += [ [data[1][i]*omega_1_2pi*MHzTOkHz for i in range(lvl)] ]
     
     # pic
     for i in range(lvl):
         plt.plot(domain, [ sp[i] for sp in spectra ], label=f"{i}" )
-    plt.title("SrYb$^+$ spectrum as a function of $\omega_z$\n"\
-              f"$\omega_\\rho$= {omega_rho}MHz, "\
-              "truncation: "+get_truncation_string(dataset))
+#    plt.title("SrYb$^+$ spectrum as a function of $\omega_z$\n"\
+#              f"$\omega_\\rho$= {omega_rho}MHz, "\
+#              "truncation: "+get_truncation_string(dataset))
     plt.xlabel("$\omega_z$ (MHz)")
-    plt.ylabel("$E$ (MHz)")
+    plt.ylabel("$E/2\pi\hbar$ (kHz)")
+    
     labelLines(plt.gca().get_lines(),zorder=2.5)
+    
+    plt.savefig("figx.eps", dpi=300, orientation='portrait', 
+                format='eps', transparent=True,
+                bbox_inches='tight')
     return 0
 
 # =============================================================================

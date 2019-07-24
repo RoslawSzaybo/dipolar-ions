@@ -12,8 +12,8 @@ void state_init(state* psi)
 
 void state_free(state* psi)
 {
-    free (psi->kets);
-    free (psi->amplitudes);
+    free(psi->kets);
+    free(psi->amplitudes);
     psi->length = 0;
     psi->cap = 0;
 }
@@ -31,20 +31,21 @@ int state_cnt(state *psi)
 * If the normalisation facor is different from unity, then the state
 * sould be divided by the sqrt(state_normalisation).
 */
-float state_normalisation(state *psi)
+double state_normalisation(state *psi)
 {
-    float N2 = 0.f;
+    double N2 = 0.;
 
     // we add first the small amplitudes
     // we assume that the state is sorted i.e. 
     // state_sort(&psi);
+    // but if it is not then nothing happens
+    // sort would give a better numerical stability
     int i=psi->length-1;
     for (;i>=0; i--)
-        N2 += fcomplex_amplitude_sqr(&psi->amplitudes[i]);
+        N2 += dcomplex_amplitude_sqr(&psi->amplitudes[i]);
 
     return N2;
 }
-
 
 // returns 1 when the state `psi` has as its member versor 
 // a versor exactly the same as `ket`
@@ -69,13 +70,13 @@ int state_contains_versor(state *psi, const versor *ket)
 void state_sort(state *psi)
 {
     versor tmp_ket;
-    fcomplex tmp_amp;
+    dcomplex tmp_amp;
 
     // assume that the state is not sored
     int is_sorted = 0;
 
     int i;
-    float amp0, amp1;
+    double amp0, amp1;
     while (!is_sorted)
     {
         // suppose that after some changes the state is sorted
@@ -83,8 +84,8 @@ void state_sort(state *psi)
 
         for (i=0; i<psi->length-1; i++)
         {
-            amp0 = fcomplex_amplitude_sqr(&psi->amplitudes[i]);
-            amp1 = fcomplex_amplitude_sqr(&psi->amplitudes[i+1]);
+            amp0 = dcomplex_amplitude_sqr(&psi->amplitudes[i]);
+            amp1 = dcomplex_amplitude_sqr(&psi->amplitudes[i+1]);
 
             // check if for all pairs amplitudes do not increase
             if (amp1 > amp0) 
@@ -149,7 +150,7 @@ void state_rm(state *psi, const int idx)
 // returns the location of a versor `ket` on the list
 // of all member versors of the state `psi`
 // WARNING:
-// the code assumes that the versos `ket` is a member
+// the code assumes that the versor `ket` is a member
 // versor of the state `psi`. 
 int state_versor_location(state *psi, const versor *ket)
 {
@@ -163,10 +164,10 @@ int state_versor_location(state *psi, const versor *ket)
     printf("ERROR!");
     printf("A versor location was not found.");
     printf("state_versor_location() failed.");
-    exit(1);
+    exit(0);
 }
 
-void state_add(state* psi, const versor ket, const fcomplex amplitude)
+void state_add(state* psi, const versor ket, const dcomplex amplitude)
 {
     // the versor `ket` is already present in the state;
     // it is enough to sum amplitudes
@@ -184,7 +185,7 @@ void state_add(state* psi, const versor ket, const fcomplex amplitude)
         {
             psi->cap = 25;
             psi->kets = (versor*)malloc(sizeof(versor)*psi->cap);
-            psi->amplitudes = (fcomplex*)malloc(sizeof(fcomplex)*psi->cap);
+            psi->amplitudes = (dcomplex*)malloc(sizeof(dcomplex)*psi->cap);
         }
         // check if the extra versor can fit into the state
         if (psi->length == psi->cap)
@@ -197,7 +198,7 @@ void state_add(state* psi, const versor ket, const fcomplex amplitude)
                 printf("The requested number of versors: %d\n", psi->cap);
                 exit(0);
             }
-            psi->amplitudes = (fcomplex*)realloc(psi->amplitudes, sizeof(fcomplex)*psi->cap);
+            psi->amplitudes = (dcomplex*)realloc(psi->amplitudes, sizeof(dcomplex)*psi->cap);
             if(psi->kets == NULL)
             {
                 printf("The state cannot fit into the memory.\n");
@@ -214,44 +215,48 @@ void state_add(state* psi, const versor ket, const fcomplex amplitude)
 
 versor state_get_versor(state* psi, int idx)
 {
-    if(idx >= psi->length)
+    if (idx >= psi->length || idx <0)
     {
         //return NULL;
         printf("Error!");
         printf("state_get_amplitude is attmeptig to"
-        " reach index larger than the state length.");
+        " reach index larger than the state length or"
+        " a negative index.\n");
+        exit(0);
     }
     
     return psi->kets[idx];
 }
 
-fcomplex state_get_amplitude(state* psi, int idx)
+dcomplex state_get_amplitude(state* psi, int idx)
 {
-    if(idx >= psi->length)
+    if (idx >= psi->length || idx <0)
     {
         //return NULL;
         printf("Error!");
         printf("state_get_amplitude is attmeptig to"
-        " reach index larger than the state length.");
+        " reach index larger than the state length or"
+        " a negative index.\n");
+        exit(0);
     }
 
     return psi->amplitudes[idx];
 }
 
-void state_times_float(state * input, const float factor)
+void state_times_double(state *input, const double factor)
 {
-    for(int l=0; l < input->length; l++)
+    for (int l=0; l < input->length; l++)
     {
         input->amplitudes[l].re *= factor;
         input->amplitudes[l].im *= factor;
     }
 }
 
-void state_times_i_float(state * input, const float factor)
+void state_times_i_double(state *input, const double factor)
 {
     // (re + i im) * i factor = - im*factor + i re*factor
-    float re;
-    float im;
+    double re;
+    double im;
 
     for(int l=0; l < input->length; l++)
     {
@@ -264,9 +269,9 @@ void state_times_i_float(state * input, const float factor)
 }
 
 
-void state_add_state(state * sum, const state * component)
+void state_add_state(state *sum, const state *component)
 {
-    for(int l=0; l<component->length; l++)
+    for (int l=0; l<component->length; l++)
         state_add(sum, component->kets[l], component->amplitudes[l]);
 }
 
@@ -299,16 +304,16 @@ void state_clean_unphysical_versors(state *psi)
  * This function removes from the state all the versors which have 
  * the square of its amplitude smaller than the threshold value.
  */
-void state_cut(state *psi, float threshold)
+void state_cut(state *psi, double threshold)
 {
     /* Rm works faster when applied from the end. */
     int i = psi->length-1;
-    float amp = 0.f;
+    double amp = 0.;
 
     for (; i>=0; i--)
     {
         // square of an amplitude of the versor in a state
-        amp = fcomplex_amplitude_sqr(&psi->amplitudes[i]);
+        amp = dcomplex_amplitude_sqr(&psi->amplitudes[i]);
         if ( amp < threshold )
             state_rm(psi, i);
     }

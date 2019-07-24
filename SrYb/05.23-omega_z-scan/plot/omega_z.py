@@ -3,12 +3,12 @@
 Plot of a spectrum of two charged dipoles.
 """
 import matplotlib.pyplot as plt
-from os import listdir
 from os.path import expanduser
 import numpy as np
 import sys 
 sys.path.insert(0, expanduser('~')+'/ions/lib')
 from label_lines import *
+from latex import *
 
 # =============================================================================
 # Universal set of functions which serve to read the program oputput and 
@@ -111,66 +111,86 @@ def get_truncation_string(dataset):
     n1 = truncation['n1']
     n3 = truncation['n3']
     j1 = truncation['j1']
-    out_string = f"$n_1$={n1}"+", $n_{3/5}$ = "+f"{n3}, "\
-    "$j_{1/2}$"+f"={j1}"
+    out_string = f"$n_1=$ {n1}"+", $n_{3/5}$ ="+f" {n3}, "\
+    "$j_{1/2}=$"+f" {j1}"
     return out_string
 
-def show_spectrum(dataset, m=100, n=0):    
-    for data in dataset:
-        omega = get_omega_z(data)
-        omega_1 = np.sqrt(3)*omega
-        # collect spectrum, avoid reaching for elements that are not accesible
-        if m > len(data[1]):
-            m = len(data[1])
-        if n<0 or n >= m:
-            print("Incorrect n - No of the smallest eigenvalue")
-            n = m-1
-        spectrum = [ d*omega_1 for d in data[1][n:m] ] # in MHz
-        # present result
-        plt.scatter([omega]*(m-n), spectrum, color='k')
-        plt.title(f"Spectrum: eigenvalues {n} through {m-1}")
-    return 0
-
-# Presents how energy of the lvl-th energy level changes with one of the system
-# parameters
-def show_energy_level(dataset, lvl=0):  
-    domain = [] # omega_z
-    spectrum = [] # energy
-
-    for data in dataset:
-        omega_z = get_omega_z(data)
-        domain += [ omega_z ]
-        # the selected energy
-        # omega_1 = omega_z * sqrt(3)
-        # program outpus in omega_1
-        spectrum += [ data[1][lvl]*omega_z*np.sqrt(3) ] # in MHz
-    # present result
-    plt.scatter(domain, spectrum, color='k')
-    plt.title(f"Energy level {lvl}")
-    return 0
-
 # presents  energies of the first `lvl` excited states
-def show_one_energy_level_change_together(dataset, lvl=10):
+def spectrum(dataset, lvl=10, fname='test.eps'):
     domain = [] # omega_z
     spectra = [] # energy
     
-    omega_rho = get_omega_rho(dataset[0])
+    MHzTOkHz=1e3
+    
     for data in dataset:
         omega_z = get_omega_z(data)
+        omega_1 = omega_z * np.sqrt(3)
+        omega_1_2pi = omega_1 /2/np.pi
         domain += [ omega_z ]
-        # omega_1 = omega_z * sqrt(3)
         # program outpus in omega_1
-        spectra += [ [data[1][i]*omega_z*np.sqrt(3)  for i in range(lvl)] ]
+        spectra += [ [data[1][i]*omega_1_2pi*MHzTOkHz 
+                      for i in range(lvl)] ]
     
     # pic
     for i in range(lvl):
         plt.plot(domain, [ sp[i] for sp in spectra ], label=f"{i}" )
-    plt.title("SrYb$^+$ spectrum as a function of $\omega_z$\n"\
-              f"$\omega_\\rho$= {omega_rho}MHz, "\
-              "truncation: "+get_truncation_string(dataset))
+# =============================================================================
+#     omega_rho = get_omega_rho(dataset[0])
+#     plt.title("SrYb$^+$ spectrum as a function of $\omega_z$\n"\
+#               f"$\omega_\\rho$= {omega_rho}MHz, "\
+#               "truncation: "+get_truncation_string(dataset))
+# =============================================================================
     plt.xlabel("$\omega_z$ (MHz)")
-    plt.ylabel("$E$ (MHz)")
-    labelLines(plt.gca().get_lines(),zorder=2.5)
+    plt.ylabel("$E/2\pi\hbar$ (kHz)")
+    plt.legend(labelspacing=-0.08, loc=2)
+    
+    plt.text(0.18, 260, "(a)")
+    
+# =============================================================================
+#     labelLines(lines, reverse=True, zorder=2.5)
+# =============================================================================
+    plt.savefig(fname, dpi=300, orientation='portrait', 
+                format='eps', transparent=True,
+                bbox_inches='tight')
+    return 0
+
+# blow-up of the interesting avoided-crossing
+def zoom_in(dataset, lvl=10, fname='test.eps'):
+    domain = [] # omega_z
+    spectra = [] # energy
+    
+    MHzTOkHz=1e3
+    
+    for data in dataset:
+        omega_z = get_omega_z(data)
+        omega_1 = omega_z * np.sqrt(3)
+        omega_1_2pi = omega_1 /2/np.pi
+        domain += [ omega_z ]
+        # program outpus in omega_1
+        spectra += [ [data[1][i]*omega_1_2pi*MHzTOkHz 
+                      for i in range(lvl)] ]
+    
+    # pic
+    for i in range(lvl):
+        plt.plot(domain, [ sp[i] for sp in spectra ], label=f"{i}" )
+# =============================================================================
+#     omega_rho = get_omega_rho(dataset[0])
+#     plt.title("SrYb$^+$ spectrum as a function of $\omega_z$\n"\
+#               f"$\omega_\\rho$= {omega_rho}MHz, "\
+#               "truncation: "+get_truncation_string(dataset))
+# =============================================================================
+    plt.xlabel("$\omega_z$ (MHz)")
+    plt.ylabel("$E/2\pi\hbar$ (kHz)")
+    
+    plt.ylim(410,500)
+    plt.xlim(0.1, 0.2)
+
+    
+    labelLines(plt.gca().get_lines(), reverse=True, zorder=2.5)
+    
+    plt.savefig(fname, dpi=300, orientation='portrait', 
+                format='eps', transparent=True,
+                bbox_inches='tight')
     return 0
 
 # =============================================================================
@@ -179,14 +199,13 @@ def show_one_energy_level_change_together(dataset, lvl=10):
 def main():
     home = expanduser("~")
     path = home+"/ions/SrYb/05.23-omega_z-scan/"
-    omegas = ["0.01", "0.02", "0.04", "0.06", "0.08", "0.1", "0.12", "0.14", 
+    omegas = ["0.02", "0.04", "0.06", "0.08", "0.1", "0.12", "0.14", 
               "0.16", "0.18", "0.2"]
     filenames = ['SrYb_w_z-'+str(o)+'.out' for o in omegas]
+    latex_fonts()
     dataset = get_dataset(filenames, path)
-    dataset.sort(key=get_dipole)
-#    show_spectrum(dataset)
-#    show_energy_level(dataset, 1)
-    show_one_energy_level_change_together(dataset, 11)
+#    spectrum(dataset, 10, fname="fig2a.eps")
+    zoom_in(dataset, 10, fname="zoom-in.eps")
     
     return 0
     

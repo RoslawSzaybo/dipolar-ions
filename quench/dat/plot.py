@@ -1,5 +1,13 @@
 from os.path import expanduser
 import matplotlib.pyplot as plt
+import sys 
+sys.path.insert(0, expanduser('~')+'/ions/lib')
+from label_lines import *
+
+# latex font 
+plt.rcParams.update({'font.size': 22})
+plt.rcParams.update({'font.family': 'serif'})
+plt.rcParams.update({'text.usetex': True})
 
 # =============================================================================
 # Data readout
@@ -89,22 +97,82 @@ def get_amp2(cnumber):
     return amp2
     
 
-def oscillations(states):
+def fig3a(states, fname = "fig3a.eps", pltname="(a)"):
+    if (fname=="fig3a.eps"):
+        #interesting moments of the evolution
+        plt.axvline(x=507, color="red")
+        plt.axvline(x=1250, color="red")
+        plt.axvline(x=1730, color="red")
+    # evolution amplitudes
+    labels = {}
+    labels["0001000"] = "$|\\alpha\\rangle$"
+    labels["0000000"] = "$|\\beta\\rangle$"
+    labels["0001010"] = "$|\gamma\\rangle$"
+    labels["0002000"] = "$|\delta\\rangle$"
+    labels["0000010"] = "$|\epsilon\\rangle$"
     for state, fringes in states.items():
         amp2s = [ get_amp2(point[1]) for point in fringes]
-        t = [point[0] for point in fringes]        
-        plt.plot(t, amp2s, label=state)
+        t = [point[0] for point in fringes]
+        if state in labels:
+            plt.plot(t, amp2s, label = labels[state])
+        else:
+            plt.plot(t, amp2s, label="$|$"+state+"$\\rangle$")
     
-    plt.legend()
+    plt.legend(labelspacing=0.2, 
+               loc=5,
+               handletextpad=0.3,
+               handlelength=0.7)
+#    labelLines(plt.gca().get_lines(), zorder=2.5)
     plt.xlabel("Propagation time, $t$ ($\mu$s)")
+    
+    if ( pltname != "noname" ):
+        plt.text(0, 0.28, pltname)
+    
+    plt.savefig(fname, dpi=300, orientation='portrait', 
+                format='eps', transparent=True,
+                bbox_inches='tight')
+
+
+def oscillations(states, fname = "test.eps"):
+    labels = {}
+    labels["0001000"] = "$|\\alpha\\rangle$"
+    labels["0000000"] = "$|\\beta\\rangle$"
+    labels["0001010"] = "$|\gamma\\rangle$"
+    labels["0002000"] = "$|\delta\\rangle$"
+    labels["0000010"] = "$|\epsilon\\rangle$"
+    for state, fringes in states.items():
+        amp2s = [ get_amp2(point[1]) for point in fringes]
+        t = [point[0] for point in fringes]
+        if state in labels:
+            plt.plot(t, amp2s)
+        else:
+            plt.plot(t, amp2s, label="$|$"+state+"$\\rangle$")
+    
+    plt.legend(labelspacing=0.2, 
+               loc=5,
+               handletextpad=0.3,
+               handlelength=0.7)
+#    labelLines(plt.gca().get_lines(), zorder=2.5)
+    plt.xlabel("Propagation time, $t$ ($\mu$s)")
+    plt.text(0, 0.25, "(b)")
+    
+    plt.savefig(fname, dpi=300, orientation='portrait', 
+                format='eps', transparent=True,
+                bbox_inches='tight')
 
 def main():
     home = expanduser('~')
-    filename = home + '/ions/quench/dat/j1.dat'
-    filename = home + '/ions/quench/dat/j1-2500.dat'
-    states = read_file(filename)
-    states2 = get_main_oscillations(states,5)
-    oscillations(states2)
+    longfname = home + '/ions/quench/dat/j1.dat'
+    longstates = read_file(longfname)
+    longstates2 = get_main_oscillations(longstates, 5)
+    fig3a(longstates2, fname = "fig3c.eps", pltname="noname")
+
+    
+#    filename = home + '/ions/quench/dat/j1-2500.dat'
+#    states = read_file(filename)
+##    oscillations(states, fname="fig3b.eps")
+#    states2 = get_main_oscillations(states,5)
+#    fig3a(states2)
     
     return 0
     
