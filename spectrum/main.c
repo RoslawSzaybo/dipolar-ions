@@ -85,9 +85,9 @@ int main(int argc, char *argv[]) {
     int *work_int = my_malloc(sizeof(int)*n, "work_int");
     // 50 is the number of states which will be printed
     sort_print_lower_spectrum(a, n, b, 25, work, work_int);
-    int first = b.n1*b.n3*b.n5;
-    int last = first + 50;
-    sort_print_upper_spectrum(a, n, b, first, last, work, work_int);
+    // int first = b.n1*b.n3*b.n5;
+    // int last = first + 50;
+    // sort_print_upper_spectrum(a, n, b, first, last, work, work_int);
 
     /* Free workspace - part II */
     free( a );
