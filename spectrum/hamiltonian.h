@@ -2,7 +2,6 @@
 #define hamiltonian_h
 
 #include "input.h" 
-#include "versor.h"
 #include "find-spectrum.h"
 #include "state.h"
 

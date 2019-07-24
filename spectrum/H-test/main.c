@@ -8,7 +8,7 @@
 void choose_test_versor_idx(basis b, parameters p);
 void choose_test_versor_quantum_numbers(basis b, parameters p);
 void present_braH(versor psi0, parameters pars, basis b);
-void present_versor_contribution(fcomplex amp, versor bra, basis b);
+void present_versor_contribution(dcomplex amp, versor bra, basis b);
 
 int main(int argc, char *argv[])
 {
@@ -18,9 +18,9 @@ int main(int argc, char *argv[])
     j1 = 2,
     j2 = 2;
 
-    if(argc > 1)
+    if (argc > 1)
     {
-        if(argc == 2 && argv[1][0] == '-' && argv[1][1] == 'b')
+        if (argc == 2 && argv[1][0] == '-' && argv[1][1] == 'b')
         {
             printf("Define basis truncation:\n");
             scanf("%d %d %d %d %d", &n1, &n3, &n5, &j1, &j2);
@@ -38,22 +38,28 @@ int main(int argc, char *argv[])
     // $ \omega_1 = \sqrt{3} 0.16MHz \approx 0.28 MHz $
     // $ \omega_3 \approx 1.39 MHz $
     // $ \omega_3 / \omega_1 \approx 5$
-    float omega_rho = 1.4f;
-    float omega_z = 0.16f;
-    float omega_1 = sqrt(3.0)*omega_z;
-    float omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
+    double omega_rho = 1.4;
+    double omega_z = 0.16;
+    double omega_1 = sqrt(3.0)*omega_z;
+    double omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
 
     hamiltonian activate;
-    activate.normal_modes = 1;
+    activate.normal_modes = 0;
     activate.T_rot = 1;
-    activate.Vqd_zeroth = 1;
-    activate.Vqd_first = 1;
-    activate.Vdd_zeroth = 1;
+    activate.Vqd_zeroth = 0;
+    activate.Vqd_first = 0;
+    activate.Vdd_zeroth = 0;
     
+    /* MgH^+
     const parameters pars = 
-    // MgH^+
-    {25.f, 1.f, 4.745f, 503.7f, omega_1, omega_3, activate};
+    {25.0, 1.0, 3.0, 1.9e5, omega_1, omega_3, activate};
+    */
 
+    const parameters pars = 
+    // SrYb^+
+    {261.0, 1.0, 4.745, 503.7, omega_1, omega_3, activate};
+
+    print_system_parameters(pars);
     print_active_terms_of_Hamiltonian(pars);
 
     while(1)
@@ -132,7 +138,7 @@ void present_braH(versor psi0, parameters pars, basis b)
     // intially it contains only a singe versor, the test versor.
     state state0;
     state_init(&state0);
-    state_add(&state0, psi0, (fcomplex){1.0f, 0.0f});
+    state_add(&state0, psi0, (dcomplex){1.0, 0.0});
 
     // apply the Hamiltonian and save the output bra state
     state sps = bra_H(&state0, pars);
@@ -140,7 +146,7 @@ void present_braH(versor psi0, parameters pars, basis b)
     // present the resut state
     printf("\n <psi0|H = \n");
     versor loop_versor;
-    fcomplex loop_amplitude;
+    dcomplex loop_amplitude;
     for(int l=0; l < sps.length; l++)
     {
         loop_versor = state_get_versor(&sps, l);
@@ -166,7 +172,7 @@ void present_braH(versor psi0, parameters pars, basis b)
     state_free(&state0);
 }
 
-void present_versor_contribution(fcomplex amp, versor bra, basis b)
+void present_versor_contribution(dcomplex amp, versor bra, basis b)
 {
     printf("\t(%14.11f,%14.11f)", amp.re, amp.im);
     show_bra_versor(bra);

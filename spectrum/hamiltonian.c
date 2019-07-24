@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "dcomplex.h"
 #include "hamiltonian.h"
 
 void apply_harmonic_oscillator(state *input, state *output, 
@@ -19,17 +20,17 @@ void apply_harmonic_oscillator(state *input, state *output,
 
         versor psi_n1 = psi;
         dcomplex A_psi_n1 = (dcomplex){ (double)psi.n1 + 0.5, 0.0 };
-        dcomplex_times_double(&A_psi_n1, homega1);
+        A_psi_n1 = dcomplex_times_double(&A_psi_n1, homega1);
         state_add(output, psi_n1, dcomplex_multiply(&A_psi_n1, &A));
 
         versor psi_n3 = psi;
         dcomplex A_psi_n3 = (dcomplex){ (double)psi.n3 + 0.5, 0.0 };
-        dcomplex_times_double(&A_psi_n3, homega3);
+        A_psi_n3 = dcomplex_times_double(&A_psi_n3, homega3);
         state_add(output, psi_n3, dcomplex_multiply(&A_psi_n3, &A));
 
         versor psi_n5 = psi;
         dcomplex A_psi_n5 = (dcomplex){ (double)psi.n5 + 0.5, 0.0 };
-        dcomplex_times_double(&A_psi_n5, homega5);
+        A_psi_n5 = dcomplex_times_double(&A_psi_n5, homega5);
         state_add(output, psi_n5, dcomplex_multiply(&A_psi_n5, &A));
     }
 }
