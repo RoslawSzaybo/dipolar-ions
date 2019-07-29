@@ -6,10 +6,10 @@
 #include <math.h>
 
 versor choose_test_versor_quantum_numbers(basis b, parameters p);
-float get_dt();
+double get_dt();
 int get_no_of_steps();
 void state_print(state *psi);
-void print_limited_state(state *psi, float threshold);
+void print_limited_state(state *psi, double threshold);
 void print_the_big_four(state *psi);
 parameters SrYb_parameters();
 
@@ -21,14 +21,14 @@ int main(int argc, char *argv[])
     print_active_terms_of_Hamiltonian(pars);
     /* 
     versor psi0 = choose_test_versor_quantum_numbers(b, pars);
-    float time_step_ns = get_dt();
+    double time_step_ns = get_dt();
     */
     versor psi0 = (versor){0, 0, 0, 1, 0, 0, 0};
-    float dt = 100e-9f;
-    float print_every = 1e-6;
-    float propagation_time = 50e-3;
-    float print_threshold = 1e-4;
-    float N2 = 0.f;
+    double dt = 100.0e-9;
+    double print_every = 1.0e-6;
+    double propagation_time = 50.0e-3;
+    double print_threshold = 1.0e-4;
+    double N2 = 0.0;
 
 
     printf("# Attention please!\n");
@@ -39,12 +39,12 @@ int main(int argc, char *argv[])
     state braH;
     state_init(&bra);
     state_init(&braH);
-    state_add(&bra, psi0, (fcomplex){1.f, 0.f});
+    state_add(&bra, psi0, (dcomplex){1.0, 0.0});
 
-    printf("t = %f us\n", 0.f);
+    printf("t = %f us\n", 0.0);
     state_sort(&bra);
     N2 = state_normalisation(&bra);
-    state_times_float(&bra, 1./sqrt(N2));
+    state_times_double(&bra, 1.0/sqrt(N2));
     state_print(&bra);
 
     int i=1;
@@ -57,18 +57,19 @@ int main(int argc, char *argv[])
         // bra{psi} = \frac{i}{\hbar}\bra{psi}H
         // H is in unit \hbar \omega_1 so you have to multiply it 
         // \bra{psi} = i \omega_1 bra_H()
-        state_times_i_float(&braH, dt*pars.omega_1); 
+        state_times_i_double(&braH, dt*pars.omega_1); 
         state_add_state(&bra, &braH);
         state_sort(&bra);
         state_keep_only_first_max_versors(&bra, 200);
         N2 = state_normalisation(&bra);
-        state_times_float(&bra, 1./sqrt(N2));
+        state_times_double(&bra, 1.0/sqrt(N2));
 
         if (!(i % print_divisor))
         {
-            printf("t = %f us\t", (float)(i)*dt*1.e6);
+            printf("t = %f us\t", (double)(i)*dt*1.0e6);
             printf("N^2 = %f\n", N2);
-            print_limited_state(&bra, print_threshold);
+            //print_limited_state(&bra, print_threshold);
+            print_the_big_four(&bra);
         }
     }
 
@@ -82,10 +83,10 @@ parameters SrYb_parameters()
     // SrYb^+
     // $ \omega_1 = \sqrt{3} \omega_z 
     // $ \omega_3 = \sqrt{omega_rho^2 - omega_z^2}$
-    float omega_rho = 1.4f;
-    float omega_z = 0.16f;
-    float omega_1 = sqrt(3.0)*omega_z;
-    float omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
+    double omega_rho = 1.4;
+    double omega_z = 0.16;
+    double omega_1 = sqrt(3.0)*omega_z;
+    double omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
 
     hamiltonian activate;
     activate.normal_modes = 1;
@@ -93,8 +94,13 @@ parameters SrYb_parameters()
     activate.Vqd_zeroth = 1;
     activate.Vqd_first = 1;
     activate.Vdd_zeroth = 1;
+
+    double mass = 261.0;
+    double charge = 1.0;
+    double dipole = 4.745;
+    double B = 503.7;
     
-    return (parameters){261.f, 1.f, 4.745f, 503.7f, omega_1, omega_3, activate};
+    return (parameters){mass, charge, dipole, B, omega_1, omega_3, activate};
 }
 
 
@@ -102,7 +108,7 @@ void state_print(state *psi)
 {
     printf("|psi> = ");
     int i = 0;
-    fcomplex amp;
+    dcomplex amp;
     versor ket;
     for(; i < psi->length; i++)
     {
@@ -120,12 +126,12 @@ void state_print(state *psi)
 /*  
  * Print all the states of an amplitude larger than a threshold
  */
-void print_limited_state(state *psi, float threshold)
+void print_limited_state(state *psi, double threshold)
 {
     printf("|psi> = ");
-    fcomplex amp;
+    dcomplex amp;
     versor ket;
-    float amp_modulus_2;
+    double amp_modulus_2;
 
     int i=0;
     for (;; i++)
@@ -137,7 +143,7 @@ void print_limited_state(state *psi, float threshold)
 
         // if the versors are too insignificant, we skip them
         amp = psi->amplitudes[i];
-        amp_modulus_2 = fcomplex_amplitude_sqr(&amp);
+        amp_modulus_2 = dcomplex_amplitude_sqr(&amp);
 
         if (amp_modulus_2 < threshold)
             break;
@@ -159,7 +165,7 @@ void print_the_big_four(state *psi)
 {
     printf("|psi> = ");
     int i = 0;
-    fcomplex amp;
+    dcomplex amp;
     versor ket;
 
     for (; i< 4; i++)
@@ -207,11 +213,11 @@ versor choose_test_versor_quantum_numbers(basis b, parameters p)
 /* 
 * Read a time step from the input
 */
-float get_dt()
+double get_dt()
 {
-    float dt=0.f;
+    double dt=0.0;
     printf(" Specify time step dt: ");
-    scanf("%f", &dt);
+    scanf("%lf", &dt);
     return dt;
 }
 
