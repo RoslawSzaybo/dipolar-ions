@@ -26,7 +26,7 @@ typedef struct {
 void state_init(state* psi);
 void state_free(state* psi);
 int state_cnt(state* psi);
-double state_normalisation(state *psi);
+double get_state_normalisation(state *psi);
 void state_sort(state *psi);
 int state_contains_versor(state *psi, const versor *ket);
 int state_versor_location(state *psi, const versor *ket);
