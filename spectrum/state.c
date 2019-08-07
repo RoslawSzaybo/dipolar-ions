@@ -29,9 +29,9 @@ int state_cnt(state *psi)
 * to unity in for all states that we consider here.
 *
 * If the normalisation facor is different from unity, then the state
-* sould be divided by the sqrt(state_normalisation).
+* sould be divided by the sqrt(get_state_normalisation).
 */
-double state_normalisation(state *psi)
+double get_state_normalisation(state *psi)
 {
     double N2 = 0.;
 
