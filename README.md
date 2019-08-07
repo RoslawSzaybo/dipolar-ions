@@ -28,6 +28,11 @@
 
 ### Statistics of the main program from plgrid:
 - 42k x 42k Hermitian matrix: 13Gb; 11-22h ;
+- 44k x 44k Hermitian double matrix: 16Gb; 11-22h ;
+
+
+### Statistics of souble
+- 44k x 44k Hermitial double matirx on 24 cores: 4h; (3days as a total cpu time)
 
 ### Selected moleules
 - MgH<sup>+</sup>
