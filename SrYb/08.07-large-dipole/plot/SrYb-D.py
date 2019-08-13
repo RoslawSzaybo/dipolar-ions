@@ -88,9 +88,9 @@ def show_one_energy_level_change_together(dataset, lvl=10, start = 0,
     plt.xlabel("Dipole moment, $d$ (D)")
     plt.ylabel("$\\frac{E_i(D=0) - E_i(D)}{2\pi\hbar}$ (Hz)")
 
-    if fig_name == 'b':
+    if fig_name == 'a':
         plt.text(0.3, -520.0, "("+fig_name+")")
-    elif fig_name == 'c':
+    elif fig_name == 'b':
         plt.text(0.3, -370, "("+fig_name+")")
     
     labelLines(plt.gca().get_lines(),zorder=2.5)
@@ -173,11 +173,11 @@ def main():
     #
     latex_fonts()
     
-    title_figb="Change in the $i$th energy level of a SrYb$^+$-alike system\n"
-    descriptors_b = [title_figb, "figr1b.eps", "b"]
+    title_figa="Change in the $i$th energy level of a SrYb$^+$-alike system\n"
+    descriptors_a = [title_figa, "figr2a.eps", "a"]
     
-    title_figc="Change in the $i$th (excited $j$) energy level of a SrYb$^+$-alike system\n"
-    descriptors_c = [title_figc, "figr1c.eps", "c"]
+    title_figb="Change in the $i$th (excited $j$) energy level of a SrYb$^+$-alike system\n"
+    descriptors_b = [title_figb, "figr2b.eps", "b"]
     
     title_figd="Change in the $i$th (excited $j$) energy level of a SrYb$^+$-alike system\n"\
     +"both ground and excited\n"
@@ -185,12 +185,12 @@ def main():
 
     # fix the position of the file name like (b) or (c) or alike thing
 
-#    show_spectrum(dataset, 10, fname='figr1a.eps')
-#    show_one_energy_level_change_together(dataset, 10, 0, descriptors_b)
-#    show_one_energy_level_change_together(excitations_dataset, 7, 0, descriptors_c)
+#    show_spectrum(dataset, 10, fname='figr1x.eps') 
+#    show_one_energy_level_change_together(dataset, 10, 0, descriptors_a)
+#    show_one_energy_level_change_together(excitations_dataset, 5, 0, descriptors_b)
 #    show_change_of_both(dataset, excitations_dataset, 5, 0, descriptors_d)
 #    show_spectrum(excitations_dataset, 17, 11, fname='figr1e.eps')
-    show_spectrum(excitations_dataset, 24, 0, fname='figr1e.eps')
+#    show_spectrum(excitations_dataset, 5, 0, fname='figr1e.eps')
 
     return 0
 
