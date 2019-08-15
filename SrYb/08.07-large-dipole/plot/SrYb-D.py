@@ -86,7 +86,7 @@ def show_one_energy_level_change_together(dataset, lvl=10, start = 0,
 #    plt.title(tit+f"$\omega_\\rho$={omega_rho} MHz, $\omega_z$={omega_z} MHz,"\
 #              "truncation: "+get_truncation_string(dataset))
     plt.xlabel("Dipole moment, $d$ (D)")
-    plt.ylabel("$\\frac{E_i(D=0) - E_i(D)}{2\pi\hbar}$ (Hz)")
+    plt.ylabel("$\\frac{E_i(d=0) - E_i(d)}{2\pi\hbar}$ (Hz)")
 
     if fig_name == 'a':
         plt.text(0.3, -520.0, "("+fig_name+")")
@@ -143,7 +143,7 @@ def show_change_of_both(dataset, excitations, lvl=10, start = 0,
     plt.title(tit+f"$\omega_\\rho$={omega_rho} MHz, $\omega_z$={omega_z} MHz,"\
               "truncation: "+get_truncation_string(dataset))
     plt.xlabel("Dipole moment, $d$ (D)")
-    plt.ylabel("$\\frac{E_i(D=0) - E_i(D)}{2\pi\hbar}$ (Hz)")
+    plt.ylabel("$\\frac{E_i(d=0) - E_i(d)}{2\pi\hbar}$ (Hz)")
 
     plt.text(0.3, -1.05, "("+fig_name+")")
 #    plt.text(6.3, -0.0001, "(c)")

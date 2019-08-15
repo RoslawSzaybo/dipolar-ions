@@ -69,6 +69,7 @@ def main():
     #MHz
     filenames0 = [ "D0.0_B"+B+".out" for B in Bs ] 
     filenames50 = [ "D50.0_B"+B+".out" for B in Bs ]
+    filenames150 = [ "D150.0_B"+B+".out" for B in Bs ]
     ##
     ##
     excitations_dataset_0D = get_excitations(filenames0, path)
@@ -76,6 +77,9 @@ def main():
     #
     excitations_dataset_50D = get_excitations(filenames50, path)
     excitations_dataset_50D.sort(key=get_B)
+    #
+    excitations_dataset_150D = get_excitations(filenames150, path)
+    excitations_dataset_150D.sort(key=get_B)
     ##
     ##
     dataset_0D = get_dataset(filenames0, path)
@@ -83,16 +87,24 @@ def main():
     #
     dataset_50D = get_dataset(filenames50, path)
     dataset_50D.sort(key=get_B)
+    #
+    dataset_150D = get_dataset(filenames150, path)
+    dataset_150D.sort(key=get_B)
     ##
     ##
     latex_fonts()
     ##
     ##
-    show_dipole_effect_as_a_fucntion_of_B(dataset_0D, dataset_50D, 6, 0, 
-                                          fname='figr2a.eps')
+#    show_dipole_effect_as_a_fucntion_of_B(dataset_0D, dataset_50D, 6, 0, 
+#                                          fname='figr2c.eps')
+    show_dipole_effect_as_a_fucntion_of_B(excitations_dataset_0D, 
+                                          excitations_dataset_50D, 5, 0, 
+                                          fname='figr2d.eps')
+#    show_dipole_effect_as_a_fucntion_of_B(dataset_0D, dataset_150D, 6, 0, 
+#                                          fname='figr2c.eps')
 #    show_dipole_effect_as_a_fucntion_of_B(excitations_dataset_0D, 
-#                                          excitations_dataset_50D, 10, 0, 
-#                                          fname='figr2b.eps')
+#                                          excitations_dataset_150D, 10, 0, 
+#                                          fname='figr2d.eps')
 
     return 0
 
