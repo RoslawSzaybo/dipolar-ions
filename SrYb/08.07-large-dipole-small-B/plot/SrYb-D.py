@@ -16,7 +16,7 @@ from latex import *
 # =============================================================================
 
 def show_dipole_effect_as_a_fucntion_of_B(dataset_0D, dataset_50D, lvl, start, 
-                                          fname='test.eps'):
+                                          fname='test.eps', fig_name='x'):
     domain = [] # rotational constants
     energy_changes = [] # difference between the energy at d=50 and d=0
 
@@ -42,16 +42,18 @@ def show_dipole_effect_as_a_fucntion_of_B(dataset_0D, dataset_50D, lvl, start,
 
     # present result
     for i in range(start, lvl):
-        plt.plot(np.log(domain), [ sp[i-start] for sp in energy_changes ], 
+        plt.plot(np.log10(domain), [ sp[i-start] for sp in energy_changes ], 
                  label=f"{i}", color = f"C{i%10}")
 
 #    plt.title(f"$\omega_\\rho$={omega_rho} MHz, $\omega_z$={omega_z} MHz,"\
 #              "truncation: "+get_truncation_string(dataset_0D))
-    plt.xlabel("Rotational constant, log(B/MHz)")
-    plt.ylabel("$\\frac{E_i(D=0) - E_i(D)}{2\pi\hbar}$ (kHz)")
+    plt.xlabel("Rotational constant, log$_{10}$(B/MHz)")
+    plt.ylabel("$\\frac{E_i(d=0) - E_i(d=50D)}{2\pi\hbar}$ (kHz)")
 
-#    plt.text(0.3, -1.05, "("+fig_name+")")
-#    plt.text(6.3, -0.0001, "(c)")
+    if fig_name=='c':
+        plt.text(2.5, -5.5, "("+fig_name+")")
+    elif fig_name == 'd':
+        plt.text(2.5, -3.8, "("+fig_name+")")
     
     labelLines(plt.gca().get_lines(),zorder=2.5)
     plt.savefig(fname, dpi=300, orientation='portrait', 
@@ -96,10 +98,10 @@ def main():
     ##
     ##
 #    show_dipole_effect_as_a_fucntion_of_B(dataset_0D, dataset_50D, 6, 0, 
-#                                          fname='figr2c.eps')
+#                                          fname='figr2c.eps', fig_name="c")
     show_dipole_effect_as_a_fucntion_of_B(excitations_dataset_0D, 
                                           excitations_dataset_50D, 5, 0, 
-                                          fname='figr2d.eps')
+                                          fname='figr2d.eps', fig_name="d")
 #    show_dipole_effect_as_a_fucntion_of_B(dataset_0D, dataset_150D, 6, 0, 
 #                                          fname='figr2c.eps')
 #    show_dipole_effect_as_a_fucntion_of_B(excitations_dataset_0D, 
