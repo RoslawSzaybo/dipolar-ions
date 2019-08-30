@@ -127,6 +127,9 @@ def get_excitations(filenames, path):
 def get_dipole(data):
     return data[0]['dipole']
 
+def get_B(data):
+    return data[0]['B']
+
 def get_omega_z(data):
     return data[0]['omega_z']
 
