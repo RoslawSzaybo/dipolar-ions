@@ -52,7 +52,7 @@ def show_spectrum(dataset, lvl=10, start = 0, fname='test.eps'):
 #    plt.title(f"$\omega_\\rho={omega_rho}$ MHz, $\omega_z={omega_z}$ MHz "\
 #              "("+get_truncation_string(dataset)+")")
     
-    plt.text(6.35, 256, "(a)")
+#    plt.text(6.35, 256, "(a)")
     
     plt.xlabel("Dipole moment, $d$ (D)")
     plt.ylabel("$E_i/2\pi\hbar$ (kHz)")
@@ -190,13 +190,14 @@ def main():
     title_figd="Change in the $i$th (excited $j$) energy level of a SrYb$^+$-alike system\n"\
     +"both ground and excited\n"
     descriptors_d = [title_figd, "figr1d.eps", "d"]
-    
+
     # fix the position of the file name like (b) or (c) or alike thing
-    
-#    show_spectrum(dataset, 10, fname='figr1a.eps')
+
+    show_spectrum(dataset, 10, fname='figr1a.eps')
 #    show_one_energy_level_change_together(dataset, 10, 0, descriptors_b)
-#    show_one_energy_level_change_together(excitations_dataset, 5, 0, descriptors_c)
-    show_change_of_both(dataset, excitations_dataset, 5, 0, descriptors_d)
+#    show_one_energy_level_change_together(excitations_dataset, 7, 0, descriptors_c)
+#    show_change_of_both(dataset, excitations_dataset, 5, 0, descriptors_d)
+#    show_spectrum(excitations_dataset, 17, 11, fname='figr1e.eps')
 
     return 0
 

@@ -12,10 +12,12 @@ void state_print(state *psi);
 void print_limited_state(state *psi, double threshold);
 void print_the_big_four(state *psi);
 parameters SrYb_parameters();
+parameters excited_SrYb_parameters();
 
 int main(int argc, char *argv[])
 {
-    const parameters pars = SrYb_parameters();
+    //const parameters pars = SrYb_parameters();
+    const parameters pars = excited_SrYb_parameters();
 
     print_system_parameters(pars);
     print_active_terms_of_Hamiltonian(pars);
@@ -24,9 +26,9 @@ int main(int argc, char *argv[])
     double time_step_ns = get_dt();
     */
     versor psi0 = (versor){0, 0, 0, 1, 0, 0, 0};
-    double dt = 100.0e-9;
+    double dt = 10.0e-9;
     double print_every = 1.0e-6;
-    double propagation_time = 50.0e-3;
+    double propagation_time = 5.0e-3;
     double print_threshold = 1.0e-4;
     double N2 = 0.0;
 
@@ -43,7 +45,7 @@ int main(int argc, char *argv[])
 
     printf("t = %f us\n", 0.0);
     state_sort(&bra);
-    N2 = state_normalisation(&bra);
+    N2 = get_state_normalisation(&bra);
     state_times_double(&bra, 1.0/sqrt(N2));
     state_print(&bra);
 
@@ -61,7 +63,7 @@ int main(int argc, char *argv[])
         state_add_state(&bra, &braH);
         state_sort(&bra);
         state_keep_only_first_max_versors(&bra, 200);
-        N2 = state_normalisation(&bra);
+        N2 = get_state_normalisation(&bra);
         state_times_double(&bra, 1.0/sqrt(N2));
 
         if (!(i % print_divisor))
@@ -103,6 +105,30 @@ parameters SrYb_parameters()
     return (parameters){mass, charge, dipole, B, omega_1, omega_3, activate};
 }
 
+parameters excited_SrYb_parameters()
+{
+    // SrYb^+
+    // $ \omega_1 = \sqrt{3} \omega_z 
+    // $ \omega_3 = \sqrt{omega_rho^2 - omega_z^2}$
+    double omega_rho = 1.4;
+    double omega_z = 0.16;
+    double omega_1 = sqrt(3.0)*omega_z;
+    double omega_3 = sqrt(omega_rho*omega_rho - omega_z*omega_z);
+
+    hamiltonian activate;
+    activate.normal_modes = 1;
+    activate.T_rot = 1;
+    activate.Vqd_zeroth = 1;
+    activate.Vqd_first = 1;
+    activate.Vdd_zeroth = 1;
+
+    double mass = 261.0;
+    double charge = 1.0;
+    double dipole = 150.0;
+    double B = 12.0;
+    
+    return (parameters){mass, charge, dipole, B, omega_1, omega_3, activate};
+}
 
 void state_print(state *psi)
 {
